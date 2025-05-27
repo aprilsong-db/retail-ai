@@ -1,10 +1,12 @@
 """Inventory page for the Streamlit Store App."""
 
 import streamlit as st
+import streamlit_modal as modal
 from components import display_metric_card, display_alert
 from utils.database import query
 from components.navigation import show_nav
 from components.styles import load_css
+from components.chat import show_chat_container
 
 def main():
     """Main inventory page."""
@@ -17,14 +19,98 @@ def main():
     # Page header
     col1, col2 = st.columns([8, 2])
     with col1:
-        st.title("📊 Inventory Management")
+        st.title("📦 Inventory Management")
         st.markdown("**Monitor stock levels and manage inventory**")
     
     with col2:
-        if st.button("🏠 Home", use_container_width=True):
-            st.switch_page("app.py")
+        if st.button("🤖 AI Assistant", use_container_width=True):
+            st.session_state.show_chat = True
 
-    # Inventory Overview with enhanced styling
+    # Create the chat modal
+    chat_modal = modal.Modal(
+        "AI Assistant",
+        key="inventory_chat_modal",
+        max_width=800
+    )
+
+    # Handle chat modal
+    if st.session_state.get("show_chat", False):
+        chat_modal.open()
+        st.session_state.show_chat = False
+
+    # Modal content
+    if chat_modal.is_open():
+        with chat_modal.container():
+            # Get chat config with fallback
+            chat_config = st.session_state.get("config", {}).get("chat", {
+                "placeholder": "How can I help you with inventory management?",
+                "max_tokens": 1000,
+                "temperature": 0.7
+            })
+            
+            # Show the chat container
+            show_chat_container(chat_config)
+
+    # Add custom CSS for better tab styling (same as daily operations)
+    st.markdown("""
+    <style>
+    .stTabs [data-baseweb="tab-list"] {
+        gap: 8px;
+    }
+    .stTabs [data-baseweb="tab"] {
+        height: 50px !important;
+        padding: 12px 24px !important;
+        background-color: #f8f9fa !important;
+        border-radius: 8px 8px 0px 0px !important;
+        border: 1px solid #dee2e6 !important;
+        border-bottom: none !important;
+        font-size: 22px !important;
+        font-weight: 700 !important;
+        color: #495057 !important;
+        transition: all 0.2s ease !important;
+    }
+    .stTabs [data-baseweb="tab"] p {
+        font-size: 22px !important;
+        font-weight: 700 !important;
+        margin: 0 !important;
+    }
+    .stTabs [data-baseweb="tab"]:hover {
+        background-color: #e9ecef !important;
+        color: #212529 !important;
+    }
+    .stTabs [aria-selected="true"] {
+        background-color: #007bff !important;
+        color: white !important;
+        border-color: #007bff !important;
+    }
+    .stTabs [aria-selected="true"] p {
+        color: white !important;
+    }
+    .stTabs [data-baseweb="tab-panel"] {
+        padding-top: 20px;
+    }
+    </style>
+    """, unsafe_allow_html=True)
+
+    # Main content in tabs - fully tab-based experience
+    tab1, tab2, tab3, tab4 = st.tabs(["Current Stock", "Low Stock Alerts", "Stock Trends", "Reorder Management"])
+    
+    with tab1:
+        show_current_inventory()
+    
+    with tab2:
+        show_low_stock_alerts()
+    
+    with tab3:
+        show_stock_trends()
+    
+    with tab4:
+        show_reorder_management()
+
+def show_current_inventory():
+    """Display current inventory with enhanced styling."""
+    # Inventory Overview at top of tab
+    st.markdown("#### 📊 Inventory Overview")
     col1, col2, col3, col4 = st.columns(4)
     
     with col1:
@@ -68,24 +154,7 @@ def main():
         """, unsafe_allow_html=True)
 
     st.markdown("---")
-
-    # Main content tabs
-    tab1, tab2, tab3, tab4 = st.tabs(["📋 Current Stock", "⚠️ Low Stock Alerts", "📈 Stock Trends", "🔄 Reorder Management"])
     
-    with tab1:
-        show_current_inventory()
-    
-    with tab2:
-        show_low_stock_alerts()
-    
-    with tab3:
-        show_stock_trends()
-    
-    with tab4:
-        show_reorder_management()
-
-def show_current_inventory():
-    """Display current inventory with enhanced styling."""
     st.markdown("### 📋 Current Inventory")
     
     # Mock inventory data focused on retail/fashion
@@ -197,6 +266,60 @@ def show_reorder_management():
 # Add custom CSS for inventory components
 st.markdown("""
     <style>
+    /* Global font improvements */
+    .stApp {
+        font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+    }
+    
+    /* Modern inventory summary card styling - Clean styling without colored borders */
+    .inventory-summary-card {
+        background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
+        border-radius: 16px;
+        padding: 1.5rem;
+        box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+        text-align: center;
+        border: 1px solid rgba(226, 232, 240, 0.6);
+        transition: all 0.3s ease;
+        margin-bottom: 1rem;
+    }
+    
+    .inventory-summary-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 30px rgba(0,0,0,0.12);
+    }
+    
+    .inventory-summary-card .inventory-icon {
+        font-size: 2.5rem;
+        margin-bottom: 0.75rem;
+        display: block;
+    }
+    
+    .inventory-summary-card .inventory-value {
+        font-size: 2.25rem;
+        font-weight: 700;
+        color: #1e293b;
+        margin-bottom: 0.5rem;
+        display: block;
+        line-height: 1.2;
+    }
+    
+    .inventory-summary-card .inventory-label {
+        font-size: 1rem;
+        color: #64748b;
+        font-weight: 500;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        margin-bottom: 0.25rem;
+        display: block;
+    }
+    
+    .inventory-summary-card .inventory-detail {
+        font-size: 0.875rem;
+        color: #94a3b8;
+        font-weight: 400;
+    }
+    
+    /* Enhanced inventory item cards */
     .inventory-item-card {
         background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
         border-radius: 12px;
@@ -253,7 +376,7 @@ st.markdown("""
         font-weight: 600;
     }
     
-    /* Alert card styling - Clean without colored borders */
+    /* Enhanced alert cards - Clean without colored borders */
     .alert-card {
         background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
         border-radius: 12px;
@@ -280,6 +403,75 @@ st.markdown("""
         color: #64748b;
         font-size: 1rem;
         line-height: 1.5;
+    }
+    
+    /* Enhanced button styling */
+    .stButton > button {
+        background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+        color: white;
+        border: none;
+        border-radius: 8px;
+        padding: 0.75rem 1.5rem;
+        font-weight: 600;
+        font-size: 1rem;
+        transition: all 0.3s ease;
+        box-shadow: 0 2px 8px rgba(59, 130, 246, 0.3);
+    }
+    
+    .stButton > button:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 4px 16px rgba(59, 130, 246, 0.4);
+        background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
+    }
+    
+    /* Enhanced selectbox styling */
+    .stSelectbox > div > div {
+        background-color: white;
+        border: 2px solid #e2e8f0;
+        border-radius: 8px;
+        font-size: 1rem;
+        transition: all 0.3s ease;
+    }
+    
+    .stSelectbox > div > div:focus-within {
+        border-color: #3b82f6;
+        box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+    }
+    
+    /* Page title styling */
+    h1 {
+        color: #1e293b;
+        font-weight: 800;
+        font-size: 2.5rem;
+        margin-bottom: 0.5rem;
+    }
+    
+    h3 {
+        color: #334155;
+        font-weight: 700;
+        font-size: 1.5rem;
+        margin-bottom: 1rem;
+    }
+    
+    h4 {
+        color: #475569;
+        font-weight: 600;
+        font-size: 1.25rem;
+        margin-bottom: 0.75rem;
+    }
+    
+    /* Enhanced markdown text */
+    .stMarkdown p {
+        font-size: 1rem;
+        line-height: 1.6;
+        color: #64748b;
+    }
+    
+    /* Success/info message styling */
+    .stSuccess, .stInfo {
+        border-radius: 8px;
+        font-size: 1rem;
+        font-weight: 500;
     }
     </style>
 """, unsafe_allow_html=True)

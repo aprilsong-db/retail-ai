@@ -2,7 +2,7 @@
 
 import streamlit as st
 from datetime import datetime, timedelta
-from utils.database import query
+from utils.database import query, get_stores
 from utils.store_context import check_permission
 from components.metrics import display_metric_card, display_alert
 from components.chat import show_chat_container
@@ -267,8 +267,49 @@ def show_associate_homepage_with_chat(chat_modal, chat_notifications):
 
 def show_associate_homepage():
     """Display homepage content for store associates with improved tab-based layout."""
-    # Main content in tabs - fully tab-based experience
-    tab1, tab2, tab3, tab4 = st.tabs(["🎯 My Work", "📅 Schedule", "🏷️ Products", "📊 Performance"])
+    # Add custom CSS for better tab styling with stronger selectors
+    st.markdown("""
+    <style>
+    .stTabs [data-baseweb="tab-list"] {
+        gap: 8px;
+    }
+    .stTabs [data-baseweb="tab"] {
+        height: 50px !important;
+        padding: 12px 24px !important;
+        background-color: #f8f9fa !important;
+        border-radius: 8px 8px 0px 0px !important;
+        border: 1px solid #dee2e6 !important;
+        border-bottom: none !important;
+        font-size: 22px !important;
+        font-weight: 700 !important;
+        color: #495057 !important;
+        transition: all 0.2s ease !important;
+    }
+    .stTabs [data-baseweb="tab"] p {
+        font-size: 22px !important;
+        font-weight: 700 !important;
+        margin: 0 !important;
+    }
+    .stTabs [data-baseweb="tab"]:hover {
+        background-color: #e9ecef !important;
+        color: #212529 !important;
+    }
+    .stTabs [aria-selected="true"] {
+        background-color: #007bff !important;
+        color: white !important;
+        border-color: #007bff !important;
+    }
+    .stTabs [aria-selected="true"] p {
+        color: white !important;
+    }
+    .stTabs [data-baseweb="tab-panel"] {
+        padding-top: 20px;
+    }
+    </style>
+    """, unsafe_allow_html=True)
+    
+    # Main content in tabs - fully tab-based experience with clean styling
+    tab1, tab2, tab3, tab4 = st.tabs(["My Work", "Schedule", "Products", "Performance"])
     
     with tab1:
         show_my_work_tab()
@@ -294,6 +335,13 @@ def show_my_work_tab():
                 <div class="status-icon">🟢</div>
                 <div class="status-text">On Shift</div>
                 <div class="status-detail">3h 37m left</div>
+                <div class="assignment-info">
+                    <div style="margin-top: 8px; padding-top: 8px; border-top: 1px solid rgba(255,255,255,0.3); font-size: 16px; font-weight: 600;">
+                        <div><strong>Assignment:</strong> Women's Fashion</div>
+                        <div><strong>Section:</strong> Designer Area</div>
+                        <div><strong>Coverage:</strong> Solo until 2 PM</div>
+                    </div>
+                </div>
             </div>
         """, unsafe_allow_html=True)
     
@@ -372,18 +420,6 @@ def show_my_work_tab():
         
         if st.button("☕ Take Break", use_container_width=True):
             st.success("Break started - timer activated")
-        
-        st.markdown("#### 📍 Current Assignment")
-        st.markdown("""
-            <div class="current-assignment-card">
-                <div class="assignment-department">Women's Fashion</div>
-                <div class="assignment-details">
-                    <div>Section: Designer Area</div>
-                    <div>Focus: Customer Service</div>
-                    <div>Coverage: Solo until 2 PM</div>
-                </div>
-            </div>
-        """, unsafe_allow_html=True)
 
 def show_schedule_tab():
     """Display the Schedule tab with shift info and time tracking."""
@@ -780,8 +816,49 @@ def show_manager_homepage_with_chat(chat_modal, chat_notifications):
 
 def show_manager_homepage():
     """Display tab-based homepage content for store managers."""
-    # Main content in tabs - fully tab-based experience
-    tab1, tab2, tab3, tab4, tab5 = st.tabs(["📊 Dashboard", "🎯 Operations", "👥 Team", "📦 Inventory", "📈 Analytics"])
+    # Add custom CSS for better tab styling with stronger selectors
+    st.markdown("""
+    <style>
+    .stTabs [data-baseweb="tab-list"] {
+        gap: 8px;
+    }
+    .stTabs [data-baseweb="tab"] {
+        height: 50px !important;
+        padding: 12px 24px !important;
+        background-color: #f8f9fa !important;
+        border-radius: 8px 8px 0px 0px !important;
+        border: 1px solid #dee2e6 !important;
+        border-bottom: none !important;
+        font-size: 22px !important;
+        font-weight: 700 !important;
+        color: #495057 !important;
+        transition: all 0.2s ease !important;
+    }
+    .stTabs [data-baseweb="tab"] p {
+        font-size: 22px !important;
+        font-weight: 700 !important;
+        margin: 0 !important;
+    }
+    .stTabs [data-baseweb="tab"]:hover {
+        background-color: #e9ecef !important;
+        color: #212529 !important;
+    }
+    .stTabs [aria-selected="true"] {
+        background-color: #007bff !important;
+        color: white !important;
+        border-color: #007bff !important;
+    }
+    .stTabs [aria-selected="true"] p {
+        color: white !important;
+    }
+    .stTabs [data-baseweb="tab-panel"] {
+        padding-top: 20px;
+    }
+    </style>
+    """, unsafe_allow_html=True)
+    
+    # Main content in tabs - fully tab-based experience with clean styling
+    tab1, tab2, tab3, tab4, tab5 = st.tabs(["Dashboard", "Operations", "Team", "Inventory", "Analytics"])
     
     with tab1:
         show_manager_dashboard_tab()
@@ -1235,12 +1312,39 @@ def show_homepage():
         current_time = datetime.now().strftime("%I:%M %p")
         current_date = datetime.now().strftime("%A, %B %d")
         
-        # Mock store info (in a real app, this would come from database/config)
+        # Get actual store data from database
+        stores_df = get_stores()
+        
+        # Find current store data
+        current_store_data = None
+        if not stores_df.empty:
+            # Find the store that matches the current store name
+            matching_stores = stores_df[stores_df['name'] == store_name]
+            if not matching_stores.empty:
+                current_store_data = matching_stores.iloc[0]
+        
+        # Build store info from database or use fallback
+        if current_store_data is not None:
+            # Build complete address from database fields
+            full_address = f"{current_store_data['address']}, {current_store_data['city']}, {current_store_data['state']} {current_store_data['zip_code']}"
+            store_phone = current_store_data['phone']
+            
+            # Determine hours based on is_24_hours flag
+            if current_store_data.get('is_24_hours', False):
+                store_hours = "24/7"
+            else:
+                store_hours = "8:00 AM - 9:00 PM"  # Default hours
+        else:
+            # Fallback data if store not found in database
+            full_address = "123 Main Street, San Francisco, CA 94102"
+            store_phone = "(555) 123-4567"
+            store_hours = "8:00 AM - 9:00 PM"
+        
         store_info = {
-            "address": "123 Main Street, Downtown",
-            "phone": "(555) 123-4567", 
-            "hours": "8:00 AM - 9:00 PM",
-            "weather": "72°F ☀️"
+            "address": full_address,
+            "phone": store_phone,
+            "hours": store_hours,
+            "weather": "72°F ☀️"  # Weather remains mock for now
         }
         
         # Create a seamless info bar under the title

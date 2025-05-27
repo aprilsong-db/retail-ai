@@ -1,8 +1,10 @@
 """Team Insights page for store managers."""
 
 import streamlit as st
+import streamlit_modal as modal
 from datetime import datetime, timedelta
 from components.styles import load_css
+from components.chat import show_chat_container
 
 def main():
     """Main team insights page."""
@@ -16,10 +18,94 @@ def main():
         st.markdown("**Monitor team performance and manage staff effectively**")
     
     with col2:
-        if st.button("🏠 Home", use_container_width=True):
-            st.switch_page("app.py")
+        if st.button("🤖 AI Assistant", use_container_width=True):
+            st.session_state.show_chat = True
+
+    # Create the chat modal
+    chat_modal = modal.Modal(
+        "AI Assistant",
+        key="team_insights_chat_modal",
+        max_width=800
+    )
+
+    # Handle chat modal
+    if st.session_state.get("show_chat", False):
+        chat_modal.open()
+        st.session_state.show_chat = False
+
+    # Modal content
+    if chat_modal.is_open():
+        with chat_modal.container():
+            # Get chat config with fallback
+            chat_config = st.session_state.get("config", {}).get("chat", {
+                "placeholder": "How can I help you with team insights?",
+                "max_tokens": 1000,
+                "temperature": 0.7
+            })
+            
+            # Show the chat container
+            show_chat_container(chat_config)
+
+    # Add custom CSS for better tab styling (same as other pages)
+    st.markdown("""
+    <style>
+    .stTabs [data-baseweb="tab-list"] {
+        gap: 8px;
+    }
+    .stTabs [data-baseweb="tab"] {
+        height: 50px !important;
+        padding: 12px 24px !important;
+        background-color: #f8f9fa !important;
+        border-radius: 8px 8px 0px 0px !important;
+        border: 1px solid #dee2e6 !important;
+        border-bottom: none !important;
+        font-size: 22px !important;
+        font-weight: 700 !important;
+        color: #495057 !important;
+        transition: all 0.2s ease !important;
+    }
+    .stTabs [data-baseweb="tab"] p {
+        font-size: 22px !important;
+        font-weight: 700 !important;
+        margin: 0 !important;
+    }
+    .stTabs [data-baseweb="tab"]:hover {
+        background-color: #e9ecef !important;
+        color: #212529 !important;
+    }
+    .stTabs [aria-selected="true"] {
+        background-color: #007bff !important;
+        color: white !important;
+        border-color: #007bff !important;
+    }
+    .stTabs [aria-selected="true"] p {
+        color: white !important;
+    }
+    .stTabs [data-baseweb="tab-panel"] {
+        padding-top: 20px;
+    }
+    </style>
+    """, unsafe_allow_html=True)
+
+    # Main content in tabs - fully tab-based experience
+    tab1, tab2, tab3, tab4 = st.tabs(["Performance", "Scheduling", "Analytics", "Feedback"])
     
-    # Team overview stats
+    with tab1:
+        show_performance_overview()
+    
+    with tab2:
+        show_scheduling_overview()
+    
+    with tab3:
+        show_team_analytics()
+    
+    with tab4:
+        show_feedback_management()
+
+def show_performance_overview():
+    """Display team performance overview."""
+    # Team overview stats at top of tab
+    st.markdown("#### 👥 Team Overview")
     col1, col2, col3, col4 = st.columns(4)
     
     with col1:
@@ -60,23 +146,6 @@ def main():
     
     st.markdown("---")
     
-    # Main content tabs
-    tab1, tab2, tab3, tab4 = st.tabs(["🏆 Performance", "📅 Scheduling", "📈 Analytics", "💬 Feedback"])
-    
-    with tab1:
-        show_performance_overview()
-    
-    with tab2:
-        show_scheduling_overview()
-    
-    with tab3:
-        show_team_analytics()
-    
-    with tab4:
-        show_feedback_management()
-
-def show_performance_overview():
-    """Display team performance overview."""
     st.markdown("### 🏆 Team Performance")
     
     # Top performers
@@ -484,6 +553,11 @@ def show_schedule_alert(alert):
 # Add custom CSS for team components
 st.markdown("""
     <style>
+    /* Global font improvements */
+    .stApp {
+        font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+    }
+    
     /* Enhanced team stat cards - Clean styling without colored borders */
     .team-stat-card {
         background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
@@ -588,6 +662,61 @@ st.markdown("""
         background: rgba(248, 250, 252, 0.8);
         border-radius: 8px;
         border: 1px solid rgba(226, 232, 240, 0.6);
+    }
+    
+    /* Performance distribution bars */
+    .performance-bar {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 0.75rem;
+        padding: 0.75rem;
+        background: rgba(248, 250, 252, 0.8);
+        border-radius: 8px;
+        border: 1px solid rgba(226, 232, 240, 0.6);
+    }
+    
+    .performance-label {
+        font-weight: 600;
+        color: #334155;
+        font-size: 1rem;
+    }
+    
+    .performance-count {
+        color: white;
+        padding: 0.5rem 1rem;
+        border-radius: 6px;
+        font-size: 0.875rem;
+        font-weight: 600;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.15);
+    }
+    
+    /* Attention items */
+    .attention-item {
+        background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
+        border-radius: 8px;
+        padding: 1rem;
+        margin-bottom: 0.75rem;
+        border: 1px solid rgba(226, 232, 240, 0.6);
+        border-left: 4px solid #ef4444;
+        transition: all 0.3s ease;
+    }
+    
+    .attention-item:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    }
+    
+    .attention-employee {
+        font-weight: 700;
+        color: #1e293b;
+        font-size: 1rem;
+        margin-bottom: 0.25rem;
+    }
+    
+    .attention-issue {
+        color: #64748b;
+        font-size: 0.875rem;
     }
     
     /* Enhanced analytics cards - Clean styling without colored borders */
@@ -801,6 +930,61 @@ st.markdown("""
         font-weight: 600;
         font-size: 1rem;
         font-style: italic;
+    }
+    
+    /* Enhanced button styling */
+    .stButton > button {
+        background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+        color: white;
+        border: none;
+        border-radius: 8px;
+        padding: 0.75rem 1.5rem;
+        font-weight: 600;
+        font-size: 1rem;
+        transition: all 0.3s ease;
+        box-shadow: 0 2px 8px rgba(59, 130, 246, 0.3);
+    }
+    
+    .stButton > button:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 4px 16px rgba(59, 130, 246, 0.4);
+        background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
+    }
+    
+    /* Page title styling */
+    h1 {
+        color: #1e293b;
+        font-weight: 800;
+        font-size: 2.5rem;
+        margin-bottom: 0.5rem;
+    }
+    
+    h3 {
+        color: #334155;
+        font-weight: 700;
+        font-size: 1.5rem;
+        margin-bottom: 1rem;
+    }
+    
+    h4 {
+        color: #475569;
+        font-weight: 600;
+        font-size: 1.25rem;
+        margin-bottom: 0.75rem;
+    }
+    
+    /* Enhanced markdown text */
+    .stMarkdown p {
+        font-size: 1rem;
+        line-height: 1.6;
+        color: #64748b;
+    }
+    
+    /* Success/info message styling */
+    .stSuccess, .stInfo {
+        border-radius: 8px;
+        font-size: 1rem;
+        font-weight: 500;
     }
     </style>
 """, unsafe_allow_html=True)

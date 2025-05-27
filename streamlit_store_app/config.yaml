@@ -13,63 +13,6 @@ employees:
   store_associate:
     name: "Mike Chen"
 
-# Store Information
-stores:
-  downtown:
-    id: 101
-    name: "Downtown Store"
-    type: "Flagship"
-    address: "123 Market Street"
-    city: "San Francisco"
-    state: "CA"
-    zip_code: "94105"
-    size_sqft: 12000
-    rating: 4.5
-    hours:
-      monday: {"open": "07:00", "close": "22:00"}
-      tuesday: {"open": "07:00", "close": "22:00"}
-      wednesday: {"open": "07:00", "close": "22:00"}
-      thursday: {"open": "07:00", "close": "22:00"}
-      friday: {"open": "07:00", "close": "23:00"}
-      saturday: {"open": "08:00", "close": "23:00"}
-      sunday: {"open": "08:00", "close": "21:00"}
-  marina:
-    id: 102
-    name: "Marina Store"
-    type: "Express"
-    address: "2200 Chestnut Street"
-    city: "San Francisco"
-    state: "CA"
-    zip_code: "94123"
-    size_sqft: 8000
-    rating: 4.3
-    hours:
-      monday: {"open": "08:00", "close": "21:00"}
-      tuesday: {"open": "08:00", "close": "21:00"}
-      wednesday: {"open": "08:00", "close": "21:00"}
-      thursday: {"open": "08:00", "close": "21:00"}
-      friday: {"open": "08:00", "close": "22:00"}
-      saturday: {"open": "08:00", "close": "22:00"}
-      sunday: {"open": "09:00", "close": "20:00"}
-  mission:
-    id: 103
-    name: "Mission Store"
-    type: "Flagship"
-    address: "2128 Mission Street"
-    city: "San Francisco"
-    state: "CA"
-    zip_code: "94110"
-    size_sqft: 15000
-    rating: 4.7
-    hours:
-      monday: {"open": "07:00", "close": "23:00"}
-      tuesday: {"open": "07:00", "close": "23:00"}
-      wednesday: {"open": "07:00", "close": "23:00"}
-      thursday: {"open": "07:00", "close": "23:00"}
-      friday: {"open": "07:00", "close": "23:00"}
-      saturday: {"open": "08:00", "close": "23:00"}
-      sunday: {"open": "08:00", "close": "22:00"}
-
 # User Roles and Permissions
 roles:
   store_associate:

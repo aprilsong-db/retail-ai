@@ -1,25 +1,117 @@
 """Daily Operations page for store managers."""
 
 import streamlit as st
-from datetime import datetime, timedelta
+import streamlit_modal as modal
+from components import display_metric_card, display_alert
+from utils.database import query
+from components.navigation import show_nav
 from components.styles import load_css
+from components.chat import show_chat_container
+from datetime import datetime, timedelta
 
 def main():
     """Main daily operations page."""
     # Load CSS
     load_css()
     
+    # Show navigation
+    show_nav()
+    
     # Page header
     col1, col2 = st.columns([8, 2])
     with col1:
         st.title("📋 Daily Operations")
-        st.markdown("**Manage daily store operations and priorities**")
+        st.markdown("**Manage today's priorities and store operations**")
     
     with col2:
-        if st.button("🏠 Home", use_container_width=True):
-            st.switch_page("app.py")
+        if st.button("🤖 AI Assistant", use_container_width=True):
+            st.session_state.show_chat = True
     
-    # Operations overview
+    # Create the chat modal
+    chat_modal = modal.Modal(
+        "AI Assistant",
+        key="daily_ops_chat_modal",
+        max_width=800
+    )
+
+    # Handle chat modal
+    if st.session_state.get("show_chat", False):
+        chat_modal.open()
+        st.session_state.show_chat = False
+
+    # Modal content
+    if chat_modal.is_open():
+        with chat_modal.container():
+            # Get chat config with fallback
+            chat_config = st.session_state.get("config", {}).get("chat", {
+                "placeholder": "How can I help you with daily operations?",
+                "max_tokens": 1000,
+                "temperature": 0.7
+            })
+            
+            # Show the chat container
+            show_chat_container(chat_config)
+
+    # Add custom CSS for better tab styling (same as homepage)
+    st.markdown("""
+    <style>
+    .stTabs [data-baseweb="tab-list"] {
+        gap: 8px;
+    }
+    .stTabs [data-baseweb="tab"] {
+        height: 50px !important;
+        padding: 12px 24px !important;
+        background-color: #f8f9fa !important;
+        border-radius: 8px 8px 0px 0px !important;
+        border: 1px solid #dee2e6 !important;
+        border-bottom: none !important;
+        font-size: 20px !important;
+        font-weight: 700 !important;
+        color: #495057 !important;
+        transition: all 0.2s ease !important;
+    }
+    .stTabs [data-baseweb="tab"] p {
+        font-size: 20px !important;
+        font-weight: 700 !important;
+        margin: 0 !important;
+    }
+    .stTabs [data-baseweb="tab"]:hover {
+        background-color: #e9ecef !important;
+        color: #212529 !important;
+    }
+    .stTabs [aria-selected="true"] {
+        background-color: #007bff !important;
+        color: white !important;
+        border-color: #007bff !important;
+    }
+    .stTabs [aria-selected="true"] p {
+        color: white !important;
+    }
+    .stTabs [data-baseweb="tab-panel"] {
+        padding-top: 20px;
+    }
+    </style>
+    """, unsafe_allow_html=True)
+    
+    # Main content in tabs - fully tab-based experience
+    tab1, tab2, tab3, tab4 = st.tabs(["Today's Priorities", "Deliveries & Vendors", "Store Metrics", "Schedule Management"])
+    
+    with tab1:
+        show_daily_priorities()
+    
+    with tab2:
+        show_deliveries_vendors()
+    
+    with tab3:
+        show_store_metrics()
+    
+    with tab4:
+        show_schedule_management()
+
+def show_daily_priorities():
+    """Display today's operational priorities."""
+    # Operations overview stats at top of tab
+    st.markdown("#### 📊 Operations Overview")
     col1, col2, col3, col4 = st.columns(4)
     
     with col1:
@@ -60,23 +152,6 @@ def main():
     
     st.markdown("---")
     
-    # Main content tabs
-    tab1, tab2, tab3, tab4 = st.tabs(["🎯 Today's Priorities", "🚚 Deliveries & Vendors", "📊 Store Metrics", "📅 Schedule Management"])
-    
-    with tab1:
-        show_daily_priorities()
-    
-    with tab2:
-        show_deliveries_vendors()
-    
-    with tab3:
-        show_store_metrics()
-    
-    with tab4:
-        show_schedule_management()
-
-def show_daily_priorities():
-    """Display today's operational priorities."""
     st.markdown("### 🎯 Today's Priorities")
     
     priorities = [
