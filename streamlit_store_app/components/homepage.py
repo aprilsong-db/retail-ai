@@ -1203,9 +1203,9 @@ def show_homepage():
     # Get user role from session state
     user_role = st.session_state.get("user_role", "store_associate")
     
-    # Get employee name and clean store name
+    # Get employee name and store name (keep full name including BrickMart)
     employee_name = st.session_state.config["employees"][st.session_state.user_role]["name"]
-    clean_store_name = st.session_state.store_name.replace("BrickMart ", "").strip()
+    store_name = st.session_state.store_name
     
     # Add chat modal setup
     chat_notifications = st.session_state.get("chat_notifications", 0)
@@ -1218,12 +1218,54 @@ def show_homepage():
         padding=20
     )
     
-    # Page header with store info, welcome message, and chat button on same line
+    # Page header with integrated store info and chat button
     col1, col2 = st.columns([8, 2])
     
     with col1:
-        st.title(f"🏪 {clean_store_name}")
-        st.markdown(f"**Welcome back, {employee_name}!**")
+        # Enhanced title with company and location
+        # Extract location from store name (remove "BrickMart" prefix if present)
+        if store_name.startswith("BrickMart "):
+            location = store_name.replace("BrickMart ", "").strip()
+        else:
+            location = store_name
+        
+        st.title(f"🏪 BrickMart - {location}")
+        
+        # Integrated store info bar - blends with header
+        current_time = datetime.now().strftime("%I:%M %p")
+        current_date = datetime.now().strftime("%A, %B %d")
+        
+        # Mock store info (in a real app, this would come from database/config)
+        store_info = {
+            "address": "123 Main Street, Downtown",
+            "phone": "(555) 123-4567", 
+            "hours": "8:00 AM - 9:00 PM",
+            "weather": "72°F ☀️"
+        }
+        
+        # Create a seamless info bar under the title
+        st.markdown(f"""
+            <div style="
+                margin-top: -10px;
+                margin-bottom: 15px;
+                padding: 8px 0px;
+                border-bottom: 1px solid #e9ecef;
+                color: #6c757d;
+                font-size: 14px;
+            ">
+                <div style="display: flex; align-items: center; gap: 20px; flex-wrap: wrap;">
+                    <div style="font-weight: 600; color: #495057;">
+                        <strong>Welcome back, {employee_name}!</strong>
+                    </div>
+                    <div style="display: flex; align-items: center; gap: 15px; font-size: 13px;">
+                        <span><strong>🕐 {current_time}</strong> • {current_date}</span>
+                        <span>🌤️ {store_info['weather']}</span>
+                        <span>📍 {store_info['address']}</span>
+                        <span>⏰ {store_info['hours']}</span>
+                    </div>
+                </div>
+            </div>
+        """, unsafe_allow_html=True)
     
     with col2:
         # Add some spacing to align with title
