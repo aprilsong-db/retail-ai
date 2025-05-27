@@ -81,11 +81,7 @@ def show_home():
         st.warning("Please select a store and role from the sidebar to continue")
         return
 
-    # Page header
-    st.title(f"🏪 {st.session_state.store_name}")
-    st.markdown(f"**Welcome back, {st.session_state.user_role.replace('_', ' ').title()}!**")
-    
-    # Show the centralized homepage content
+    # Show the centralized homepage content (which is already tab-based)
     show_homepage()
 
 def main():

@@ -232,9 +232,60 @@ def show_manager_summary_cards():
             </div>
         """, unsafe_allow_html=True)
 
+def show_associate_homepage_with_chat(chat_modal, chat_notifications):
+    """Display homepage content for store associates with integrated chat button."""
+    # Create tabs with chat button on the same line
+    col1, col2 = st.columns([8, 2])
+    
+    with col1:
+        # Main content in tabs - fully tab-based experience
+        tab1, tab2, tab3, tab4 = st.tabs(["🎯 My Work", "📅 Schedule", "🏷️ Products", "📊 Performance"])
+    
+    with col2:
+        # Chat button aligned with tabs
+        if chat_notifications > 0:
+            button_text = f"💬 AI Assistant ({chat_notifications})"
+        else:
+            button_text = "💬 AI Assistant"
+        
+        if st.button(button_text, key="associate_chat_btn", type="primary", use_container_width=True):
+            st.session_state.chat_notifications = 0
+            chat_modal.open()
+    
+    # Tab content
+    with tab1:
+        show_my_work_tab()
+    
+    with tab2:
+        show_schedule_tab()
+    
+    with tab3:
+        show_products_tab()
+    
+    with tab4:
+        show_performance_tab()
+
 def show_associate_homepage():
     """Display homepage content for store associates with improved tab-based layout."""
-    # Quick status bar at top with enhanced styling
+    # Main content in tabs - fully tab-based experience
+    tab1, tab2, tab3, tab4 = st.tabs(["🎯 My Work", "📅 Schedule", "🏷️ Products", "📊 Performance"])
+    
+    with tab1:
+        show_my_work_tab()
+    
+    with tab2:
+        show_schedule_tab()
+    
+    with tab3:
+        show_products_tab()
+    
+    with tab4:
+        show_performance_tab()
+
+def show_my_work_tab():
+    """Display the My Work tab with tasks and immediate priorities."""
+    # Quick status bar at top
+    st.markdown("#### 🎯 Current Status")
     col1, col2, col3, col4 = st.columns(4)
     
     with col1:
@@ -275,23 +326,6 @@ def show_associate_homepage():
     
     st.markdown("---")
     
-    # Main content in tabs
-    tab1, tab2, tab3, tab4 = st.tabs(["🎯 My Work", "📅 Schedule", "🏷️ Products", "📊 Performance"])
-    
-    with tab1:
-        show_my_work_tab()
-    
-    with tab2:
-        show_schedule_tab()
-    
-    with tab3:
-        show_products_tab()
-    
-    with tab4:
-        show_performance_tab()
-
-def show_my_work_tab():
-    """Display the My Work tab with tasks and immediate priorities."""
     col1, col2 = st.columns([2, 1])
     
     with col1:
@@ -699,73 +733,8 @@ def show_persistent_chat():
             
             # Show the chat container
             show_chat_container(chat_config)
-
-def show_floating_chat_window():
-    """Legacy function - now redirects to modal implementation."""
-    # This function is kept for backward compatibility
-    # but the actual implementation is now in show_persistent_chat
-    pass
-
-# Legacy functions for backward compatibility (simplified versions)
-def show_kpi_dashboard():
-    """Legacy function - redirects to summary."""
-    show_kpi_summary()
-
-def show_notifications():
-    """Legacy function - redirects to modal."""
-    show_notifications_modal()
-
-def show_inventory_status():
-    """Legacy function - redirects to summary."""
-    show_inventory_summary()
-
-def show_homepage():
-    """Main homepage function that routes to appropriate view based on user role."""
-    # Get user role from session state
-    user_role = st.session_state.get("user_role", "store_associate")
     
-    # Add chat modal button to page header
-    chat_notifications = st.session_state.get("chat_notifications", 0)
-    
-    # Create the modal first
-    chat_modal = modal.Modal(
-        title="🤖 AI Assistant",
-        key="homepage_chat_modal",
-        max_width=700,
-        padding=20
-    )
-    
-    # Page header with chat button
-    col1, col2, col3 = st.columns([6, 2, 2])
-    
-    with col1:
-        st.title("Store Dashboard")
-    
-    with col3:
-        # Chat button with notification badge
-        if chat_notifications > 0:
-            button_text = f"💬 AI Assistant ({chat_notifications})"
-        else:
-            button_text = "💬 AI Assistant"
-        
-        if st.button(button_text, key="header_chat_btn", type="primary", use_container_width=True):
-            st.session_state.chat_notifications = 0
-            chat_modal.open()
-    
-    # Modal content
-    if chat_modal.is_open():
-        with chat_modal.container():
-            # Get chat config with fallback
-            chat_config = st.session_state.get("config", {}).get("chat", {
-                "placeholder": "How can I help you today?",
-                "max_tokens": 1000,
-                "temperature": 0.7
-            })
-            
-            # Show the chat container
-            show_chat_container(chat_config)
-    
-    # Show appropriate homepage content based on user role
+    # Show appropriate homepage content based on user role (back to original functions)
     if user_role == "store_manager":
         # Show new tab-based manager homepage
         show_manager_homepage()
@@ -773,9 +742,66 @@ def show_homepage():
         # Show new tab-based associate homepage
         show_associate_homepage()
 
+def show_manager_homepage_with_chat(chat_modal, chat_notifications):
+    """Display tab-based homepage content for store managers with integrated chat button."""
+    # Create tabs with chat button on the same line
+    col1, col2 = st.columns([8, 2])
+    
+    with col1:
+        # Main content in tabs - fully tab-based experience
+        tab1, tab2, tab3, tab4, tab5 = st.tabs(["📊 Dashboard", "🎯 Operations", "👥 Team", "📦 Inventory", "📈 Analytics"])
+    
+    with col2:
+        # Chat button aligned with tabs
+        if chat_notifications > 0:
+            button_text = f"💬 AI Assistant ({chat_notifications})"
+        else:
+            button_text = "💬 AI Assistant"
+        
+        if st.button(button_text, key="manager_chat_btn", type="primary", use_container_width=True):
+            st.session_state.chat_notifications = 0
+            chat_modal.open()
+    
+    # Tab content
+    with tab1:
+        show_manager_dashboard_tab()
+    
+    with tab2:
+        show_manager_operations_tab()
+    
+    with tab3:
+        show_manager_team_tab()
+    
+    with tab4:
+        show_manager_inventory_tab()
+    
+    with tab5:
+        show_manager_analytics_tab()
+
 def show_manager_homepage():
     """Display tab-based homepage content for store managers."""
-    # Quick executive dashboard at top with enhanced styling
+    # Main content in tabs - fully tab-based experience
+    tab1, tab2, tab3, tab4, tab5 = st.tabs(["📊 Dashboard", "🎯 Operations", "👥 Team", "📦 Inventory", "📈 Analytics"])
+    
+    with tab1:
+        show_manager_dashboard_tab()
+    
+    with tab2:
+        show_manager_operations_tab()
+    
+    with tab3:
+        show_manager_team_tab()
+    
+    with tab4:
+        show_manager_inventory_tab()
+    
+    with tab5:
+        show_manager_analytics_tab()
+
+def show_manager_dashboard_tab():
+    """Display the Dashboard tab with key metrics and alerts."""
+    # Quick executive dashboard at top
+    st.markdown("#### 📊 Store Overview")
     col1, col2, col3, col4 = st.columns(4)
     
     with col1:
@@ -814,36 +840,8 @@ def show_manager_homepage():
     if st.session_state.get("show_notifications", False):
         show_notifications_modal()
     
-    # Demo section for chat notifications
-    st.markdown("---")
-    col1, col2, col3, col4 = st.columns(4)
-    with col4:
-        if st.button("📧 Simulate Chat Message", key="demo_chat_notification", help="Demo: Add a chat notification"):
-            simulate_chat_notification()
-            st.success("New chat message received!")
-    
     st.markdown("---")
     
-    # Main content in tabs
-    tab1, tab2, tab3, tab4, tab5 = st.tabs(["📊 Dashboard", "🎯 Operations", "👥 Team", "📦 Inventory", "📈 Analytics"])
-    
-    with tab1:
-        show_manager_dashboard_tab()
-    
-    with tab2:
-        show_manager_operations_tab()
-    
-    with tab3:
-        show_manager_team_tab()
-    
-    with tab4:
-        show_manager_inventory_tab()
-    
-    with tab5:
-        show_manager_analytics_tab()
-
-def show_manager_dashboard_tab():
-    """Display the Dashboard tab with key metrics and alerts."""
     col1, col2 = st.columns(2)
     
     with col1:
@@ -1179,4 +1177,84 @@ def show_manager_analytics_tab():
                     </div>
                     <div class="insight-text">{insight['insight']}</div>
                 </div>
-            """, unsafe_allow_html=True) 
+            """, unsafe_allow_html=True)
+
+def show_floating_chat_window():
+    """Legacy function - now redirects to modal implementation."""
+    # This function is kept for backward compatibility
+    # but the actual implementation is now in show_persistent_chat
+    pass
+
+# Legacy functions for backward compatibility (simplified versions)
+def show_kpi_dashboard():
+    """Legacy function - redirects to summary."""
+    show_kpi_summary()
+
+def show_notifications():
+    """Legacy function - redirects to modal."""
+    show_notifications_modal()
+
+def show_inventory_status():
+    """Legacy function - redirects to summary."""
+    show_inventory_summary()
+
+def show_homepage():
+    """Main homepage function that routes to appropriate view based on user role."""
+    # Get user role from session state
+    user_role = st.session_state.get("user_role", "store_associate")
+    
+    # Get employee name and clean store name
+    employee_name = st.session_state.config["employees"][st.session_state.user_role]["name"]
+    clean_store_name = st.session_state.store_name.replace("BrickMart ", "").strip()
+    
+    # Add chat modal setup
+    chat_notifications = st.session_state.get("chat_notifications", 0)
+    
+    # Create the modal first
+    chat_modal = modal.Modal(
+        title="🤖 AI Assistant",
+        key="homepage_chat_modal",
+        max_width=700,
+        padding=20
+    )
+    
+    # Page header with store info, welcome message, and chat button on same line
+    col1, col2 = st.columns([8, 2])
+    
+    with col1:
+        st.title(f"🏪 {clean_store_name}")
+        st.markdown(f"**Welcome back, {employee_name}!**")
+    
+    with col2:
+        # Add some spacing to align with title
+        st.markdown("<br>", unsafe_allow_html=True)
+        # Chat button with notification badge
+        if chat_notifications > 0:
+            button_text = f"💬 AI Assistant ({chat_notifications})"
+        else:
+            button_text = "💬 AI Assistant"
+        
+        if st.button(button_text, key="header_chat_btn", type="primary", use_container_width=True):
+            st.session_state.chat_notifications = 0
+            chat_modal.open()
+    
+    # Modal content
+    if chat_modal.is_open():
+        with chat_modal.container():
+            # Get chat config with fallback
+            chat_config = st.session_state.get("config", {}).get("chat", {
+                "placeholder": "How can I help you today?",
+                "max_tokens": 1000,
+                "temperature": 0.7
+            })
+            
+            # Show the chat container
+            show_chat_container(chat_config)
+    
+    # Show appropriate homepage content based on user role
+    if user_role == "store_manager":
+        # Show new tab-based manager homepage
+        show_manager_homepage()
+    else:
+        # Show new tab-based associate homepage
+        show_associate_homepage() 

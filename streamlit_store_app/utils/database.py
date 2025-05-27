@@ -1,80 +1,13 @@
 """Database utilities for the Streamlit Store App."""
 
 import os
-from typing import Dict, Any
+from typing import Dict, Any, List
 from databricks import sql
 from databricks.sdk.core import Config
 import pandas as pd
 from datetime import datetime, timedelta
 import random
-
-def get_stores():
-    """Get list of available stores."""
-    return pd.DataFrame([
-        {
-            'id': 101,
-            'name': 'Downtown Market',
-            'location': 'San Francisco',
-            'type': 'flagship',
-            'address': '123 Market Street',
-            'city': 'San Francisco',
-            'state': 'CA',
-            'zip_code': '94105',
-            'size_sqft': 12000,
-            'rating': 4.5,
-            'hours': {
-                'monday': {'open': '07:00', 'close': '22:00'},
-                'tuesday': {'open': '07:00', 'close': '22:00'},
-                'wednesday': {'open': '07:00', 'close': '22:00'},
-                'thursday': {'open': '07:00', 'close': '22:00'},
-                'friday': {'open': '07:00', 'close': '23:00'},
-                'saturday': {'open': '08:00', 'close': '23:00'},
-                'sunday': {'open': '08:00', 'close': '21:00'}
-            }
-        },
-        {
-            'id': 102,
-            'name': 'Marina Market',
-            'location': 'San Francisco',
-            'type': 'express',
-            'address': '2200 Chestnut Street',
-            'city': 'San Francisco',
-            'state': 'CA',
-            'zip_code': '94123',
-            'size_sqft': 8000,
-            'rating': 4.3,
-            'hours': {
-                'monday': {'open': '08:00', 'close': '21:00'},
-                'tuesday': {'open': '08:00', 'close': '21:00'},
-                'wednesday': {'open': '08:00', 'close': '21:00'},
-                'thursday': {'open': '08:00', 'close': '21:00'},
-                'friday': {'open': '08:00', 'close': '22:00'},
-                'saturday': {'open': '08:00', 'close': '22:00'},
-                'sunday': {'open': '09:00', 'close': '20:00'}
-            }
-        },
-        {
-            'id': 103,
-            'name': 'Mission Market',
-            'location': 'San Francisco',
-            'type': 'flagship',
-            'address': '2128 Mission Street',
-            'city': 'San Francisco',
-            'state': 'CA',
-            'zip_code': '94110',
-            'size_sqft': 15000,
-            'rating': 4.7,
-            'hours': {
-                'monday': {'open': '07:00', 'close': '23:00'},
-                'tuesday': {'open': '07:00', 'close': '23:00'},
-                'wednesday': {'open': '07:00', 'close': '23:00'},
-                'thursday': {'open': '07:00', 'close': '23:00'},
-                'friday': {'open': '07:00', 'close': '23:00'},
-                'saturday': {'open': '08:00', 'close': '23:00'},
-                'sunday': {'open': '08:00', 'close': '22:00'}
-            }
-        }
-    ])
+import streamlit as st
 
 def get_connection():
     """Get a connection to Databricks SQL warehouse."""
@@ -84,6 +17,184 @@ def get_connection():
         http_path=f"/sql/1.0/warehouses/{os.getenv('DATABRICKS_WAREHOUSE_ID')}",
         credentials_provider=lambda: cfg.authenticate
     )
+
+@st.cache_data(ttl=300)  # Cache for 5 minutes
+def get_stores_from_databricks() -> pd.DataFrame:
+    """Get stores from the actual Databricks dim_stores table."""
+    try:
+        with get_connection() as connection:
+            with connection.cursor() as cursor:
+                query_sql = """
+                SELECT 
+                    store_id,
+                    store_name,
+                    store_address,
+                    store_city,
+                    store_state,
+                    store_zipcode,
+                    store_country,
+                    store_phone,
+                    store_email,
+                    store_area_sqft,
+                    is_open_24_hours,
+                    latitude,
+                    longitude,
+                    region_id
+                FROM demos_genie.rcg_store_manager_gold.dim_stores
+                WHERE store_country = 'USA'
+                ORDER BY store_name
+                """
+                cursor.execute(query_sql)
+                
+                # Fetch results and convert to DataFrame
+                columns = [desc[0] for desc in cursor.description]
+                rows = cursor.fetchall()
+                
+                if not rows:
+                    st.warning("No stores found in the database. Using fallback data.")
+                    return get_stores_fallback()
+                
+                df = pd.DataFrame(rows, columns=columns)
+                
+                # Convert to the format expected by the app
+                stores_data = []
+                for _, row in df.iterrows():
+                    store_data = {
+                        'id': row['store_id'],
+                        'name': row['store_name'],
+                        'address': row['store_address'],
+                        'city': row['store_city'],
+                        'state': row['store_state'],
+                        'zip_code': row['store_zipcode'],
+                        'phone': row['store_phone'],
+                        'email': row['store_email'],
+                        'size_sqft': int(row['store_area_sqft']) if row['store_area_sqft'] else 3000,
+                        'rating': 4.5,  # Default rating since not in dim_stores
+                        'type': 'flagship' if row['store_area_sqft'] and row['store_area_sqft'] > 3500 else 'express',
+                        'is_24_hours': row['is_open_24_hours'],
+                        'latitude': row['latitude'],
+                        'longitude': row['longitude'],
+                        'region_id': row['region_id'],
+                        # Default hours - could be enhanced with actual hours data
+                        'hours': {
+                            'monday': {'open': '08:00', 'close': '22:00'},
+                            'tuesday': {'open': '08:00', 'close': '22:00'},
+                            'wednesday': {'open': '08:00', 'close': '22:00'},
+                            'thursday': {'open': '08:00', 'close': '22:00'},
+                            'friday': {'open': '08:00', 'close': '23:00'},
+                            'saturday': {'open': '09:00', 'close': '23:00'},
+                            'sunday': {'open': '09:00', 'close': '21:00'}
+                        } if not row['is_open_24_hours'] else {
+                            'monday': {'open': '24/7', 'close': '24/7'},
+                            'tuesday': {'open': '24/7', 'close': '24/7'},
+                            'wednesday': {'open': '24/7', 'close': '24/7'},
+                            'thursday': {'open': '24/7', 'close': '24/7'},
+                            'friday': {'open': '24/7', 'close': '24/7'},
+                            'saturday': {'open': '24/7', 'close': '24/7'},
+                            'sunday': {'open': '24/7', 'close': '24/7'}
+                        }
+                    }
+                    stores_data.append(store_data)
+                
+                return pd.DataFrame(stores_data)
+                
+    except Exception as e:
+        st.error(f"Error connecting to Databricks: {str(e)}")
+        st.info("Using fallback store data.")
+        return get_stores_fallback()
+
+@st.cache_data(ttl=3600)  # Cache for 1 hour since fallback data doesn't change
+def get_stores_fallback() -> pd.DataFrame:
+    """Fallback store data when database is not available."""
+    return pd.DataFrame([
+        {
+            'id': '001',
+            'name': 'BrickMart Downtown',
+            'address': '123 Main St',
+            'city': 'New York',
+            'state': 'NY',
+            'zip_code': '10001',
+            'phone': '(212) 555-1234',
+            'email': 'downtown@brickmart.com',
+            'size_sqft': 5000,
+            'rating': 4.5,
+            'type': 'flagship',
+            'is_24_hours': True,
+            'latitude': 40.7128,
+            'longitude': -74.006,
+            'region_id': '1',
+            'hours': {
+                'monday': {'open': '24/7', 'close': '24/7'},
+                'tuesday': {'open': '24/7', 'close': '24/7'},
+                'wednesday': {'open': '24/7', 'close': '24/7'},
+                'thursday': {'open': '24/7', 'close': '24/7'},
+                'friday': {'open': '24/7', 'close': '24/7'},
+                'saturday': {'open': '24/7', 'close': '24/7'},
+                'sunday': {'open': '24/7', 'close': '24/7'}
+            }
+        },
+        {
+            'id': '002',
+            'name': 'BrickMart Uptown',
+            'address': '456 Broadway',
+            'city': 'New York',
+            'state': 'NY',
+            'zip_code': '10002',
+            'phone': '(212) 555-5678',
+            'email': 'uptown@brickmart.com',
+            'size_sqft': 3000,
+            'rating': 4.3,
+            'type': 'express',
+            'is_24_hours': False,
+            'latitude': 40.7138,
+            'longitude': -74.007,
+            'region_id': '1',
+            'hours': {
+                'monday': {'open': '08:00', 'close': '22:00'},
+                'tuesday': {'open': '08:00', 'close': '22:00'},
+                'wednesday': {'open': '08:00', 'close': '22:00'},
+                'thursday': {'open': '08:00', 'close': '22:00'},
+                'friday': {'open': '08:00', 'close': '23:00'},
+                'saturday': {'open': '09:00', 'close': '23:00'},
+                'sunday': {'open': '09:00', 'close': '21:00'}
+            }
+        },
+        {
+            'id': '080',
+            'name': 'BrickMart Financial District',
+            'address': '343 Sansome St',
+            'city': 'San Francisco',
+            'state': 'CA',
+            'zip_code': '94104',
+            'phone': '(415) 555-1234',
+            'email': 'fidi@brickmart.com',
+            'size_sqft': 3200,
+            'rating': 4.7,
+            'type': 'flagship',
+            'is_24_hours': False,
+            'latitude': 37.7936,
+            'longitude': -122.4014,
+            'region_id': '6',
+            'hours': {
+                'monday': {'open': '08:00', 'close': '22:00'},
+                'tuesday': {'open': '08:00', 'close': '22:00'},
+                'wednesday': {'open': '08:00', 'close': '22:00'},
+                'thursday': {'open': '08:00', 'close': '22:00'},
+                'friday': {'open': '08:00', 'close': '23:00'},
+                'saturday': {'open': '09:00', 'close': '23:00'},
+                'sunday': {'open': '09:00', 'close': '21:00'}
+            }
+        }
+    ])
+
+def get_stores():
+    """Get list of available stores from Databricks or fallback data."""
+    # Check if we should use mock data from config
+    config = st.session_state.get('config', {})
+    if config.get('database', {}).get('mock', True):
+        return get_stores_fallback()
+    else:
+        return get_stores_from_databricks()
 
 def query(sql: str) -> pd.DataFrame:
     """
