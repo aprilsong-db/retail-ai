@@ -5,29 +5,40 @@ from databricks.sdk import WorkspaceClient
 import json
 import uuid
 import os
+import streamlit as st
 from typing import Optional
 
-def get_serving_endpoint() -> str:
+def get_serving_endpoint(endpoint_name: Optional[str] = None) -> str:
     """
-    Get the serving endpoint from environment variables.
+    Get the serving endpoint from parameter or config.
+    
+    Args:
+        endpoint_name: Optional endpoint name to use. If None, gets from config.
     
     Returns:
         str: The endpoint name to use for model serving
         
     Raises:
-        EnvironmentError: If SERVING_ENDPOINT is not set in environment
+        EnvironmentError: If no endpoint is found in parameter or config
     """
-    endpoint = os.getenv('SERVING_ENDPOINT')
-    if not endpoint:
-        raise EnvironmentError("SERVING_ENDPOINT must be set in .env file")
-    return endpoint
+    # Priority: parameter > config
+    if endpoint_name:
+        return endpoint_name
+    
+    # Try to get from config
+    config = st.session_state.get('config', {})
+    config_endpoint = config.get('model', {}).get('agent_endpoint')
+    if config_endpoint:
+        return config_endpoint
+    
+    raise EnvironmentError("No serving endpoint found. Set endpoint parameter or config.model.agent_endpoint")
 
 def validate_endpoint(endpoint_name: Optional[str] = None) -> str:
     """
     Validate and return the serving endpoint name.
     
     Args:
-        endpoint_name: Optional endpoint name to validate. If None, gets from env.
+        endpoint_name: Optional endpoint name to validate. If None, gets from config/env.
         
     Returns:
         str: Validated endpoint name
@@ -35,7 +46,7 @@ def validate_endpoint(endpoint_name: Optional[str] = None) -> str:
     Raises:
         ValueError: If endpoint name is invalid
     """
-    endpoint = endpoint_name or get_serving_endpoint()
+    endpoint = get_serving_endpoint(endpoint_name)
     
     try:
         w = WorkspaceClient()
@@ -50,8 +61,16 @@ def _throw_unexpected_endpoint_format():
                     "2) Databricks agent serving endpoints that implement the conversational agent schema documented "
                     "in https://docs.databricks.com/aws/en/generative-ai/agent-framework/author-agent")
 
-def query_endpoint_stream(endpoint_name: str, messages: list[dict[str, str]], max_tokens: int, return_traces: bool):
-    """Streams chat-completions style chunks and converts to ChatAgent-style streaming deltas."""
+def query_endpoint_stream(messages: list[dict[str, str]], max_tokens: int, return_traces: bool, endpoint_name: Optional[str] = None):
+    """
+    Streams chat-completions style chunks and converts to ChatAgent-style streaming deltas.
+    
+    Args:
+        messages: List of message dictionaries with role and content
+        max_tokens: Maximum tokens in response
+        return_traces: Whether to return tracing information
+        endpoint_name: Optional endpoint name. If None, gets from config/env.
+    """
     endpoint = validate_endpoint(endpoint_name)
     client = get_deploy_client("databricks")
 
@@ -85,14 +104,13 @@ def query_endpoint_stream(endpoint_name: str, messages: list[dict[str, str]], ma
         else:
             _throw_unexpected_endpoint_format()
 
-def query_endpoint(endpoint_name: str, messages: list[dict[str, str]], **kwargs):
+def query_endpoint(messages: list[dict[str, str]], endpoint_name: Optional[str] = None, **kwargs):
     """
-    Query an endpoint, returning the string message content and request
-    ID for feedback.
+    Query an endpoint, returning the string message content and request ID for feedback.
     
     Args:
-        endpoint_name (str): Name of the model serving endpoint
         messages (list): List of message dictionaries with role and content
+        endpoint_name (str, optional): Name of the model serving endpoint. If None, gets from config/env.
         **kwargs: Optional parameters including:
             - return_traces (bool): Whether to return tracing information
             - max_tokens (int): Maximum tokens in response
@@ -127,14 +145,14 @@ def query_endpoint(endpoint_name: str, messages: list[dict[str, str]], **kwargs)
         return [res["choices"][0]["message"]], request_id
     _throw_unexpected_endpoint_format()
 
-def submit_feedback(endpoint_name: str, request_id: str, rating: Optional[int] = None):
+def submit_feedback(request_id: str, rating: Optional[int] = None, endpoint_name: Optional[str] = None):
     """
     Submit feedback to the agent.
     
     Args:
-        endpoint_name: Name of the serving endpoint
         request_id: ID of the request to provide feedback for
         rating: Optional rating (1 for positive, 0 for negative)
+        endpoint_name: Optional endpoint name. If None, gets from config/env.
     """
     endpoint = validate_endpoint(endpoint_name)
     
@@ -166,12 +184,12 @@ def submit_feedback(endpoint_name: str, request_id: str, rating: Optional[int] =
         body=proxy_payload,
     )
 
-def endpoint_supports_feedback(endpoint_name: str) -> bool:
+def endpoint_supports_feedback(endpoint_name: Optional[str] = None) -> bool:
     """
     Check if an endpoint supports feedback.
     
     Args:
-        endpoint_name: Name of the serving endpoint
+        endpoint_name: Optional endpoint name. If None, gets from config/env.
         
     Returns:
         bool: Whether the endpoint supports feedback
@@ -179,7 +197,7 @@ def endpoint_supports_feedback(endpoint_name: str) -> bool:
     try:
         endpoint = validate_endpoint(endpoint_name)
         w = WorkspaceClient()
-        endpoint_info = w.serving_endpoints.get(endpoint_name)
+        endpoint_info = w.serving_endpoints.get(endpoint)
         return "feedback" in [entity.entity_name for entity in endpoint_info.config.served_entities]
     except:
         return False

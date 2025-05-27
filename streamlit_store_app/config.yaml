@@ -20,7 +20,7 @@ roles:
     can_process_orders: true
     can_view_inventory: true
     can_reorder_inventory: false
-    can_view_staff_schedule: true
+    can_view_staff_schedle: true
     can_modify_staff_schedule: false
     can_view_sales_data: false
   store_manager:
@@ -41,6 +41,7 @@ chat:
 
 # Model Serving Configuration
 model:
+  agent_endpoint: "retail_ai_agent"  # Default agent endpoint name
   max_tokens: 1000
   temperature: 0.7
   stop: ["\n"]

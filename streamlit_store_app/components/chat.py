@@ -148,13 +148,13 @@ def get_model_response(messages, model_config):
         # Update status to processing
         update_chat_status("processing")
         
-        # Get endpoint name
-        endpoint = get_serving_endpoint()
+        # Get endpoint name from config if specified, otherwise use default resolution
+        endpoint_name = model_config.get('agent_endpoint')
         
         # Query the model with configuration from config.yaml
         response_messages, request_id = query_endpoint(
-            endpoint_name=endpoint,
             messages=messages,
+            endpoint_name=endpoint_name,
             **optional_params
         )
         

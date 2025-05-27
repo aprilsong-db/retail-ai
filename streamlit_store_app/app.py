@@ -5,7 +5,7 @@ from dotenv import load_dotenv
 import streamlit as st
 from components import display_metric_card, display_alert, load_css, show_chat_widget, show_nav
 from components.homepage import show_homepage
-from utils.config import load_config, validate_env
+from utils.config import load_config
 from utils.database import query
 from utils.store_context import init_store_context, show_context_selector, check_permission
 from datetime import datetime
@@ -62,8 +62,7 @@ def init_app():
     # Load environment variables
     load_dotenv()
     
-    # Validate environment and load config
-    validate_env()
+    # Load config
     config = load_config()
     
     # Store the config in session state for easy access
@@ -81,14 +80,7 @@ def show_home():
         st.warning("Please select a store and role from the sidebar to continue")
         return
 
-    # Get employee name from config
-    employee_name = st.session_state.config.get('employees', {}).get(st.session_state.user_role, st.session_state.user_role.replace('_', ' ').title())
-
-    # Page header
-    st.title(f"🏪 {st.session_state.store_name}")
-    st.markdown(f"**Welcome back, {employee_name}!**")
-    
-    # Show the centralized homepage content
+    # Show the centralized homepage content (which already handles the header)
     show_homepage()
 
 def main():

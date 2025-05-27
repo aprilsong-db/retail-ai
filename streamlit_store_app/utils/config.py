@@ -13,15 +13,4 @@ def load_config() -> Dict[str, Any]:
     if config_path.exists():
         with open(config_path) as f:
             config = yaml.safe_load(f)
-        
-    
-
-    return config
-
-def validate_env() -> None:
-    """Validate required environment variables."""
-    required = ['DATABRICKS_WAREHOUSE_ID', 'DATABRICKS_HOST', 'DATABRICKS_TOKEN', 'SERVING_ENDPOINT']
-    missing = [var for var in required if not os.getenv(var)]
-    
-    if missing:
-        raise EnvironmentError(f"Missing environment variables: {', '.join(missing)}") 
+    return config 
