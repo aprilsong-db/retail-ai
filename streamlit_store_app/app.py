@@ -81,7 +81,14 @@ def show_home():
         st.warning("Please select a store and role from the sidebar to continue")
         return
 
-    # Show the centralized homepage content (which is already tab-based)
+    # Get employee name from config
+    employee_name = st.session_state.config.get('employees', {}).get(st.session_state.user_role, st.session_state.user_role.replace('_', ' ').title())
+
+    # Page header
+    st.title(f"🏪 {st.session_state.store_name}")
+    st.markdown(f"**Welcome back, {employee_name}!**")
+    
+    # Show the centralized homepage content
     show_homepage()
 
 def main():

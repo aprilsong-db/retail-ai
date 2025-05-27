@@ -1,74 +1,76 @@
+USE IDENTIFIER(:database);
+
 -- Employee Tasks table for retail store management
 -- Supports the store companion app with task tracking, priorities, and assignments
 CREATE TABLE IF NOT EXISTS employee_tasks (
-    task_id STRING NOT NULL,
-    employee_id STRING NOT NULL,
-    store_id STRING NOT NULL,
-    task_title STRING NOT NULL,
-    task_description STRING,
-    task_type STRING NOT NULL, -- 'BOPIS', 'Service', 'Restock', 'Cleaning', 'Training', 'Administrative', 'Customer_Service', 'Inventory'
-    task_category STRING NOT NULL, -- 'Operations', 'Customer_Service', 'Inventory_Management', 'Maintenance', 'Administrative'
-    priority_level STRING NOT NULL, -- 'Low', 'Medium', 'High', 'Critical', 'Urgent'
-    task_status STRING NOT NULL, -- 'Pending', 'In_Progress', 'Completed', 'Cancelled', 'On_Hold', 'Overdue'
+    task_id STRING NOT NULL COMMENT 'Unique identifier for each task (UUID or sequential ID)',
+    employee_id STRING NOT NULL COMMENT 'Employee ID who is assigned to complete the task',
+    store_id STRING NOT NULL COMMENT 'Store location where the task should be performed',
+    task_title STRING NOT NULL COMMENT 'Brief descriptive title of the task',
+    task_description STRING COMMENT 'Detailed description of what needs to be accomplished',
+    task_type STRING NOT NULL COMMENT 'Type of task: BOPIS, Service, Restock, Cleaning, Training, Administrative, Customer_Service, Inventory',
+    task_category STRING NOT NULL COMMENT 'Category grouping: Operations, Customer_Service, Inventory_Management, Maintenance, Administrative',
+    priority_level STRING NOT NULL COMMENT 'Task priority: Low, Medium, High, Critical, Urgent',
+    task_status STRING NOT NULL COMMENT 'Current status: Pending, In_Progress, Completed, Cancelled, On_Hold, Overdue',
     
     -- Scheduling information
-    assigned_date DATE NOT NULL,
-    due_date DATE,
-    due_time TIME,
-    estimated_duration_minutes INT, -- Estimated time to complete in minutes
-    actual_duration_minutes INT, -- Actual time taken to complete
+    assigned_date DATE NOT NULL COMMENT 'Date when the task was assigned',
+    due_date DATE COMMENT 'Target completion date for the task',
+    due_time TIMESTAMP COMMENT 'Specific time when task should be completed',
+    estimated_duration_minutes INT COMMENT 'Estimated time to complete the task in minutes',
+    actual_duration_minutes INT COMMENT 'Actual time taken to complete the task in minutes',
     
     -- Assignment details
-    assigned_by STRING, -- Employee ID of who assigned the task
-    assigned_to STRING NOT NULL, -- Employee ID of who should complete the task
-    department STRING, -- Department where task should be performed
-    location_details STRING, -- Specific location within store (e.g., "Floor 2", "Electronics Section")
+    assigned_by STRING COMMENT 'Employee ID of the person who assigned the task',
+    assigned_to STRING NOT NULL COMMENT 'Employee ID of the person responsible for completing the task',
+    department STRING COMMENT 'Department where the task should be performed (e.g., Electronics, Grocery)',
+    location_details STRING COMMENT 'Specific location within store (e.g., Floor 2, Electronics Section, Aisle 5)',
     
     -- Customer/Order related information (for BOPIS, Service tasks)
-    customer_id STRING,
-    customer_name STRING,
-    order_id STRING,
-    order_number STRING,
+    customer_id STRING COMMENT 'Customer ID for customer-related tasks',
+    customer_name STRING COMMENT 'Customer name for easy identification',
+    order_id STRING COMMENT 'Internal order identifier for order-related tasks',
+    order_number STRING COMMENT 'Customer-facing order number for reference',
     
     -- Product/Inventory related information (for Restock, Inventory tasks)
-    product_sku STRING,
-    product_name STRING,
-    quantity_required INT,
+    product_sku STRING COMMENT 'Product SKU for inventory and restock tasks',
+    product_name STRING COMMENT 'Product name for easy identification',
+    quantity_required INT COMMENT 'Quantity of items needed for restock or inventory tasks',
     
     -- Task completion tracking
-    started_at TIMESTAMP,
-    completed_at TIMESTAMP,
-    notes STRING, -- Notes added during task execution
-    completion_notes STRING, -- Notes added upon completion
+    started_at TIMESTAMP COMMENT 'Timestamp when employee started working on the task',
+    completed_at TIMESTAMP COMMENT 'Timestamp when the task was marked as completed',
+    notes STRING COMMENT 'Notes added during task execution for progress tracking',
+    completion_notes STRING COMMENT 'Final notes added when task is completed',
     
     -- Recurring task information
-    is_recurring BOOLEAN DEFAULT FALSE,
-    recurrence_pattern STRING, -- 'Daily', 'Weekly', 'Monthly', 'Custom'
-    parent_task_id STRING, -- Reference to parent task if this is a recurring instance
+    is_recurring BOOLEAN COMMENT 'Whether this task repeats on a schedule (true/false)',
+    recurrence_pattern STRING COMMENT 'Recurrence frequency: Daily, Weekly, Monthly, Custom',
+    parent_task_id STRING COMMENT 'Reference to parent task if this is a recurring instance',
     
     -- Performance and quality metrics
-    quality_score DECIMAL(3,2), -- Quality rating (1.00 to 5.00)
-    customer_satisfaction_score DECIMAL(3,2), -- Customer satisfaction if applicable
-    requires_manager_approval BOOLEAN DEFAULT FALSE,
-    approved_by STRING, -- Manager who approved completion
-    approved_at TIMESTAMP,
+    quality_score DECIMAL(3,2) COMMENT 'Quality rating for completed task (1.00 to 5.00 scale)',
+    customer_satisfaction_score DECIMAL(3,2) COMMENT 'Customer satisfaction rating if applicable (1.00 to 5.00 scale)',
+    requires_manager_approval BOOLEAN COMMENT 'Whether task completion requires manager approval (true/false)',
+    approved_by STRING COMMENT 'Manager employee ID who approved the task completion',
+    approved_at TIMESTAMP COMMENT 'Timestamp when manager approved the task completion',
     
     -- System tracking
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP(),
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP(),
-    created_by STRING,
-    updated_by STRING,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP() COMMENT 'Timestamp when the task record was created',
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP() COMMENT 'Timestamp when the task record was last modified',
+    created_by STRING COMMENT 'Employee ID of who created the task record',
+    updated_by STRING COMMENT 'Employee ID of who last updated the task record',
     
     -- Additional metadata
-    tags ARRAY<STRING>, -- Tags for categorization and filtering
-    attachments ARRAY<STRING>, -- File paths or URLs to related documents/images
-    dependencies ARRAY<STRING>, -- Task IDs that must be completed before this task
+    tags ARRAY<STRING> COMMENT 'Tags for categorization and filtering (e.g., urgent, seasonal, training)',
+    attachments ARRAY<STRING> COMMENT 'File paths or URLs to related documents, images, or instructions',
+    dependencies ARRAY<STRING> COMMENT 'Task IDs that must be completed before this task can start',
     
     -- Mobile app specific fields
-    requires_photo_proof BOOLEAN DEFAULT FALSE,
-    photo_urls ARRAY<STRING>, -- URLs to photos taken during task completion
-    gps_location STRING, -- GPS coordinates where task was completed
-    device_id STRING, -- Device used to complete the task
+    requires_photo_proof BOOLEAN COMMENT 'Whether task completion requires photo documentation (true/false)',
+    photo_urls ARRAY<STRING> COMMENT 'URLs to photos taken during or after task completion',
+    gps_location STRING COMMENT 'GPS coordinates where the task was completed for verification',
+    device_id STRING COMMENT 'Mobile device identifier used to complete the task',
     
     CONSTRAINT pk_employee_tasks PRIMARY KEY (task_id)
 ) 
@@ -77,31 +79,6 @@ TBLPROPERTIES (
     'delta.autoOptimize.optimizeWrite' = 'true',
     'delta.autoOptimize.autoCompact' = 'true'
 );
-
--- Create indexes for better query performance
-CREATE INDEX IF NOT EXISTS idx_employee_tasks_employee_date 
-ON employee_tasks (assigned_to, assigned_date);
-
-CREATE INDEX IF NOT EXISTS idx_employee_tasks_store_date 
-ON employee_tasks (store_id, assigned_date);
-
-CREATE INDEX IF NOT EXISTS idx_employee_tasks_status_priority 
-ON employee_tasks (task_status, priority_level);
-
-CREATE INDEX IF NOT EXISTS idx_employee_tasks_type_category 
-ON employee_tasks (task_type, task_category);
-
-CREATE INDEX IF NOT EXISTS idx_employee_tasks_due_date 
-ON employee_tasks (due_date, due_time);
-
-CREATE INDEX IF NOT EXISTS idx_employee_tasks_customer 
-ON employee_tasks (customer_id) WHERE customer_id IS NOT NULL;
-
-CREATE INDEX IF NOT EXISTS idx_employee_tasks_order 
-ON employee_tasks (order_id) WHERE order_id IS NOT NULL;
-
-CREATE INDEX IF NOT EXISTS idx_employee_tasks_product 
-ON employee_tasks (product_sku) WHERE product_sku IS NOT NULL;
 
 -- Create views for common queries used by the store companion app
 
@@ -126,7 +103,7 @@ SELECT
     department,
     notes,
     CASE 
-        WHEN due_time IS NOT NULL AND due_time < CURRENT_TIME() AND task_status IN ('Pending', 'In_Progress') 
+        WHEN due_time IS NOT NULL AND due_time < CURRENT_TIMESTAMP() AND task_status IN ('Pending', 'In_Progress') 
         THEN TRUE 
         ELSE FALSE 
     END AS is_overdue,
@@ -171,10 +148,10 @@ SELECT
     priority_level,
     COUNT(*) AS task_count,
     COUNT(CASE WHEN task_status = 'Completed' THEN 1 END) AS completed_count,
-    COUNT(CASE WHEN task_status IN ('Pending', 'In_Progress') AND due_time < CURRENT_TIME() THEN 1 END) AS overdue_count,
+    COUNT(CASE WHEN task_status IN ('Pending', 'In_Progress') AND due_time < CURRENT_TIMESTAMP() THEN 1 END) AS overdue_count,
     COUNT(CASE WHEN priority_level IN ('Critical', 'Urgent') THEN 1 END) AS high_priority_count,
     AVG(CASE WHEN actual_duration_minutes IS NOT NULL THEN actual_duration_minutes END) AS avg_duration_minutes
 FROM employee_tasks
-WHERE assigned_date >= CURRENT_DATE() - INTERVAL 7 DAYS
+WHERE assigned_date >= DATE_SUB(CURRENT_DATE(), 7)
 GROUP BY store_id, assigned_date, department, task_type, priority_level
 ORDER BY assigned_date DESC, overdue_count DESC, high_priority_count DESC; 
