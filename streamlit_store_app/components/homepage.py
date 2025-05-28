@@ -7,6 +7,8 @@ from utils.store_context import check_permission
 from components.metrics import display_metric_card, display_alert
 from components.chat import show_chat_container
 import streamlit_modal as modal
+import pandas as pd
+from streamlit_card import card
 
 def show_notifications_modal():
     """Display notifications in an expandable modal."""
@@ -785,7 +787,7 @@ def show_manager_homepage_with_chat(chat_modal, chat_notifications):
     
     with col1:
         # Main content in tabs - fully tab-based experience
-        tab1, tab2, tab3, tab4, tab5 = st.tabs(["📊 Dashboard", "🎯 Operations", "👥 Team", "📦 Inventory", "📈 Analytics"])
+        tab1, tab2, tab3, tab4, tab5, tab6 = st.tabs(["📊 Dashboard", "🎯 Operations", "👥 Team", "📦 Inventory", "📈 Analytics", "💡 Alerts"])
     
     with col2:
         # Chat button aligned with tabs
@@ -803,15 +805,18 @@ def show_manager_homepage_with_chat(chat_modal, chat_notifications):
         show_manager_dashboard_tab()
     
     with tab2:
-        show_manager_operations_tab()
+        show_manager_alerts_tab()
     
     with tab3:
-        show_manager_team_tab()
+        show_manager_operations_tab()
     
     with tab4:
-        show_manager_inventory_tab()
+        show_manager_team_tab()
     
     with tab5:
+        show_manager_inventory_tab()
+    
+    with tab6:
         show_manager_analytics_tab()
 
 def show_manager_homepage():
@@ -858,25 +863,28 @@ def show_manager_homepage():
     """, unsafe_allow_html=True)
     
     # Main content in tabs - fully tab-based experience with clean styling
-    tab1, tab2, tab3, tab4, tab5 = st.tabs(["Dashboard", "Operations", "Team", "Inventory", "Analytics"])
+    tab1, tab2, tab3, tab4, tab5, tab6 = st.tabs(["Dashboard", "Alerts", "Operations", "Team", "Inventory", "Analytics"])
     
     with tab1:
         show_manager_dashboard_tab()
     
     with tab2:
-        show_manager_operations_tab()
+        show_manager_alerts_tab()
     
     with tab3:
-        show_manager_team_tab()
+        show_manager_operations_tab()
     
     with tab4:
-        show_manager_inventory_tab()
+        show_manager_team_tab()
     
     with tab5:
+        show_manager_inventory_tab()
+    
+    with tab6:
         show_manager_analytics_tab()
 
 def show_manager_dashboard_tab():
-    """Display the Dashboard tab with key metrics and alerts."""
+    """Display the Dashboard tab with key metrics."""
     # Quick executive dashboard at top
     st.markdown("#### 📊 Store Overview")
     col1, col2, col3, col4 = st.columns(4)
@@ -909,13 +917,13 @@ def show_manager_dashboard_tab():
         """, unsafe_allow_html=True)
     
     with col4:
-        # Notifications button
-        if st.button("🔔 4 Alerts", key="manager_notifications", use_container_width=True):
-            st.session_state.show_notifications = not st.session_state.get("show_notifications", False)
-    
-    # Show notifications if toggled
-    if st.session_state.get("show_notifications", False):
-        show_notifications_modal()
+        st.markdown("""
+            <div class="manager-status-card alerts">
+                <div class="status-icon">🔔</div>
+                <div class="status-text">4</div>
+                <div class="status-detail">Active Alerts</div>
+            </div>
+        """, unsafe_allow_html=True)
     
     st.markdown("---")
     
@@ -952,30 +960,448 @@ def show_manager_dashboard_tab():
         """, unsafe_allow_html=True)
     
     with col2:
-        st.markdown("#### ⚠️ Priority Alerts")
+        st.markdown("#### 📈 Performance Trends")
         
-        priority_alerts = [
-            {"type": "Critical Stock", "message": "Designer Jeans - only 2 left", "severity": "high", "action": "Reorder now"},
-            {"type": "Staff Coverage", "message": "Electronics understaffed 3-4 PM", "severity": "high", "action": "Find coverage"},
-            {"type": "VIP Customer", "message": "Sarah Johnson arriving at 2 PM", "severity": "medium", "action": "Prep personal shopper"},
-            {"type": "Delivery", "message": "Designer collection delayed to 4:30 PM", "severity": "medium", "action": "Update team"}
-        ]
-        
-        for alert in priority_alerts:
-            severity_colors = {"high": "#dc3545", "medium": "#ffc107", "low": "#28a745"}
-            st.markdown(f"""
-                <div class="priority-alert-card" style="border-left-color: {severity_colors[alert['severity']]}">
-                    <div class="alert-header">
-                        <span class="alert-type">{alert['type']}</span>
-                        <span class="alert-severity">{alert['severity'].upper()}</span>
+        st.markdown("""
+            <div class="manager-dashboard-card">
+                <div class="dashboard-metrics">
+                    <div class="dashboard-metric">
+                        <span class="metric-label">Weekly Sales:</span>
+                        <span class="metric-value">$142,350</span>
+                        <span class="metric-trend positive">+12% vs last week</span>
                     </div>
-                    <div class="alert-message">{alert['message']}</div>
-                    <div class="alert-action">→ {alert['action']}</div>
+                    <div class="dashboard-metric">
+                        <span class="metric-label">Monthly Target:</span>
+                        <span class="metric-value">78% complete</span>
+                        <span class="metric-trend positive">On track</span>
+                    </div>
+                    <div class="dashboard-metric">
+                        <span class="metric-label">Customer Satisfaction:</span>
+                        <span class="metric-value">4.7/5.0</span>
+                        <span class="metric-trend positive">+0.2 vs last month</span>
+                    </div>
+                    <div class="dashboard-metric">
+                        <span class="metric-label">Staff Efficiency:</span>
+                        <span class="metric-value">94%</span>
+                        <span class="metric-trend positive">+3% vs avg</span>
+                    </div>
                 </div>
-            """, unsafe_allow_html=True)
+            </div>
+        """, unsafe_allow_html=True)
+
+def show_manager_alerts_tab():
+    """Display the Alerts tab with interactive counters and scrollable alert containers."""
+    # Add custom CSS for scrollable alert containers and interactive elements
+    st.markdown("""
+    <style>
+    .alerts-container {
+        height: 400px;
+        overflow-y: auto;
+        border: 1px solid #dee2e6;
+        border-radius: 8px;
+        padding: 1rem;
+        background: #f8f9fa;
+        margin-bottom: 1rem;
+    }
+    
+    .alert-item {
+        background: white;
+        border-radius: 8px;
+        padding: 1rem;
+        margin-bottom: 0.75rem;
+        border-left: 4px solid;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        transition: all 0.2s ease;
+        cursor: pointer;
+        position: relative;
+    }
+    
+    .alert-item:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+    }
+    
+    .alert-item.urgent {
+        border-left-color: #dc3545;
+        background: linear-gradient(90deg, #fff5f5 0%, white 10%);
+    }
+    
+    .alert-item.important {
+        border-left-color: #ffc107;
+        background: linear-gradient(90deg, #fffbf0 0%, white 10%);
+    }
+    
+    .alert-item.resolved {
+        opacity: 0.6;
+        background: #f8f9fa;
+    }
+    
+    .alert-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 0.5rem;
+    }
+    
+    .alert-type {
+        font-weight: 600;
+        color: #495057;
+        font-size: 0.9rem;
+    }
+    
+    .alert-severity {
+        background: #dc3545;
+        color: white;
+        padding: 0.2rem 0.5rem;
+        border-radius: 12px;
+        font-size: 0.7rem;
+        font-weight: 600;
+    }
+    
+    .alert-severity.important {
+        background: #ffc107;
+        color: #212529;
+    }
+    
+    .alert-time {
+        font-size: 0.75rem;
+        color: #6c757d;
+    }
+    
+    .alert-message {
+        color: #495057;
+        margin-bottom: 0.5rem;
+        line-height: 1.4;
+    }
+    
+    .alert-actions {
+        display: flex;
+        gap: 0.5rem;
+        align-items: center;
+    }
+    </style>
+    """, unsafe_allow_html=True)
+    
+    # Initialize alert state
+    if "resolved_alerts" not in st.session_state:
+        st.session_state.resolved_alerts = set()
+    if "show_alert_modal" not in st.session_state:
+        st.session_state.show_alert_modal = False
+    if "modal_alert_type" not in st.session_state:
+        st.session_state.modal_alert_type = ""
+    
+    st.markdown("#### 🔔 Alert Management Center")
+    
+    # All alerts data
+    all_alerts = [
+        {"id": 0, "type": "Security Alert", "message": "Security system maintenance in 30 minutes - Electronics section", "severity": "urgent", "action": "Notify staff", "time": "5 min ago"},
+        {"id": 1, "type": "VIP Customer", "message": "VIP customer arriving at 2 PM - Personal shopping assistance needed", "severity": "urgent", "action": "Prep personal shopper", "time": "15 min ago"},
+        {"id": 2, "type": "Critical Stock", "message": "Designer Jeans - only 2 left", "severity": "urgent", "action": "Reorder now", "time": "20 min ago"},
+        {"id": 3, "type": "Staff Coverage", "message": "Electronics understaffed 3-4 PM", "severity": "urgent", "action": "Find coverage", "time": "30 min ago"},
+        {"id": 4, "type": "Delivery Update", "message": "New designer collection arriving tomorrow - Prepare display area", "severity": "important", "action": "Prep display area", "time": "1 hour ago"},
+        {"id": 5, "type": "Schedule Change", "message": "Staff meeting moved to 3 PM in conference room", "severity": "important", "action": "Update team", "time": "2 hours ago"},
+        {"id": 6, "type": "VIP Customer", "message": "Sarah Johnson arriving at 2 PM", "severity": "important", "action": "Prep personal shopper", "time": "2 hours ago"},
+        {"id": 7, "type": "Delivery Delay", "message": "Designer collection delayed to 4:30 PM", "severity": "important", "action": "Update team", "time": "3 hours ago"}
+    ]
+    
+    # Calculate real-time counters
+    urgent_alerts = [a for a in all_alerts if a["severity"] == "urgent" and a["id"] not in st.session_state.resolved_alerts]
+    important_alerts = [a for a in all_alerts if a["severity"] == "important" and a["id"] not in st.session_state.resolved_alerts]
+    resolved_alerts = [a for a in all_alerts if a["id"] in st.session_state.resolved_alerts]
+    total_active = len(urgent_alerts) + len(important_alerts)
+    
+    urgent_count = len(urgent_alerts)
+    important_count = len(important_alerts)
+    resolved_count = len(resolved_alerts)
+    
+    # Real-time counters with color-coded statistics using streamlit-card
+    col1, col2, col3, col4 = st.columns(4)
+    
+    with col1:
+        # Urgent alerts card - Red theme
+        urgent_clicked = card(
+            title="🚨 Urgent",
+            text=f"{urgent_count} alerts",
+            styles={
+                "card": {
+                    "width": "100%",
+                    "height": "200px",
+                    "border-radius": "16px",
+                    "box-shadow": "0 4px 20px rgba(220, 53, 69, 0.25)",
+                    "background": "linear-gradient(135deg, #dc3545 0%, #c82333 100%)",
+                    "border": "1px solid rgba(220, 53, 69, 0.3)",
+                    "margin": "0",
+                    "padding": "1.5rem",
+                    "text-align": "center",
+                    "cursor": "pointer",
+                    "transition": "all 0.3s ease"
+                },
+                "title": {
+                    "font-size": "2.5rem",
+                    "color": "white",
+                    "font-weight": "700",
+                    "margin-bottom": "0.5rem"
+                },
+                "text": {
+                    "font-size": "1rem",
+                    "color": "white",
+                    "font-weight": "500",
+                    "text-transform": "uppercase",
+                    "letter-spacing": "0.5px"
+                }
+            },
+            key="urgent_card"
+        )
         
+        if urgent_clicked:
+            st.session_state.modal_alert_type = "urgent"
+    
+    with col2:
+        # Important alerts card - Orange theme
+        important_clicked = card(
+            title="⚠️ Important",
+            text=f"{important_count} alerts",
+            styles={
+                "card": {
+                    "width": "100%",
+                    "height": "200px",
+                    "border-radius": "16px",
+                    "box-shadow": "0 4px 20px rgba(255, 152, 0, 0.25)",
+                    "background": "linear-gradient(135deg, #ff9800 0%, #f57c00 100%)",
+                    "border": "1px solid rgba(255, 152, 0, 0.3)",
+                    "margin": "0",
+                    "padding": "1.5rem",
+                    "text-align": "center",
+                    "cursor": "pointer",
+                    "transition": "all 0.3s ease"
+                },
+                "title": {
+                    "font-size": "2.5rem",
+                    "color": "white",
+                    "font-weight": "700",
+                    "margin-bottom": "0.5rem"
+                },
+                "text": {
+                    "font-size": "1rem",
+                    "color": "white",
+                    "font-weight": "500",
+                    "text-transform": "uppercase",
+                    "letter-spacing": "0.5px"
+                }
+            },
+            key="important_card"
+        )
+        
+        if important_clicked:
+            st.session_state.modal_alert_type = "important"
+    
+    with col3:
+        # Resolved alerts card - Green theme
+        resolved_clicked = card(
+            title="✅ Resolved",
+            text=f"{resolved_count} alerts",
+            styles={
+                "card": {
+                    "width": "100%",
+                    "height": "200px",
+                    "border-radius": "16px",
+                    "box-shadow": "0 4px 20px rgba(40, 167, 69, 0.25)",
+                    "background": "linear-gradient(135deg, #28a745 0%, #1e7e34 100%)",
+                    "border": "1px solid rgba(40, 167, 69, 0.3)",
+                    "margin": "0",
+                    "padding": "1.5rem",
+                    "text-align": "center",
+                    "cursor": "pointer",
+                    "transition": "all 0.3s ease"
+                },
+                "title": {
+                    "font-size": "2.5rem",
+                    "color": "white",
+                    "font-weight": "700",
+                    "margin-bottom": "0.5rem"
+                },
+                "text": {
+                    "font-size": "1rem",
+                    "color": "white",
+                    "font-weight": "500",
+                    "text-transform": "uppercase",
+                    "letter-spacing": "0.5px"
+                }
+            },
+            key="resolved_card"
+        )
+        
+        if resolved_clicked:
+            st.session_state.modal_alert_type = "resolved"
+    
+    with col4:
+        # Total active alerts card - Blue theme
+        total_clicked = card(
+            title="📊 Total Active",
+            text=f"{total_active} alerts",
+            styles={
+                "card": {
+                    "width": "100%",
+                    "height": "200px",
+                    "border-radius": "16px",
+                    "box-shadow": "0 4px 20px rgba(0, 123, 255, 0.25)",
+                    "background": "linear-gradient(135deg, #007bff 0%, #0056b3 100%)",
+                    "border": "1px solid rgba(0, 123, 255, 0.3)",
+                    "margin": "0",
+                    "padding": "1.5rem",
+                    "text-align": "center",
+                    "cursor": "pointer",
+                    "transition": "all 0.3s ease"
+                },
+                "title": {
+                    "font-size": "2.5rem",
+                    "color": "white",
+                    "font-weight": "700",
+                    "margin-bottom": "0.5rem"
+                },
+                "text": {
+                    "font-size": "1rem",
+                    "color": "white",
+                    "font-weight": "500",
+                    "text-transform": "uppercase",
+                    "letter-spacing": "0.5px"
+                }
+            },
+            key="total_card"
+        )
+        
+        if total_clicked:
+            st.session_state.modal_alert_type = "all"
+    
+    # Set default alert type if none selected
+    if not st.session_state.modal_alert_type:
+        st.session_state.modal_alert_type = "all"
+    
+    # Always show the alert display area below the cards
+    # Filter alerts based on current modal type
+    if st.session_state.modal_alert_type == "urgent":
+        display_alerts = urgent_alerts
+        display_title = f"🚨 Urgent Alerts ({len(display_alerts)})"
+    elif st.session_state.modal_alert_type == "important":
+        display_alerts = important_alerts
+        display_title = f"⚠️ Important Alerts ({len(display_alerts)})"
+    elif st.session_state.modal_alert_type == "resolved":
+        display_alerts = resolved_alerts
+        display_title = f"✅ Resolved Alerts ({len(display_alerts)})"
+    else:  # all
+        display_alerts = urgent_alerts + important_alerts
+        display_title = f"📊 All Active Alerts ({len(display_alerts)})"
+    
+    # Display the selected alert type
+    st.markdown(f"### {display_title}")
+    
+    # Fixed height container with alert cards
+    with st.container(height=400):
+        if len(display_alerts) > 0:
+            for alert in display_alerts:
+                is_resolved = alert["id"] in st.session_state.resolved_alerts
+                severity_class = "resolved" if is_resolved else alert["severity"]
+                severity_label = "RESOLVED" if is_resolved else alert["severity"].upper()
+                
+                # Color coding for alert cards
+                if alert["severity"] == "urgent":
+                    border_color = "#dc3545"
+                    bg_color = "#fff5f5" if not is_resolved else "#f8f9fa"
+                    severity_bg = "#dc3545"
+                    severity_text = "white"
+                elif alert["severity"] == "important":
+                    border_color = "#ffc107"
+                    bg_color = "#fffbf0" if not is_resolved else "#f8f9fa"
+                    severity_bg = "#ffc107"
+                    severity_text = "#212529"
+                else:
+                    border_color = "#6c757d"
+                    bg_color = "#f8f9fa"
+                    severity_bg = "#6c757d"
+                    severity_text = "white"
+                
+                # Alert card
+                st.markdown(f"""
+                <div style="
+                    background: {bg_color};
+                    border-left: 4px solid {border_color};
+                    border-radius: 8px;
+                    padding: 1rem;
+                    margin-bottom: 0.75rem;
+                    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+                    opacity: {'0.6' if is_resolved else '1'};
+                ">
+                    <div style="
+                        display: flex;
+                        justify-content: space-between;
+                        align-items: center;
+                        margin-bottom: 0.5rem;
+                    ">
+                        <span style="
+                            font-weight: 600;
+                            color: #495057;
+                            font-size: 0.9rem;
+                        ">{alert['type']}</span>
+                        <div style="display: flex; align-items: center; gap: 0.5rem;">
+                            <span style="
+                                background: {severity_bg};
+                                color: {severity_text};
+                                padding: 0.2rem 0.5rem;
+                                border-radius: 12px;
+                                font-size: 0.7rem;
+                                font-weight: 600;
+                            ">{severity_label}</span>
+                            <span style="
+                                font-size: 0.75rem;
+                                color: #6c757d;
+                            ">{alert['time']}</span>
+                        </div>
+                    </div>
+                    <div style="
+                        color: #495057;
+                        margin-bottom: 0.5rem;
+                        line-height: 1.4;
+                    ">{alert['message']}</div>
+                    <div style="
+                        color: #007bff;
+                        font-size: 0.8rem;
+                    ">→ {alert['action']}</div>
+                </div>
+                """, unsafe_allow_html=True)
+                
+                # Action buttons for each alert
+                if not is_resolved:
+                    col1, col2, col3, col4 = st.columns([1, 1, 1, 6])
+                    
+                    with col1:
+                        if st.button("✅", key=f"resolve_{alert['id']}", help="Mark as resolved"):
+                            st.session_state.resolved_alerts.add(alert['id'])
+                            st.rerun()
+                    
+                    with col2:
+                        if st.button("📋", key=f"action_{alert['id']}", help="Take action"):
+                            st.success(f"Taking action: {alert['action']}")
+                    
+                    with col3:
+                        if st.button("👁️", key=f"details_{alert['id']}", help="View details"):
+                            st.info(f"Alert details: {alert['message']}")
+                else:
+                    st.markdown("*This alert has been resolved*")
+                
+                st.markdown("---")
+        else:
+            st.info("No alerts to display.")
+    
+    # Action buttons at bottom
+    col1, col2 = st.columns(2)
+    
+    with col1:
         if st.button("📋 View All Operations", use_container_width=True):
             st.switch_page("pages/daily_operations.py")
+    
+    with col2:
+        if st.button("📊 Generate Alert Report", use_container_width=True):
+            st.info("Alert report would be generated")
 
 def show_manager_operations_tab():
     """Display the Operations tab with daily priorities and tasks."""
