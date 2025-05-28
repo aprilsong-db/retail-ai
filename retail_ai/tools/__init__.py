@@ -17,6 +17,7 @@ from retail_ai.tools.employee import (
 from retail_ai.tools.inventory import (
     create_find_inventory_by_sku_tool,
     create_find_store_inventory_by_sku_tool,
+    create_place_item_hold_tool,
 )
 from retail_ai.tools.product import (
     create_find_product_by_sku_tool,
@@ -46,6 +47,11 @@ from retail_ai.tools.customer import (
     create_find_upcoming_customer_appointments_tool,
     create_get_customer_details_tool,
     create_customer_preparation_summary_tool,
+    create_customer_profile_intelligence_tool,
+    create_stylist_notification_tool,
+    create_inventory_preselection_tool,
+    create_appointment_preparation_workflow_tool,
+    create_real_time_styling_assistant_tool,
 )
 
 __all__ = [
@@ -63,6 +69,7 @@ __all__ = [
     # Inventory tools
     "create_find_inventory_by_sku_tool",
     "create_find_store_inventory_by_sku_tool",
+    "create_place_item_hold_tool",
     
     # Store tools
     "create_find_store_by_number_tool",
@@ -92,4 +99,9 @@ __all__ = [
     "create_find_upcoming_customer_appointments_tool",
     "create_get_customer_details_tool",
     "create_customer_preparation_summary_tool",
+    "create_customer_profile_intelligence_tool",
+    "create_stylist_notification_tool",
+    "create_inventory_preselection_tool",
+    "create_appointment_preparation_workflow_tool",
+    "create_real_time_styling_assistant_tool",
 ] 

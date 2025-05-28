@@ -198,6 +198,50 @@ app:
           user_id: sarah.associate
           store_num: 101
 
+    # Customer Profile Intelligence Example
+    customer_profile_intelligence_example:
+      messages:
+        - role: user
+          content: Show me everything I need to know about Victoria Chen.
+      custom_inputs:
+        configurable:
+          thread_id: "1"
+          user_id: maria.stylist
+          store_num: 101
+
+    # Styling Appointment Preparation Example
+    styling_appointment_prep_example:
+      messages:
+        - role: user
+          content: I have a styling appointment with Victoria Sterling today. Help me prepare.
+      custom_inputs:
+        configurable:
+          thread_id: "1"
+          user_id: maria.stylist
+          store_num: 101
+
+    # Stylist Notification Example
+    stylist_notification_example:
+      messages:
+        - role: user
+          content: Generate a notification for Victoria Sterling's upcoming styling appointment.
+      custom_inputs:
+        configurable:
+          thread_id: "1"
+          user_id: maria.stylist
+          store_num: 101
+
+    # Real-time Styling Assistance Example
+    real_time_styling_example:
+      messages:
+        - role: user
+          content: Victoria is here for her appointment. She's looking at sneakers but seems unsure. What should I recommend?
+      custom_inputs:
+        configurable:
+          thread_id: "1"
+          user_id: maria.stylist
+          store_num: 101
+
     # Demo Script Scene 4: Directions and Notifications
     demo_directions_notifications:
       messages:
@@ -690,6 +734,7 @@ agents:
       - diy
       - orders
       - general
+      - stylist
     default_route: general
     prompt: |
       Analyze the customer question and select ONE specific route from the allowed options:
@@ -712,6 +757,9 @@ agents:
       - Route to 'orders': Questions about tracking orders, delivery status, scheduling deliveries or services
         Example: "When will my order arrive?" or "Can I schedule delivery for my new refrigerator?"
 
+      - Route to 'stylist': Questions about personal styling, fashion advice, customer appointments, or styling services
+        Example: "I have a styling appointment with Victoria Sterling" or "Help me prepare for a customer styling session"
+
       - Route to 'general': ANY other questions that don't fit the above categories, including store policies, hours, etc.
         Example: "What are your store hours?" or "Do you offer free delivery?"
       
@@ -729,66 +777,63 @@ agents:
       
       You are a helpful store associate providing general information and assistance. Help customers with:
       
-      **Store Lookup Process:**
-      1. **When given store names/locations**: Use vector search to find store information
-         - Use `find_store_details_by_location` to search for stores by name or location
-         - Extract store details, hours, contact information from search results
-         - Example: "Downtown Market hours" → search → get store details and hours
-      
-      2. **When given store numbers**: Use direct store lookup if available
-         - Use store number extraction and lookup tools when appropriate
-      
-      **Advanced Analytics with Genie:**
-      - Use `query_retail_data_with_genie` for complex analytical questions
-      - Perfect for questions requiring data analysis across multiple tables
-      - Examples: "What are the top selling products?", "Compare store performance", "Show inventory trends"
-      - Use when customers ask for insights, comparisons, or analytical data
+      **Customer Profile Intelligence:**
+      - Use `get_customer_profile_intelligence` for comprehensive customer insights
+      - Perfect for questions like "Show me everything I need to know about [customer name]"
+      - Provides AI-powered analysis of purchase patterns, brand affinity, style profile, and recommendations
+      - Includes current needs assessment and personalized service recommendations
       
       **Store Information:**
-      - Store hours and locations for all store locations
-      - Store policies, returns, exchanges, and customer service
-      - Loyalty program benefits and enrollment
-      - Store services and amenities
+      - Use `find_store_by_location` for store locations and details
+      - Use `find_nearby_stores_inventory` for inventory at nearby locations
       
-      **Customer Service:**
-      - Answer questions about store policies and procedures
-      - Provide directions and store contact information
-      - Help with general inquiries about products and services
-      - Assist with loyalty program questions
+      **Complex Analytics:**
+      - Use `query_genie` for complex analytical questions about business data
+      - Perfect for questions requiring data analysis across multiple tables
+      - Examples: sales trends, customer analytics, inventory insights, performance metrics
       
-      **Employee Support:**
-      - Help staff with general store information
-      - Provide guidance on store procedures
-      - Answer questions about store operations
+      **General Assistance:**
+      - Answer general questions about store policies, hours, services
+      - Provide helpful information and guidance
+      - Route complex requests to appropriate specialists
       
-      **Key Tools Available:**
-      - `find_store_details_by_location`: Search stores by name/location to get details
-      - `query_retail_data_with_genie`: Advanced analytics and complex questions about retail data
-      
-      **Workflow Examples:**
-      1. Customer asks: "What are the hours for Downtown Market?"
-         → Search for "Downtown Market" using vector search
-         → Extract store hours, contact info, and location details
-         → Provide comprehensive store information
-      
-      2. Customer asks: "Which stores sell the most Adidas products?"
-         → Use Genie tool to analyze sales data across stores
-         → Provide analytical insights and comparisons
-      
-      **When to Use Genie:**
-      - Complex analytical questions requiring data aggregation
-      - Questions about trends, comparisons, or insights
-      - Multi-table queries involving inventory, products, and stores
-      - Performance analysis and business intelligence questions
-      
-      **When to Redirect:**
-      - For specific product details → route to product specialist
-      - For inventory questions → route to inventory team
-      - For product recommendations → route to styling specialist
-      - For product comparisons → route to comparison specialist
-      
-      Maintain a warm, professional demeanor while providing clear, helpful information about our store locations and services.
+      Always be helpful, informative, and customer-focused.
 
+  stylist:
+    model: *tool_calling_llm
+    guardrails: ~
+      #- *llm_judge_guardrail
+    prompt: |
+      ### User Information
+      - **User Id**: {user_id}
+      - **Store Number**: {store_num}
+      
+      You are a professional personal stylist providing expert styling services and appointment support. You specialize in:
+      
+      **Personal Styling Appointments:**
+      - Use `generate_stylist_notification` to create intelligent appointment notifications
+      - Use `prepare_customer_appointment` for comprehensive appointment preparation
+      - Use `generate_inventory_preselection` to pre-select items for customer appointments
+      - Use `get_real_time_styling_assistance` during active styling sessions
+      
+      **Customer Intelligence:**
+      - Use `get_customer_profile_intelligence` for deep customer insights
+      - Analyze purchase patterns, brand affinity, and style preferences
+      - Identify current needs and styling opportunities
+      
+      **Styling Expertise:**
+      - Provide personalized styling recommendations based on customer profile
+      - Suggest outfit combinations and styling tips
+      - Help customers discover new styles that match their preferences
+      - Use `find_similar_products_with_inventory` for alternative recommendations
+      
+      **Appointment Workflow:**
+      - Prepare for upcoming appointments with customer intelligence
+      - Generate pre-selected inventory recommendations
+      - Provide real-time styling assistance during appointments
+      - Follow up with styling tips and recommendations
+      
+      Always be professional, fashion-forward, and customer-focused. Provide specific, actionable styling advice.
 
   orders:
     model: *tool_calling_llm
@@ -973,6 +1018,13 @@ agents:
       - Identify which nearby stores have items in stock
       - Provide store contact information for transfers
       
+      **Hold Placement:**
+      - Place 24-hour holds on items at specific stores for customers
+      - Generate hold confirmation with unique hold ID
+      - Provide pickup instructions and store contact information
+      - Handle hold requests with customer names and item sizes when specified
+      - Confirm hold details including expiration time and pickup requirements
+      
       **Key Tools Available:**
       - `find_product_details_by_description`: Search products by name/description to get SKU
       - `find_store_details_by_location`: Search stores by name/location to get store_id
@@ -980,6 +1032,7 @@ agents:
       - `find_store_inventory_by_sku`: Check inventory at a specific store location
       - `find_nearby_stores_inventory`: Find inventory at stores near a reference location
       - `find_similar_products_with_inventory`: Find similar products with real-time inventory when items are out of stock
+      - `place_item_hold`: Place a hold on an item at a specific store for customer pickup
       
       **Workflow Example:**
       1. Customer asks: "Do you have Adidas Gazelle at Downtown Market?"
@@ -988,6 +1041,13 @@ agents:
       4. Use `find_store_inventory_by_sku` with store_id and SKU
       5. If out of stock: Use `find_nearby_stores_inventory` to check nearby locations
       6. If still needed: Use `find_similar_products_with_inventory` to suggest alternatives
+      
+      **Hold Placement Workflow:**
+      1. Customer requests: "Place a hold for size 10 black Gazelles at Marina Market"
+      2. Search for "Adidas Gazelle" to get SKU (e.g., "ADI-GAZ-001")
+      3. Use `place_item_hold` with SKU="ADI-GAZ-001", store_name="Marina Market", size="10"
+      4. Provide hold confirmation with hold ID, expiration time, and pickup instructions
+      5. Include store phone number and address for customer reference
       
       **Nearby Stores Workflow:**
       1. When primary store is out of stock, automatically check nearby locations
@@ -1004,6 +1064,8 @@ agents:
       - **When items are out of stock**: Use `find_similar_products_with_inventory` to suggest alternatives with availability
       - **Stock Status**: Check `store_quantity` field to determine if items are in stock (0 = out of stock)
       - **Customer Communication**: Clearly communicate stock levels and offer alternatives when items are unavailable
+      - **Hold Management**: Always confirm hold details and provide clear pickup instructions
+      - **Hold Duration**: Standard holds are 24 hours unless otherwise specified
       
       **Out of Stock Workflow:**
       1. Customer asks for a product that's out of stock
@@ -1012,6 +1074,7 @@ agents:
       4. Use `find_similar_products_with_inventory` to suggest alternatives with availability
       5. Explain why each alternative is similar to their original request
       6. Offer to check other store locations for immediate availability
+      7. If customer finds item at another store, offer to place a hold for pickup
 
   comparison:
     model: *tool_calling_llm
@@ -1215,6 +1278,12 @@ datasets:
   - table: customers
     ddl: ./data/retail/customers.sql
     data: ./data/retail/customers_data.sql
+    format: sql
+
+  # Customer appointments for styling services
+  - table: appointments
+    ddl: ./data/retail/appointments.sql
+    data: ./data/retail/appointments_data.sql
     format: sql
 
   # Brand Rep Product Education Demo Tables

@@ -21,6 +21,7 @@ from retail_ai.state import AgentConfig, AgentState
 from retail_ai.types import AgentCallable
 from retail_ai.tools.store import find_store_details_by_location_tool
 from retail_ai.tools.genie import create_genie_query_tool
+from retail_ai.tools.customer import create_customer_profile_intelligence_tool
 
 # Optional imports for guardrails
 try:
@@ -47,6 +48,13 @@ def general_agent(model_config: ModelConfig) -> AgentCallable:
     prompt: str = model_config.get("agents").get("general").get("prompt")
     guardrails: Sequence[dict[str, Any]] = (
         model_config.get("agents").get("general").get("guardrails") or []
+    )
+
+    warehouse_id: str = (
+        model_config.get("resources")
+        .get("warehouses")
+        .get("shared_endpoint_warehouse")
+        .get("warehouse_id")
     )
 
     # Get vector search configuration for stores
@@ -83,6 +91,11 @@ def general_agent(model_config: ModelConfig) -> AgentCallable:
         genie_tool = create_genie_query_tool(model_config)
         tools.append(genie_tool)
         logger.debug("Added Genie query tool to general agent")
+        
+        # Add customer profile intelligence tool for customer insights
+        customer_intelligence_tool = create_customer_profile_intelligence_tool(warehouse_id, model_config, llm)
+        tools.append(customer_intelligence_tool)
+        logger.debug("Added customer profile intelligence tool to general agent")
         
         # Add store search tool if vector search is configured
         if store_endpoint_name and store_index_name and store_columns:

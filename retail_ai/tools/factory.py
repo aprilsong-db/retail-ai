@@ -44,6 +44,11 @@ from retail_ai.tools.customer import (
     create_find_upcoming_customer_appointments_tool,
     create_get_customer_details_tool,
     create_customer_preparation_summary_tool,
+    create_customer_profile_intelligence_tool,
+    create_stylist_notification_tool,
+    create_inventory_preselection_tool,
+    create_appointment_preparation_workflow_tool,
+    create_real_time_styling_assistant_tool,
 )
 
 
@@ -266,6 +271,21 @@ class ToolFactory:
                 warehouse_id, self.model_config
             ),
             "create_customer_preparation_summary": create_customer_preparation_summary_tool(
+                warehouse_id, self.model_config, llm
+            ),
+            "get_customer_profile_intelligence": create_customer_profile_intelligence_tool(
+                warehouse_id, self.model_config, llm
+            ),
+            "generate_stylist_notification": create_stylist_notification_tool(
+                warehouse_id, self.model_config, llm
+            ),
+            "generate_inventory_preselection": create_inventory_preselection_tool(
+                warehouse_id, self.model_config, llm
+            ),
+            "prepare_customer_appointment": create_appointment_preparation_workflow_tool(
+                warehouse_id, self.model_config, llm
+            ),
+            "get_real_time_styling_assistance": create_real_time_styling_assistant_tool(
                 warehouse_id, self.model_config, llm
             ),
         }

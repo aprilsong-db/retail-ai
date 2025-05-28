@@ -301,4 +301,110 @@ def create_find_nearby_stores_inventory_tool(warehouse_id: str, config: ModelCon
         logger.debug(f"Found {len(nearby_stores_data)} nearby store inventory records")
         return tuple(nearby_stores_data)
     
-    return find_nearby_stores_inventory 
+    return find_nearby_stores_inventory
+
+
+def create_place_item_hold_tool(warehouse_id: str, config: ModelConfig) -> Callable:
+    """Create a tool for placing holds on items at specific stores."""
+    
+    @tool
+    def place_item_hold(sku: str, store_name: str, size: str = None, customer_name: str = None, hold_duration_hours: int = 24) -> dict:
+        """
+        Place a hold on an item at a specific store for a customer.
+        This tool allows store associates to reserve items for customers for pickup.
+
+        Args: 
+            sku (str): The SKU code of the item to place on hold (e.g., "ADI-GAZ-001")
+            store_name (str): The name of the store where the hold should be placed (e.g., "Marina Market")
+            size (str, optional): The size of the item if applicable (e.g., "10", "Large", "XL")
+            customer_name (str, optional): The customer's name for the hold (if not provided, will use "Customer")
+            hold_duration_hours (int): Duration of the hold in hours (default: 24)
+
+        Returns: 
+            (dict): A dictionary containing hold confirmation details:
+                hold_id STRING - Unique identifier for the hold
+                sku STRING - Product SKU
+                store_name STRING - Store where item is held
+                size STRING - Item size (if applicable)
+                customer_name STRING - Customer name
+                hold_expires_at STRING - When the hold expires
+                confirmation_message STRING - Success message
+                store_phone STRING - Store phone number for customer reference
+                pickup_instructions STRING - Instructions for pickup
+        """
+        logger.debug(f"place_item_hold: sku={sku}, store={store_name}, size={size}, customer={customer_name}")
+
+        # Generate a unique hold ID
+        import uuid
+        from datetime import datetime, timedelta
+        
+        hold_id = f"HOLD-{uuid.uuid4().hex[:8].upper()}"
+        current_time = datetime.now()
+        expiry_time = current_time + timedelta(hours=hold_duration_hours)
+        
+        # Use default customer name if not provided
+        if not customer_name:
+            customer_name = "Customer"
+        
+        # Mock store phone numbers and details
+        store_details = {
+            'Marina Market': {
+                'phone': '415-555-0102',
+                'address': '2200 Chestnut Street, San Francisco, CA 94123'
+            },
+            'Mission Market': {
+                'phone': '415-555-0103', 
+                'address': '2128 Mission Street, San Francisco, CA 94110'
+            },
+            'Union Square Market': {
+                'phone': '415-555-0104',
+                'address': '350 Post Street, San Francisco, CA 94108'
+            },
+            'Downtown Market': {
+                'phone': '415-555-0101',
+                'address': '123 Market Street, San Francisco, CA 94102'
+            }
+        }
+        
+        store_info = store_details.get(store_name, {
+            'phone': '415-555-0100',
+            'address': 'Store address not available'
+        })
+        
+        # Create size description
+        size_desc = f" in size {size}" if size else ""
+        
+        # Create product description based on SKU
+        product_descriptions = {
+            'ADI-GAZ-001': 'Adidas Gazelle Sneakers',
+            'ADI-SMB-001': 'Adidas Samba Classic Sneakers',
+            'ADI-STS-001': 'Adidas Stan Smith Classic Sneakers',
+            'ADI-SUP-001': 'Adidas Superstar Classic Sneakers',
+            'ADI-CAM-001': 'Adidas Campus Classic Sneakers',
+            'NIK-AF1-001': 'Nike Air Force 1 Low',
+            'CON-CHK-001': 'Converse Chuck Taylor All Star',
+            'VAN-OLD-001': 'Vans Old Skool'
+        }
+        
+        product_name = product_descriptions.get(sku, f"Product {sku}")
+        
+        hold_result = {
+            'hold_id': hold_id,
+            'sku': sku,
+            'product_name': product_name,
+            'store_name': store_name,
+            'store_phone': store_info['phone'],
+            'store_address': store_info['address'],
+            'size': size,
+            'customer_name': customer_name,
+            'hold_duration_hours': hold_duration_hours,
+            'hold_expires_at': expiry_time.strftime('%Y-%m-%d %H:%M:%S'),
+            'confirmation_message': f"Successfully placed a {hold_duration_hours}-hour hold on {product_name}{size_desc} at {store_name} for {customer_name}.",
+            'pickup_instructions': f"Please bring a valid ID when picking up your item. Ask for hold ID {hold_id} at customer service.",
+            'hold_created_at': current_time.strftime('%Y-%m-%d %H:%M:%S')
+        }
+        
+        logger.debug(f"Created hold {hold_id} for {customer_name}")
+        return hold_result
+    
+    return place_item_hold 

@@ -14,6 +14,7 @@ from retail_ai.agents.orders import orders_agent
 from retail_ai.agents.product import product_agent
 from retail_ai.agents.recommendation import recommendation_agent
 from retail_ai.agents.router import router_agent
+from retail_ai.agents.stylist import stylist_agent
 from retail_ai.agents.validation import message_validation_agent
 
 __all__ = [
@@ -27,4 +28,5 @@ __all__ = [
     "recommendation_agent",
     "orders_agent",
     "process_images_agent",
+    "stylist_agent",
 ] 

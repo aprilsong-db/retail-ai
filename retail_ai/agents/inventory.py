@@ -28,7 +28,8 @@ from retail_ai.tools import (
 from retail_ai.tools.inventory import (
     create_find_inventory_by_sku_tool,
     create_find_store_inventory_by_sku_tool,
-    create_find_nearby_stores_inventory_tool
+    create_find_nearby_stores_inventory_tool,
+    create_place_item_hold_tool
 )
 from retail_ai.types import AgentCallable
 
@@ -130,6 +131,11 @@ def inventory_agent(model_config: ModelConfig) -> AgentCallable:
         nearby_stores_inventory_tool = create_find_nearby_stores_inventory_tool(warehouse_id, config)
         tools.append(nearby_stores_inventory_tool)
         logger.debug("Added nearby stores inventory tool to inventory agent")
+
+        # Add item hold placement tool
+        place_hold_tool = create_place_item_hold_tool(warehouse_id, model_config)
+        tools.append(place_hold_tool)
+        logger.debug("Added place item hold tool to inventory agent")
 
         # Add similar products recommendation tool for suggesting alternatives when out of stock
         if product_endpoint_name and product_index_name and product_columns and warehouse_id:
