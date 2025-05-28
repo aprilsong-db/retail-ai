@@ -27,8 +27,8 @@ except ImportError:
 from retail_ai.state import AgentConfig, AgentState
 from retail_ai.tools import (
     create_find_product_by_sku_tool,
-    create_find_product_by_upc_tool,
     find_product_details_by_description_tool,
+    create_similar_products_recommendation_tool,
 )
 from retail_ai.types import AgentCallable
 
@@ -97,9 +97,21 @@ def product_agent(model_config: ModelConfig) -> AgentCallable:
                 columns=columns,
                 k=num_results,
             ),
-            create_find_product_by_sku_tool(warehouse_id),
-            create_find_product_by_upc_tool(warehouse_id),
+            create_find_product_by_sku_tool(warehouse_id, model_config),
         ]
+
+        # Add similar products recommendation tool for product discovery and alternatives
+        if endpoint_name and index_name and columns and warehouse_id:
+            similar_products_tool = create_similar_products_recommendation_tool(
+                endpoint_name=endpoint_name,
+                index_name=index_name,
+                columns=columns,
+                warehouse_id=warehouse_id,
+                model_config=model_config,
+                k=5,  # Return top 5 similar products
+            )
+            tools.append(similar_products_tool)
+            logger.debug("Added similar products recommendation tool to product agent")
 
         # Create the agent with tools
         agent: CompiledStateGraph = create_react_agent(

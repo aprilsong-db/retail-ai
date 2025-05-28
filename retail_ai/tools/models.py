@@ -134,4 +134,54 @@ class SkuIdentifier(BaseModel):
         "json_schema_extra": {
             "additionalProperties": False  # Explicitly set in schema
         },
+    }
+
+
+class DepartmentInfo(BaseModel):
+    """Information about department names extracted from text."""
+
+    department_names: list[str] = Field(
+        default_factory=list,
+        description="The department names mentioned in the text. Common departments include Electronics, Footwear, Customer Service, Womens Fashion, etc."
+    )
+
+    model_config = {
+        "extra": "forbid",  # This prevents additional properties
+        "json_schema_extra": {
+            "additionalProperties": False  # Explicitly set in schema
+        },
+    }
+
+
+class TaskAssignmentInfo(BaseModel):
+    """Information about task assignments extracted from text."""
+
+    task_title: str = Field(
+        description="Brief title for the task to be assigned"
+    )
+    task_description: str = Field(
+        description="Detailed description of what needs to be done"
+    )
+    task_type: str = Field(
+        default="routine",
+        description="Type of task: routine, priority, emergency, project, or training"
+    )
+    priority_level: str = Field(
+        default="medium",
+        description="Priority level: low, medium, high, or critical"
+    )
+    due_hours: int = Field(
+        default=24,
+        description="Hours from now when the task should be completed"
+    )
+    estimated_duration_minutes: int = Field(
+        default=60,
+        description="Estimated time to complete the task in minutes"
+    )
+
+    model_config = {
+        "extra": "forbid",  # This prevents additional properties
+        "json_schema_extra": {
+            "additionalProperties": False  # Explicitly set in schema
+        },
     } 

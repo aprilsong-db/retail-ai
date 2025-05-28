@@ -36,7 +36,6 @@
 
 from agent_as_code import app
 from retail_ai.models import display_graph
-import dbutils
 
 display_graph(app)
 
@@ -81,9 +80,12 @@ for _, model  in config.get("resources").get("llms", {}).items():
     model_names.add(model_name)
 
 vector_indexes: set = set()
-for _, vector_store  in config.get("resources").get("vector_stores", {}).items():
-    index_name: str = vector_store["index_name"]
-    vector_indexes.add(index_name)
+# Use the indexes_to_provision list instead of iterating over all vector_stores
+indexes_to_provision = config.get("resources").get("vector_stores", {}).get("indexes_to_provision", [])
+for vector_store in indexes_to_provision:
+    if isinstance(vector_store, dict) and "index_name" in vector_store:
+        index_name: str = vector_store["index_name"]
+        vector_indexes.add(index_name)
 
 warehouse_ids: set = set()
 for _, warehouse  in config.get("resources").get("warehouses", {}).items():

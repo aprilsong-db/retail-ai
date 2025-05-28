@@ -100,8 +100,8 @@ INSERT INTO products (
     'Returnable within 30 days if unopened',
     
     true, true,
-    ARRAY('medium roast', 'everyday coffee', 'balanced', 'popular'),
-    ARRAY('starbucks', 'pike place', 'medium roast', 'k-cup', 'coffee pods'),
+    '["medium roast", "everyday coffee", "balanced", "popular"]',
+    '["starbucks", "pike place", "medium roast", "k-cup", "coffee pods"]',
     1, 'Eye-level shelf',
     
     false,
@@ -139,8 +139,8 @@ INSERT INTO products (
     'Returnable within 30 days if unopened',
     
     true, true,
-    ARRAY('dark roast', 'bold', 'complex', 'popular'),
-    ARRAY('peets', 'major dickason', 'dark roast', 'k-cup', 'coffee pods'),
+    '["dark roast", "bold", "complex", "popular"]',
+    '["peets", "major dickason", "dark roast", "k-cup", "coffee pods"]',
     1, 'Eye-level shelf',
     
     false,
@@ -178,8 +178,8 @@ INSERT INTO products (
     'Returnable within 30 days if unopened',
     
     true, true,
-    ARRAY('medium roast', 'classic', 'smooth', 'popular'),
-    ARRAY('dunkin', 'original blend', 'medium roast', 'k-cup', 'coffee pods'),
+    '["medium roast", "classic", "smooth", "popular"]',
+    '["dunkin", "original blend", "medium roast", "k-cup", "coffee pods"]',
     1, 'Eye-level shelf',
     
     false,
@@ -217,8 +217,8 @@ INSERT INTO products (
     'Returnable within 30 days if unopened',
     
     true, true,
-    ARRAY('light roast', 'breakfast blend', 'smooth', 'morning coffee'),
-    ARRAY('green mountain', 'breakfast blend', 'light roast', 'k-cup', 'coffee pods'),
+    '["light roast", "breakfast blend", "smooth", "morning coffee"]',
+    '["green mountain", "breakfast blend", "light roast", "k-cup", "coffee pods"]',
     2, 'Eye-level shelf',
     
     false,
@@ -256,12 +256,363 @@ INSERT INTO products (
     'Returnable within 30 days if unopened',
     
     true, true,
-    ARRAY('medium roast', 'classic', 'diner style', 'popular'),
-    ARRAY('donut shop', 'regular', 'medium roast', 'k-cup', 'coffee pods'),
+    '["medium roast", "classic", "diner style", "popular"]',
+    '["donut shop", "regular", "medium roast", "k-cup", "coffee pods"]',
     2, 'Eye-level shelf',
     
     false,
     '{"food_grade": true, "fda_approved": true}',
+    0,
+    
+    '2023-01-01 00:00:00', CURRENT_TIMESTAMP(),
+    'system', 'system'),
+
+    -- Adidas Gazelle Sneakers
+    (6, 'ADI-GAZ-001', '567890123456',
+    'Adidas', 'Gazelle Classic Sneakers',
+    'Iconic Adidas Gazelle retro sneakers in various colors',
+    'The Adidas Gazelle is a timeless classic that has been a staple in streetwear culture for decades. Originally designed as a training shoe, the Gazelle features a suede upper, leather 3-Stripes, and a rubber outsole. This versatile sneaker offers comfort and style for everyday wear.',
+    'https://retail.ai/products/adi-gaz-001',
+    'https://retail.ai/images/adi-gaz-001.jpg',
+    
+    'Footwear', 'SNK-CAS',
+    'FOO-01', 'Footwear',
+    'SNK-01', 'Sneakers',
+    'CAS-01', 'Casual Sneakers',
+    
+    89.99, 100.00,
+    1.2, 'lb',
+    '{"length": 12.0, "width": 4.5, "height": 5.0, "unit": "inch"}',
+    '{"material": "suede", "sole": "rubber", "closure": "lace-up", "sizes": ["7", "7.5", "8", "8.5", "9", "9.5", "10", "10.5", "11", "11.5", "12"], "colors": ["black", "navy", "grey", "burgundy"]}',
+    
+    6, 60, 12, 7, 18, 36,
+    
+    'SUP006', 'Adidas Distribution',
+    'AD-GAZ-MULTI',
+    '{"suppliers": ["Athletic Footwear Inc", "Sports Direct Supply"]}',
+    
+    'active', '2021-01-01', false, true,
+    'Returnable within 30 days with original packaging',
+    
+    true, true,
+    '["retro", "classic", "casual", "streetwear", "comfortable"]',
+    '["adidas", "gazelle", "sneakers", "casual shoes", "retro"]',
+    1, 'Featured display',
+    
+    false,
+    '{"material_safety": true, "non_toxic": true}',
+    0,
+    
+    '2023-01-01 00:00:00', CURRENT_TIMESTAMP(),
+    'system', 'system'),
+
+    -- Nike Air Force 1 Low
+    (7, 'NIK-AF1-001', '678901234567',
+    'Nike', 'Air Force 1 Low Sneakers',
+    'Classic Nike Air Force 1 Low basketball-inspired sneakers',
+    'The Nike Air Force 1 Low is a basketball legend that has transcended the court to become a street style icon. Featuring premium leather construction, perforated toe box for breathability, and the classic pivot point outsole for smooth transitions. A timeless design that goes with everything.',
+    'https://retail.ai/products/nik-af1-001',
+    'https://retail.ai/images/nik-af1-001.jpg',
+    
+    'Footwear', 'SNK-CAS',
+    'FOO-01', 'Footwear',
+    'SNK-01', 'Sneakers',
+    'CAS-01', 'Casual Sneakers',
+    
+    109.99, 120.00,
+    1.5, 'lb',
+    '{"length": 12.5, "width": 4.8, "height": 5.2, "unit": "inch"}',
+    '{"material": "leather", "sole": "rubber", "closure": "lace-up", "sizes": ["7", "7.5", "8", "8.5", "9", "9.5", "10", "10.5", "11", "11.5", "12", "13"], "colors": ["white", "black", "white/black"]}',
+    
+    6, 60, 15, 7, 20, 40,
+    
+    'SUP007', 'Nike Distribution',
+    'NK-AF1-LOW',
+    '{"suppliers": ["Athletic Footwear Inc", "Nike Direct Supply"]}',
+    
+    'active', '2021-02-01', false, true,
+    'Returnable within 30 days with original packaging',
+    
+    true, true,
+    '["basketball", "classic", "leather", "iconic", "versatile"]',
+    '["nike", "air force 1", "sneakers", "basketball shoes", "classic"]',
+    1, 'Featured display',
+    
+    false,
+    '{"material_safety": true, "non_toxic": true}',
+    0,
+    
+    '2023-01-01 00:00:00', CURRENT_TIMESTAMP(),
+    'system', 'system'),
+
+    -- Converse Chuck Taylor All Star
+    (8, 'CON-CHK-001', '789012345678',
+    'Converse', 'Chuck Taylor All Star High Top',
+    'Classic Converse Chuck Taylor All Star high-top canvas sneakers',
+    'The Converse Chuck Taylor All Star is the original basketball shoe and an American icon. Featuring a timeless silhouette, durable canvas upper, and the signature rubber toe cap and outsole. These high-top sneakers have been a symbol of self-expression and creativity for generations.',
+    'https://retail.ai/products/con-chk-001',
+    'https://retail.ai/images/con-chk-001.jpg',
+    
+    'Footwear', 'SNK-CAS',
+    'FOO-01', 'Footwear',
+    'SNK-01', 'Sneakers',
+    'CAS-01', 'Casual Sneakers',
+    
+    64.99, 70.00,
+    1.0, 'lb',
+    '{"length": 12.0, "width": 4.2, "height": 6.0, "unit": "inch"}',
+    '{"material": "canvas", "sole": "rubber", "closure": "lace-up", "sizes": ["6", "6.5", "7", "7.5", "8", "8.5", "9", "9.5", "10", "10.5", "11", "11.5", "12"], "colors": ["black", "white", "red", "navy", "optical white"]}',
+    
+    6, 72, 18, 5, 24, 48,
+    
+    'SUP008', 'Converse Distribution',
+    'CV-CHK-HI',
+    '{"suppliers": ["Athletic Footwear Inc", "Canvas Shoe Supply"]}',
+    
+    'active', '2021-03-01', false, true,
+    'Returnable within 30 days with original packaging',
+    
+    true, true,
+    '["classic", "canvas", "high-top", "iconic", "vintage"]',
+    '["converse", "chuck taylor", "all star", "canvas sneakers", "high top"]',
+    2, 'Eye-level shelf',
+    
+    false,
+    '{"material_safety": true, "non_toxic": true}',
+    0,
+    
+    '2023-01-01 00:00:00', CURRENT_TIMESTAMP(),
+    'system', 'system'),
+
+    -- Vans Old Skool
+    (9, 'VAN-OLD-001', '890123456789',
+    'Vans', 'Old Skool Skate Sneakers',
+    'Classic Vans Old Skool skateboarding sneakers with side stripe',
+    'The Vans Old Skool is the original skate shoe and an icon of street culture. Featuring sturdy canvas and suede uppers, the signature side stripe, and Vans'' waffle outsole for superior grip. Built for skateboarding but loved by everyone for its timeless style and durability.',
+    'https://retail.ai/products/van-old-001',
+    'https://retail.ai/images/van-old-001.jpg',
+    
+    'Footwear', 'SNK-SKT',
+    'FOO-01', 'Footwear',
+    'SNK-01', 'Sneakers',
+    'SKT-01', 'Skate Sneakers',
+    
+    69.99, 75.00,
+    1.1, 'lb',
+    '{"length": 12.2, "width": 4.3, "height": 4.8, "unit": "inch"}',
+    '{"material": "canvas/suede", "sole": "waffle rubber", "closure": "lace-up", "sizes": ["6.5", "7", "7.5", "8", "8.5", "9", "9.5", "10", "10.5", "11", "11.5", "12"], "colors": ["black/white", "navy", "burgundy", "grey"]}',
+    
+    6, 60, 15, 6, 20, 40,
+    
+    'SUP009', 'Vans Distribution',
+    'VN-OLD-SKOOL',
+    '{"suppliers": ["Skate Supply Co", "Street Footwear Inc"]}',
+    
+    'active', '2021-04-01', false, true,
+    'Returnable within 30 days with original packaging',
+    
+    true, true,
+    '["skate", "street", "durable", "classic", "side stripe"]',
+    '["vans", "old skool", "skate shoes", "street wear", "skateboarding"]',
+    2, 'Eye-level shelf',
+    
+    false,
+    '{"material_safety": true, "non_toxic": true}',
+    0,
+    
+    '2023-01-01 00:00:00', CURRENT_TIMESTAMP(),
+    'system', 'system'),
+
+    -- Puma Suede Classic
+    (10, 'PUM-SUD-001', '901234567890',
+    'Puma', 'Suede Classic Sneakers',
+    'Iconic Puma Suede Classic retro basketball sneakers',
+    'The Puma Suede Classic is a basketball legend that became a street style staple. Originally worn by basketball players in the 1960s, this shoe features a premium suede upper, classic Puma formstrip, and a rubber outsole. A timeless design that represents the intersection of sport and culture.',
+    'https://retail.ai/products/pum-sud-001',
+    'https://retail.ai/images/pum-sud-001.jpg',
+    
+    'Footwear', 'SNK-CAS',
+    'FOO-01', 'Footwear',
+    'SNK-01', 'Sneakers',
+    'CAS-01', 'Casual Sneakers',
+    
+    79.99, 85.00,
+    1.1, 'lb',
+    '{"length": 12.0, "width": 4.4, "height": 4.9, "unit": "inch"}',
+    '{"material": "suede", "sole": "rubber", "closure": "lace-up", "sizes": ["7", "7.5", "8", "8.5", "9", "9.5", "10", "10.5", "11", "11.5", "12"], "colors": ["black", "navy", "red", "grey", "green"]}',
+    
+    6, 60, 12, 7, 18, 36,
+    
+    'SUP010', 'Puma Distribution',
+    'PM-SUD-CLS',
+    '{"suppliers": ["Athletic Footwear Inc", "Puma Direct Supply"]}',
+    
+    'active', '2021-05-01', false, true,
+    'Returnable within 30 days with original packaging',
+    
+    true, true,
+    '["retro", "suede", "basketball", "classic", "heritage"]',
+    '["puma", "suede", "classic", "retro sneakers", "basketball"]',
+    2, 'Eye-level shelf',
+    
+    false,
+    '{"material_safety": true, "non_toxic": true}',
+    0,
+    
+    '2023-01-01 00:00:00', CURRENT_TIMESTAMP(),
+    'system', 'system'),
+
+    -- Adidas Samba Classic Sneakers
+    (11, 'ADI-SMB-001', '012345678902',
+    'Adidas', 'Samba Classic Sneakers',
+    'Iconic Adidas Samba indoor soccer shoes with gum sole',
+    'The Adidas Samba is a timeless classic originally designed for indoor soccer training. Featuring a premium leather upper, suede T-toe overlay, and the signature gum rubber outsole. This versatile sneaker has transcended sports to become a street style icon, perfect for casual wear.',
+    'https://retail.ai/products/adi-smb-001',
+    'https://retail.ai/images/adi-smb-001.jpg',
+    
+    'Footwear', 'SNK-CAS',
+    'FOO-01', 'Footwear',
+    'SNK-01', 'Sneakers',
+    'CAS-01', 'Casual Sneakers',
+    
+    94.99, 105.00,
+    1.3, 'lb',
+    '{"length": 12.0, "width": 4.5, "height": 4.8, "unit": "inch"}',
+    '{"material": "leather/suede", "sole": "gum rubber", "closure": "lace-up", "sizes": ["7", "7.5", "8", "8.5", "9", "9.5", "10", "10.5", "11", "11.5", "12"], "colors": ["black/white", "white/green", "navy/white", "burgundy/white"]}',
+    
+    6, 60, 12, 7, 18, 36,
+    
+    'SUP006', 'Adidas Distribution',
+    'AD-SMB-CLS',
+    '{"suppliers": ["Athletic Footwear Inc", "Sports Direct Supply"]}',
+    
+    'active', '2021-06-01', false, true,
+    'Returnable within 30 days with original packaging',
+    
+    true, true,
+    '["soccer", "indoor", "gum sole", "leather", "classic"]',
+    '["adidas", "samba", "soccer shoes", "indoor training", "gum sole"]',
+    1, 'Featured display',
+    
+    false,
+    '{"material_safety": true, "non_toxic": true}',
+    0,
+    
+    '2023-01-01 00:00:00', CURRENT_TIMESTAMP(),
+    'system', 'system'),
+
+    -- Adidas Stan Smith Sneakers
+    (12, 'ADI-STS-001', '123456789013',
+    'Adidas', 'Stan Smith Classic Sneakers',
+    'Iconic Adidas Stan Smith tennis shoes in clean white leather',
+    'The Adidas Stan Smith is one of the most recognizable tennis shoes in the world. Originally created for tennis legend Stan Smith, this minimalist design features premium white leather construction with green accents. A timeless, versatile sneaker that works with any outfit.',
+    'https://retail.ai/products/adi-sts-001',
+    'https://retail.ai/images/adi-sts-001.jpg',
+    
+    'Footwear', 'SNK-CAS',
+    'FOO-01', 'Footwear',
+    'SNK-01', 'Sneakers',
+    'CAS-01', 'Casual Sneakers',
+    
+    84.99, 90.00,
+    1.2, 'lb',
+    '{"length": 12.0, "width": 4.4, "height": 4.6, "unit": "inch"}',
+    '{"material": "leather", "sole": "rubber", "closure": "lace-up", "sizes": ["7", "7.5", "8", "8.5", "9", "9.5", "10", "10.5", "11", "11.5", "12"], "colors": ["white/green", "white/navy", "white/black", "all white"]}',
+    
+    6, 60, 15, 7, 20, 40,
+    
+    'SUP006', 'Adidas Distribution',
+    'AD-STS-CLS',
+    '{"suppliers": ["Athletic Footwear Inc", "Sports Direct Supply"]}',
+    
+    'active', '2021-07-01', false, true,
+    'Returnable within 30 days with original packaging',
+    
+    true, true,
+    '["tennis", "minimalist", "white leather", "clean", "versatile"]',
+    '["adidas", "stan smith", "tennis shoes", "white sneakers", "classic"]',
+    1, 'Featured display',
+    
+    false,
+    '{"material_safety": true, "non_toxic": true}',
+    0,
+    
+    '2023-01-01 00:00:00', CURRENT_TIMESTAMP(),
+    'system', 'system'),
+
+    -- Adidas Superstar Sneakers
+    (13, 'ADI-SUP-001', '234567890124',
+    'Adidas', 'Superstar Classic Sneakers',
+    'Iconic Adidas Superstar with signature shell toe design',
+    'The Adidas Superstar is a basketball legend that became a cultural icon. Originally designed for the court in 1969, this shoe features the distinctive rubber shell toe, premium leather upper, and classic 3-Stripes. A symbol of street culture and self-expression.',
+    'https://retail.ai/products/adi-sup-001',
+    'https://retail.ai/images/adi-sup-001.jpg',
+    
+    'Footwear', 'SNK-CAS',
+    'FOO-01', 'Footwear',
+    'SNK-01', 'Sneakers',
+    'CAS-01', 'Casual Sneakers',
+    
+    99.99, 110.00,
+    1.4, 'lb',
+    '{"length": 12.2, "width": 4.6, "height": 5.0, "unit": "inch"}',
+    '{"material": "leather", "sole": "rubber", "closure": "lace-up", "sizes": ["7", "7.5", "8", "8.5", "9", "9.5", "10", "10.5", "11", "11.5", "12"], "colors": ["white/black", "black/white", "white/gold", "all black"]}',
+    
+    6, 60, 12, 7, 18, 36,
+    
+    'SUP006', 'Adidas Distribution',
+    'AD-SUP-CLS',
+    '{"suppliers": ["Athletic Footwear Inc", "Sports Direct Supply"]}',
+    
+    'active', '2021-08-01', false, true,
+    'Returnable within 30 days with original packaging',
+    
+    true, true,
+    '["basketball", "shell toe", "street culture", "iconic", "leather"]',
+    '["adidas", "superstar", "shell toe", "basketball shoes", "street"]',
+    1, 'Featured display',
+    
+    false,
+    '{"material_safety": true, "non_toxic": true}',
+    0,
+    
+    '2023-01-01 00:00:00', CURRENT_TIMESTAMP(),
+    'system', 'system'),
+
+    -- Adidas Campus Sneakers
+    (14, 'ADI-CAM-001', '345678901235',
+    'Adidas', 'Campus Classic Sneakers',
+    'Retro Adidas Campus basketball shoes with suede upper',
+    'The Adidas Campus is a vintage basketball shoe that has become a streetwear staple. Originally designed in the 1980s, this shoe features a premium suede upper, classic 3-Stripes, and a rubber cupsole. A perfect blend of retro style and modern comfort.',
+    'https://retail.ai/products/adi-cam-001',
+    'https://retail.ai/images/adi-cam-001.jpg',
+    
+    'Footwear', 'SNK-CAS',
+    'FOO-01', 'Footwear',
+    'SNK-01', 'Sneakers',
+    'CAS-01', 'Casual Sneakers',
+    
+    87.99, 95.00,
+    1.2, 'lb',
+    '{"length": 12.0, "width": 4.5, "height": 4.9, "unit": "inch"}',
+    '{"material": "suede", "sole": "rubber", "closure": "lace-up", "sizes": ["7", "7.5", "8", "8.5", "9", "9.5", "10", "10.5", "11", "11.5", "12"], "colors": ["grey/white", "navy/white", "burgundy/white", "black/white"]}',
+    
+    6, 60, 12, 7, 18, 36,
+    
+    'SUP006', 'Adidas Distribution',
+    'AD-CAM-CLS',
+    '{"suppliers": ["Athletic Footwear Inc", "Sports Direct Supply"]}',
+    
+    'active', '2021-09-01', false, true,
+    'Returnable within 30 days with original packaging',
+    
+    true, true,
+    '["retro", "basketball", "suede", "vintage", "streetwear"]',
+    '["adidas", "campus", "retro sneakers", "suede shoes", "basketball"]',
+    2, 'Eye-level shelf',
+    
+    false,
+    '{"material_safety": true, "non_toxic": true}',
     0,
     
     '2023-01-01 00:00:00', CURRENT_TIMESTAMP(),

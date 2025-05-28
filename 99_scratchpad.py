@@ -83,6 +83,8 @@ agent.invoke({
 # COMMAND ----------
 
 # MAGIC %sql
+# MAGIC -- TODO: Parameterize catalog and database names
+# MAGIC -- SELECT * FROM ${catalog_name}.${database_name}.find_store_inventory_by_upc('35048', ARRAY('0017627748017'))
 # MAGIC SELECT * FROM nfleming.retail_ai.find_store_inventory_by_upc('35048', ARRAY('0017627748017'))
 
 # COMMAND ----------

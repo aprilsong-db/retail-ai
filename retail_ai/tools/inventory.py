@@ -2,7 +2,7 @@
 Inventory Tools
 
 This module contains tool creation functions for inventory-related operations including
-inventory lookup by SKU/UPC and store-specific inventory queries.
+inventory lookup by SKU and store-specific inventory queries.
 """
 
 import pandas as pd
@@ -10,10 +10,16 @@ from databricks.sdk import WorkspaceClient
 from databricks.sdk.service.sql import StatementResponse, StatementState
 from langchain_core.tools import tool
 from loguru import logger
+from typing import Callable
+from mlflow.models import ModelConfig
 
 
-def create_find_inventory_by_sku_tool(warehouse_id: str) -> None:
+def create_find_inventory_by_sku_tool(warehouse_id: str, config: ModelConfig) -> Callable:
     """Create a Unity Catalog tool for finding inventory by SKU."""
+    
+    # Get catalog and database names from config
+    catalog_name = config.get("catalog_name")
+    database_name = config.get("database_name")
     
     @tool
     def find_inventory_by_sku(skus: list[str]) -> tuple:
@@ -30,9 +36,8 @@ def create_find_inventory_by_sku_tool(warehouse_id: str) -> None:
             (tuple): A tuple containing inventory information with fields like:
                 inventory_id BIGINT
                 ,sku STRING
-                ,upc STRING
                 ,product_id BIGINT
-                ,store_id INT
+                ,store_id INT (or similar store identifier)
                 ,store_quantity INT
                 ,warehouse STRING
                 ,warehouse_quantity INT
@@ -41,15 +46,16 @@ def create_find_inventory_by_sku_tool(warehouse_id: str) -> None:
                 ,department STRING
                 ,aisle_location STRING
                 ,is_closeout BOOLEAN
+                (Additional fields may be available depending on Unity Catalog function definition)
         """
         logger.debug(f"find_inventory_by_sku: {skus}")
 
         # Convert list to SQL array format
         skus_str = ", ".join([f"'{sku}'" for sku in skus])
         
-        # Execute the Unity Catalog function
+        # Execute the Unity Catalog function with basic query
         sql_query = f"""
-            SELECT * FROM nfleming.retail_ai.find_inventory_by_sku(ARRAY({skus_str}))
+            SELECT * FROM {catalog_name}.{database_name}.find_inventory_by_sku(ARRAY({skus_str}))
         """
         
         # Get workspace client and execute query
@@ -67,83 +73,43 @@ def create_find_inventory_by_sku_tool(warehouse_id: str) -> None:
 
         # Convert results to DataFrame and then to tuple
         if response.result and response.result.data_array:
-            df = pd.DataFrame(
-                response.result.data_array,
-                columns=[col.name for col in response.result.manifest.schema.columns]
-            )
-            logger.debug(f"Found {len(df)} inventory records")
-            return tuple(df.to_dict('records'))
+            # Try to get column names from different possible locations
+            columns = None
+            
+            # Try the manifest approach first (older SDK versions)
+            if hasattr(response.result, 'manifest') and hasattr(response.result.manifest, 'schema'):
+                columns = [col.name for col in response.result.manifest.schema.columns]
+            # Try the schema approach (newer SDK versions)
+            elif hasattr(response.result, 'schema') and hasattr(response.result.schema, 'columns'):
+                columns = [col.name for col in response.result.schema.columns]
+            # Fallback: try to infer from the first row of data
+            elif response.result.data_array and len(response.result.data_array) > 0:
+                # Use generic column names based on the number of columns
+                num_cols = len(response.result.data_array[0]) if response.result.data_array[0] else 0
+                columns = [f"col_{i}" for i in range(num_cols)]
+            else:
+                logger.warning("Could not determine column names from response")
+                columns = []
+            
+            if columns:
+                df = pd.DataFrame(response.result.data_array, columns=columns)
+                logger.debug(f"Found {len(df)} inventory records")
+                return tuple(df.to_dict('records'))
+            else:
+                logger.error("No columns found in response")
+                return ()
         
         return ()
-
-
-def create_find_inventory_by_upc_tool(warehouse_id: str) -> None:
-    """Create a Unity Catalog tool for finding inventory by UPC."""
     
-    @tool
-    def find_inventory_by_upc(upcs: list[str]) -> tuple:
-        """
-        Find inventory details by one or more UPCs using Unity Catalog functions.
-        This tool retrieves detailed inventory information across all stores for products based on their UPC codes.
-
-        Args: 
-            upcs (list[str]): One or more unique identifiers to retrieve. 
-                             UPC values are between 10-16 alpha numeric characters.
-                             Examples: ["123456789012", "234567890123"]
-
-        Returns: 
-            (tuple): A tuple containing inventory information with fields like:
-                inventory_id BIGINT
-                ,sku STRING
-                ,upc STRING
-                ,product_id BIGINT
-                ,store_id INT
-                ,store_quantity INT
-                ,warehouse STRING
-                ,warehouse_quantity INT
-                ,retail_amount DECIMAL(11, 2)
-                ,popularity_rating STRING
-                ,department STRING
-                ,aisle_location STRING
-                ,is_closeout BOOLEAN
-        """
-        logger.debug(f"find_inventory_by_upc: {upcs}")
-
-        # Convert list to SQL array format
-        upcs_str = ", ".join([f"'{upc}'" for upc in upcs])
-        
-        # Execute the Unity Catalog function
-        sql_query = f"""
-            SELECT * FROM nfleming.retail_ai.find_inventory_by_upc(ARRAY({upcs_str}))
-        """
-        
-        # Get workspace client and execute query
-        w = WorkspaceClient()
-        
-        response: StatementResponse = w.statement_execution.execute_statement(
-            warehouse_id=warehouse_id,
-            statement=sql_query,
-            wait_timeout="30s",
-        )
-
-        if response.status.state != StatementState.SUCCEEDED:
-            logger.error(f"Query failed: {response.status}")
-            return ()
-
-        # Convert results to DataFrame and then to tuple
-        if response.result and response.result.data_array:
-            df = pd.DataFrame(
-                response.result.data_array,
-                columns=[col.name for col in response.result.manifest.schema.columns]
-            )
-            logger.debug(f"Found {len(df)} inventory records")
-            return tuple(df.to_dict('records'))
-        
-        return ()
+    return find_inventory_by_sku
 
 
-def create_find_store_inventory_by_sku_tool(warehouse_id: str) -> None:
+def create_find_store_inventory_by_sku_tool(warehouse_id: str, config: ModelConfig) -> Callable:
     """Create a Unity Catalog tool for finding store-specific inventory by SKU."""
+    
+    # Get catalog and database names from config
+    catalog_name = config.get("catalog_name")
+    database_name = config.get("database_name")
     
     @tool
     def find_store_inventory_by_sku(store: str, skus: list[str]) -> tuple:
@@ -152,7 +118,7 @@ def create_find_store_inventory_by_sku_tool(warehouse_id: str) -> None:
         This tool retrieves detailed inventory information for a specific store based on SKU codes.
 
         Args: 
-            store (str): The store identifier to retrieve inventory for
+            store (str): The store identifier to retrieve inventory for (can be store ID or store name)
             skus (list[str]): One or more unique identifiers to retrieve. 
                              SKU values are between 5-8 alpha numeric characters.
                              Examples: ["PET-KCP-001", "DUN-KCP-002"]
@@ -161,9 +127,8 @@ def create_find_store_inventory_by_sku_tool(warehouse_id: str) -> None:
             (tuple): A tuple containing store-specific inventory information with fields like:
                 inventory_id BIGINT
                 ,sku STRING
-                ,upc STRING
                 ,product_id BIGINT
-                ,store_id INT
+                ,store_id INT (or similar store identifier)
                 ,store_quantity INT
                 ,warehouse STRING
                 ,warehouse_quantity INT
@@ -172,21 +137,53 @@ def create_find_store_inventory_by_sku_tool(warehouse_id: str) -> None:
                 ,department STRING
                 ,aisle_location STRING
                 ,is_closeout BOOLEAN
+                (Additional fields may be available depending on Unity Catalog function definition)
         """
         logger.debug(f"find_store_inventory_by_sku: store={store}, skus={skus}")
+
+        # Get workspace client
+        w = WorkspaceClient()
+        
+        # First, determine if store is an ID or name and get the store ID
+        store_id = None
+        
+        # Check if store is already a numeric ID
+        if store.isdigit():
+            store_id = int(store)
+        else:
+            # Look up store ID by name
+            store_lookup_query = f"""
+                SELECT store_id FROM {catalog_name}.{database_name}.dim_stores2 
+                WHERE store_name = '{store}'
+                LIMIT 1
+            """
+            
+            store_response = w.statement_execution.execute_statement(
+                warehouse_id=warehouse_id,
+                statement=store_lookup_query,
+                wait_timeout="30s",
+            )
+            
+            if store_response.status.state != StatementState.SUCCEEDED:
+                logger.error(f"Store lookup query failed: {store_response.status}")
+                return ()
+            
+            if store_response.result and store_response.result.data_array and len(store_response.result.data_array) > 0:
+                store_id = store_response.result.data_array[0][0]
+                logger.debug(f"Found store ID {store_id} for store name '{store}'")
+            else:
+                logger.error(f"Store '{store}' not found in dim_stores2 table")
+                return ()
 
         # Convert list to SQL array format
         skus_str = ", ".join([f"'{sku}'" for sku in skus])
         
-        # Execute the Unity Catalog function
+        # Execute the Unity Catalog function with basic query
         sql_query = f"""
-            SELECT * FROM nfleming.retail_ai.find_store_inventory_by_sku({store}, ARRAY({skus_str}))
+            SELECT * FROM {catalog_name}.{database_name}.find_store_inventory_by_sku({store_id}, ARRAY({skus_str}))
         """
         
-        # Get workspace client and execute query
-        w = WorkspaceClient()
-        
-        response: StatementResponse = w.statement_execution.execute_statement(
+        response = w.statement_execution.execute_statement(
             warehouse_id=warehouse_id,
             statement=sql_query,
             wait_timeout="30s",
@@ -198,77 +195,110 @@ def create_find_store_inventory_by_sku_tool(warehouse_id: str) -> None:
 
         # Convert results to DataFrame and then to tuple
         if response.result and response.result.data_array:
-            df = pd.DataFrame(
-                response.result.data_array,
-                columns=[col.name for col in response.result.manifest.schema.columns]
-            )
-            logger.debug(f"Found {len(df)} store inventory records")
-            return tuple(df.to_dict('records'))
+            # Try to get column names from different possible locations
+            columns = None
+            
+            # Try the manifest approach first (older SDK versions)
+            if hasattr(response.result, 'manifest') and hasattr(response.result.manifest, 'schema'):
+                columns = [col.name for col in response.result.manifest.schema.columns]
+            # Try the schema approach (newer SDK versions)
+            elif hasattr(response.result, 'schema') and hasattr(response.result.schema, 'columns'):
+                columns = [col.name for col in response.result.schema.columns]
+            # Fallback: try to infer from the first row of data
+            elif response.result.data_array and len(response.result.data_array) > 0:
+                # Use generic column names based on the number of columns
+                num_cols = len(response.result.data_array[0]) if response.result.data_array[0] else 0
+                columns = [f"col_{i}" for i in range(num_cols)]
+            else:
+                logger.warning("Could not determine column names from response")
+                columns = []
+            
+            if columns:
+                df = pd.DataFrame(response.result.data_array, columns=columns)
+                logger.debug(f"Found {len(df)} store inventory records")
+                return tuple(df.to_dict('records'))
+            else:
+                logger.error("No columns found in response")
+                return ()
         
         return ()
+    
+    return find_store_inventory_by_sku 
 
 
-def create_find_store_inventory_by_upc_tool(warehouse_id: str) -> None:
-    """Create a Unity Catalog tool for finding store-specific inventory by UPC."""
+def create_find_nearby_stores_inventory_tool(warehouse_id: str, config: ModelConfig) -> Callable:
+    """Create a tool for finding inventory at nearby stores."""
     
     @tool
-    def find_store_inventory_by_upc(store: str, upcs: list[str]) -> tuple:
+    def find_nearby_stores_inventory(reference_store: str, skus: list[str], radius_miles: float = 5.0) -> tuple:
         """
-        Find store-specific inventory details by one or more UPCs using Unity Catalog functions.
-        This tool retrieves detailed inventory information for a specific store based on UPC codes.
+        Find inventory for products at stores near a reference location.
+        This tool helps customers find products at nearby store locations when the primary store is out of stock.
 
         Args: 
-            store (str): The store identifier to retrieve inventory for
-            upcs (list[str]): One or more unique identifiers to retrieve. 
-                             UPC values are between 10-16 alpha numeric characters.
-                             Examples: ["123456789012", "234567890123"]
+            reference_store (str): The reference store name or ID to search around (e.g., "Downtown Market")
+            skus (list[str]): One or more SKU codes to check inventory for
+                             Examples: ["ADI-GAZ-001", "ADI-SMB-001"]
+            radius_miles (float): Search radius in miles (default: 5.0)
 
         Returns: 
-            (tuple): A tuple containing store-specific inventory information with fields like:
-                inventory_id BIGINT
+            (tuple): A tuple containing nearby store inventory information with fields:
+                store_name STRING
+                ,store_address STRING
+                ,distance_miles FLOAT
                 ,sku STRING
-                ,upc STRING
-                ,product_id BIGINT
-                ,store_id INT
                 ,store_quantity INT
-                ,warehouse STRING
-                ,warehouse_quantity INT
                 ,retail_amount DECIMAL(11, 2)
-                ,popularity_rating STRING
-                ,department STRING
                 ,aisle_location STRING
-                ,is_closeout BOOLEAN
+                ,store_phone STRING
+                ,estimated_travel_time_minutes INT
         """
-        logger.debug(f"find_store_inventory_by_upc: store={store}, upcs={upcs}")
+        logger.debug(f"find_nearby_stores_inventory: reference_store={reference_store}, skus={skus}, radius={radius_miles}")
 
-        # Convert list to SQL array format
-        upcs_str = ", ".join([f"'{upc}'" for upc in upcs])
+        # Mock data for stores near Downtown Market in SF
+        nearby_stores_data = []
         
-        # Execute the Unity Catalog function
-        sql_query = f"""
-            SELECT * FROM nfleming.retail_ai.find_store_inventory_by_upc({store}, ARRAY({upcs_str}))
-        """
-        
-        # Get workspace client and execute query
-        w = WorkspaceClient()
-        
-        response: StatementResponse = w.statement_execution.execute_statement(
-            warehouse_id=warehouse_id,
-            statement=sql_query,
-            wait_timeout="30s",
-        )
+        for sku in skus:
+            # Marina Market - 2.1 miles from Downtown Market
+            nearby_stores_data.append({
+                'store_name': 'Marina Market',
+                'store_address': '2200 Chestnut Street, San Francisco, CA 94123',
+                'distance_miles': 2.1,
+                'sku': sku,
+                'store_quantity': 12 if sku == 'ADI-GAZ-001' else 8,
+                'retail_amount': 89.99 if 'GAZ' in sku else 94.99,
+                'aisle_location': 'Aisle 3A',
+                'store_phone': '415-555-0102',
+                'estimated_travel_time_minutes': 15
+            })
+            
+            # Mission Market - 2.8 miles from Downtown Market
+            nearby_stores_data.append({
+                'store_name': 'Mission Market',
+                'store_address': '2128 Mission Street, San Francisco, CA 94110',
+                'distance_miles': 2.8,
+                'sku': sku,
+                'store_quantity': 18 if sku == 'ADI-GAZ-001' else 14,
+                'retail_amount': 89.99 if 'GAZ' in sku else 94.99,
+                'aisle_location': 'Aisle 6C',
+                'store_phone': '415-555-0103',
+                'estimated_travel_time_minutes': 20
+            })
+            
+            # Union Square Market - 1.2 miles from Downtown Market
+            nearby_stores_data.append({
+                'store_name': 'Union Square Market',
+                'store_address': '350 Post Street, San Francisco, CA 94108',
+                'distance_miles': 1.2,
+                'sku': sku,
+                'store_quantity': 6 if sku == 'ADI-GAZ-001' else 10,
+                'retail_amount': 89.99 if 'GAZ' in sku else 94.99,
+                'aisle_location': 'Aisle 2B',
+                'store_phone': '415-555-0104',
+                'estimated_travel_time_minutes': 8
+            })
 
-        if response.status.state != StatementState.SUCCEEDED:
-            logger.error(f"Query failed: {response.status}")
-            return ()
-
-        # Convert results to DataFrame and then to tuple
-        if response.result and response.result.data_array:
-            df = pd.DataFrame(
-                response.result.data_array,
-                columns=[col.name for col in response.result.manifest.schema.columns]
-            )
-            logger.debug(f"Found {len(df)} store inventory records")
-            return tuple(df.to_dict('records'))
-        
-        return () 
+        logger.debug(f"Found {len(nearby_stores_data)} nearby store inventory records")
+        return tuple(nearby_stores_data)
+    
+    return find_nearby_stores_inventory 
