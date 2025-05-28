@@ -1090,7 +1090,6 @@ def show_manager_alerts_tab():
     if "modal_alert_type" not in st.session_state:
         st.session_state.modal_alert_type = ""
     
-    st.markdown("#### 🔔 Alert Management Center")
     
     # All alerts data
     all_alerts = [
@@ -1369,40 +1368,9 @@ def show_manager_alerts_tab():
                 </div>
                 """, unsafe_allow_html=True)
                 
-                # Action buttons for each alert
-                if not is_resolved:
-                    col1, col2, col3, col4 = st.columns([1, 1, 1, 6])
-                    
-                    with col1:
-                        if st.button("✅", key=f"resolve_{alert['id']}", help="Mark as resolved"):
-                            st.session_state.resolved_alerts.add(alert['id'])
-                            st.rerun()
-                    
-                    with col2:
-                        if st.button("📋", key=f"action_{alert['id']}", help="Take action"):
-                            st.success(f"Taking action: {alert['action']}")
-                    
-                    with col3:
-                        if st.button("👁️", key=f"details_{alert['id']}", help="View details"):
-                            st.info(f"Alert details: {alert['message']}")
-                else:
-                    st.markdown("*This alert has been resolved*")
-                
-                st.markdown("---")
         else:
             st.info("No alerts to display.")
     
-    # Action buttons at bottom
-    col1, col2 = st.columns(2)
-    
-    with col1:
-        if st.button("📋 View All Operations", use_container_width=True):
-            st.switch_page("pages/daily_operations.py")
-    
-    with col2:
-        if st.button("📊 Generate Alert Report", use_container_width=True):
-            st.info("Alert report would be generated")
-
 def show_manager_operations_tab():
     """Display the Operations tab with daily priorities and tasks."""
     col1, col2 = st.columns([2, 1])
