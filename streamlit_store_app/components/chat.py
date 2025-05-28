@@ -144,6 +144,31 @@ def get_model_response(messages, model_config):
     # Remove None values
     optional_params = {k: v for k, v in optional_params.items() if v is not None}
     
+    # Build custom_inputs with store context
+    custom_inputs = {
+        "configurable": {}
+    }
+    
+    # Add store_num from session state store context
+    if st.session_state.get("store_id"):
+        # Use the numerical store_id directly as store_num
+        custom_inputs["configurable"]["store_num"] = st.session_state.store_id
+    
+    # Add user_id if available (could be from user_role or a separate user identifier)
+    if st.session_state.get("user_role"):
+        # Use the employee name as user_id if available
+        employee_name = st.session_state.config.get("employees", {}).get(st.session_state.user_role, {}).get("name")
+        if employee_name:
+            custom_inputs["configurable"]["user_id"] = employee_name
+        else:
+            custom_inputs["configurable"]["user_id"] = st.session_state.user_role
+    
+    # Add thread_id for conversation continuity
+    if "thread_id" not in st.session_state:
+        import uuid
+        st.session_state.thread_id = str(uuid.uuid4())
+    custom_inputs["configurable"]["thread_id"] = st.session_state.thread_id
+    
     try:
         # Update status to processing
         update_chat_status("processing")
@@ -151,10 +176,11 @@ def get_model_response(messages, model_config):
         # Get endpoint name from config if specified, otherwise use default resolution
         endpoint_name = model_config.get('agent_endpoint')
         
-        # Query the model with configuration from config.yaml
+        # Query the model with configuration from config.yaml and custom_inputs
         response_messages, request_id = query_endpoint(
             messages=messages,
             endpoint_name=endpoint_name,
+            custom_inputs=custom_inputs,
             **optional_params
         )
         

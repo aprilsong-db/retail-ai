@@ -6,6 +6,10 @@ app:
   version: "1.0.0"
   debug: true
 
+# Store Configuration
+store:
+  store_id: 101 # Default store ID for Downtown Market
+
 # Employee Configuration
 employees:
   store_manager:
@@ -41,7 +45,7 @@ chat:
 
 # Model Serving Configuration
 model:
-  agent_endpoint: "retail_ai_agent"  # Default agent endpoint name
+  agent_endpoint: "retail_multi_agent"  # Default agent endpoint name
   max_tokens: 1000
   temperature: 0.7
   stop: ["\n"]

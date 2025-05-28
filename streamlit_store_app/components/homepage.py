@@ -1,13 +1,11 @@
 """Homepage components for the retail store employee iPad app."""
 
 import streamlit as st
-from datetime import datetime, timedelta
-from utils.database import query, get_stores
+from datetime import datetime
+from utils.database import get_stores
 from utils.store_context import check_permission
-from components.metrics import display_metric_card, display_alert
 from components.chat import show_chat_container
 import streamlit_modal as modal
-import pandas as pd
 from streamlit_card import card
 
 def show_notifications_modal():
@@ -31,7 +29,7 @@ def show_notifications_modal():
             st.markdown("#### 🚨 Urgent")
             urgent_notifications = [
                 {"message": "Security system maintenance in 30 minutes - Electronics section", "time": "5 min ago"},
-                {"message": "VIP customer arriving at 2 PM - Personal shopping assistance needed", "time": "15 min ago"}
+                {"message": "Platinum Member arriving at 2 PM - Personal styling appointment requires immediate assignment", "time": "15 min ago"}
             ]
             
             for notif in urgent_notifications:
@@ -58,7 +56,7 @@ def show_notifications_modal():
 
 def show_kpi_summary():
     """Display condensed KPI dashboard for store managers."""
-    st.markdown("### 📊 Store Performance")
+    st.markdown("### Store Performance")
     
     # Mock retail data
     today_sales = 28750.00
@@ -112,7 +110,7 @@ def show_kpi_summary():
 
 def show_inventory_summary():
     """Display condensed inventory status for all employees."""
-    st.markdown("### 📊 Inventory Status")
+    st.markdown("### Inventory Status")
     
     col1, col2, col3, col4 = st.columns(4)
     
@@ -158,7 +156,7 @@ def show_inventory_summary():
 
 def show_manager_summary_cards():
     """Display summary cards for store managers with navigation."""
-    st.markdown("### 🎯 Quick Access")
+    st.markdown("### Quick Access")
     
     col1, col2, col3 = st.columns(3)
     
@@ -187,7 +185,7 @@ def show_manager_summary_cards():
         """, unsafe_allow_html=True)
     
     with col2:
-        if st.button("👥 Team Insights", key="team_insights", use_container_width=True):
+        if st.button("Team Insights", key="team_insights", use_container_width=True):
             st.switch_page("pages/team_insights.py")
         
         st.markdown("""
@@ -205,13 +203,13 @@ def show_manager_summary_cards():
                 <div class="summary-preview">
                     🏆 Top: Sarah Chen (98%)<br>
                     ⚠️ Coverage gap: 3-4 PM<br>
-                    📅 3 shift changes today
+                    3 shift changes today
                 </div>
             </div>
         """, unsafe_allow_html=True)
     
     with col3:
-        if st.button("📊 Detailed Inventory", key="detailed_inventory", use_container_width=True):
+        if st.button("Detailed Inventory", key="detailed_inventory", use_container_width=True):
             st.switch_page("pages/inventory.py")
         
         st.markdown("""
@@ -241,14 +239,14 @@ def show_associate_homepage_with_chat(chat_modal, chat_notifications):
     
     with col1:
         # Main content in tabs - fully tab-based experience
-        tab1, tab2, tab3, tab4 = st.tabs(["🎯 My Work", "📅 Schedule", "🏷️ Products", "📊 Performance"])
+        tab1, tab2, tab3, tab4 = st.tabs(["My Work", "Schedule", "Products", "Performance"])
     
     with col2:
         # Chat button aligned with tabs
         if chat_notifications > 0:
-            button_text = f"💬 AI Assistant ({chat_notifications})"
+            button_text = f"AI Assistant ({chat_notifications})"
         else:
-            button_text = "💬 AI Assistant"
+            button_text = "AI Assistant"
         
         if st.button(button_text, key="associate_chat_btn", type="primary", use_container_width=True):
             st.session_state.chat_notifications = 0
@@ -311,7 +309,7 @@ def show_associate_homepage():
     """, unsafe_allow_html=True)
     
     # Main content in tabs - fully tab-based experience with clean styling
-    tab1, tab2, tab3, tab4 = st.tabs(["My Work", "Schedule", "Products", "Performance"])
+    tab1, tab2, tab3, tab4 = st.tabs(["My Tasks", "Schedule", "Products", "Performance"])
     
     with tab1:
         show_my_work_tab()
@@ -326,80 +324,241 @@ def show_associate_homepage():
         show_performance_tab()
 
 def show_my_work_tab():
-    """Display the My Work tab with tasks and immediate priorities."""
-    # Quick status bar at top
-    st.markdown("#### 🎯 Current Status")
+    """Display the My Tasks tab with tasks and immediate priorities."""
+    # Add modern CSS for associate overview cards
+    st.markdown("""
+    <style>
+    .associate-overview-card {
+        width: 100%;
+        height: 140px;
+        border-radius: 16px;
+        margin: 0;
+        padding: 1rem;
+        text-align: center;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        position: relative;
+        overflow: hidden;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+    }
+    
+    .associate-overview-card:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 8px 40px rgba(0, 0, 0, 0.2) !important;
+    }
+    
+    .associate-card-icon {
+        font-size: 2.5rem;
+        margin-bottom: 0.5rem;
+        display: block;
+        filter: drop-shadow(0 2px 4px rgba(0,0,0,0.2));
+    }
+    
+    .associate-card-value {
+        font-size: 2.25rem;
+        font-weight: 700;
+        margin-bottom: 0.25rem;
+        display: block;
+        line-height: 1.2;
+        text-shadow: 0 1px 2px rgba(0,0,0,0.1);
+    }
+    
+    .associate-card-label {
+        font-size: 1rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        opacity: 0.9;
+    }
+    
+    .associate-card-label:hover {
+        opacity: 1;
+        letter-spacing: 1.5px;
+    }
+    
+    .modern-work-card {
+        background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
+        border-radius: 16px;
+        padding: 1.5rem;
+        box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+        border: 1px solid rgba(226, 232, 240, 0.6);
+        transition: all 0.3s ease;
+    }
+    
+    .modern-work-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 30px rgba(0,0,0,0.12);
+    }
+    
+    @keyframes pulse {
+        0% {
+            transform: scale(1);
+            opacity: 1;
+        }
+        50% {
+            transform: scale(1.05);
+            opacity: 0.8;
+        }
+        100% {
+            transform: scale(1);
+            opacity: 1;
+        }
+    }
+    </style>
+    """, unsafe_allow_html=True)
+    
+    # Quick status overview at top - modern cards matching manager style
     col1, col2, col3, col4 = st.columns(4)
     
     with col1:
         st.markdown("""
-            <div class="quick-status-card active">
-                <div class="status-icon">🟢</div>
-                <div class="status-text">On Shift</div>
-                <div class="status-detail">3h 37m left</div>
-                <div class="assignment-info">
-                    <div style="margin-top: 8px; padding-top: 8px; border-top: 1px solid rgba(255,255,255,0.3); font-size: 16px; font-weight: 600;">
-                        <div><strong>Assignment:</strong> Women's Fashion</div>
-                        <div><strong>Section:</strong> Designer Area</div>
-                        <div><strong>Coverage:</strong> Solo until 2 PM</div>
-                    </div>
-                </div>
+            <div class="associate-overview-card" style="
+                box-shadow: 0 4px 20px rgba(34, 197, 94, 0.4), 0 1px 3px rgba(0, 0, 0, 0.1);
+                background: linear-gradient(135deg, #22c55e 0%, #16a34a 50%, #15803d 100%);
+                border: 1px solid rgba(34, 197, 94, 0.3);
+                color: white;
+            ">
+                <div class="associate-card-icon">🟢</div>
+                <div class="associate-card-value">On Shift</div>
+                <div class="associate-card-label">3h 37m remaining</div>
             </div>
         """, unsafe_allow_html=True)
     
     with col2:
         st.markdown("""
-            <div class="quick-status-card tasks">
-                <div class="status-icon">📋</div>
-                <div class="status-text">7 Tasks</div>
-                <div class="status-detail">3 high priority</div>
+            <div class="associate-overview-card" style="
+                box-shadow: 0 4px 20px rgba(59, 130, 246, 0.4), 0 1px 3px rgba(0, 0, 0, 0.1);
+                background: linear-gradient(135deg, #3b82f6 0%, #2563eb 50%, #1d4ed8 100%);
+                border: 1px solid rgba(59, 130, 246, 0.3);
+                color: white;
+            ">
+                <div class="associate-card-icon">📋</div>
+                <div class="associate-card-value">7 Tasks</div>
+                <div class="associate-card-label">3 high priority</div>
             </div>
         """, unsafe_allow_html=True)
     
     with col3:
         st.markdown("""
-            <div class="quick-status-card inventory">
-                <div class="status-icon">📦</div>
-                <div class="status-text">Inventory</div>
-                <div class="status-detail">3 critical items</div>
+            <div class="associate-overview-card" style="
+                box-shadow: 0 4px 20px rgba(245, 158, 11, 0.4), 0 1px 3px rgba(0, 0, 0, 0.1);
+                background: linear-gradient(135deg, #fbbf24 0%, #f59e0b 50%, #d97706 100%);
+                border: 1px solid rgba(245, 158, 11, 0.3);
+                color: white;
+            ">
+                <div class="associate-card-icon">📦</div>
+                <div class="associate-card-value">Inventory</div>
+                <div class="associate-card-label">3 critical items</div>
             </div>
         """, unsafe_allow_html=True)
     
     with col4:
         st.markdown("""
-            <div class="quick-status-card notifications">
-                <div class="status-icon">🔔</div>
-                <div class="status-text">4 Alerts</div>
-                <div class="status-detail">2 urgent</div>
+            <div class="associate-overview-card" style="
+                box-shadow: 0 4px 20px rgba(239, 68, 68, 0.4), 0 1px 3px rgba(0, 0, 0, 0.1);
+                background: linear-gradient(135deg, #ef4444 0%, #dc2626 50%, #b91c1c 100%);
+                border: 1px solid rgba(239, 68, 68, 0.3);
+                color: white;
+            ">
+                <div class="associate-card-icon">🔔</div>
+                <div class="associate-card-value">4 Alerts</div>
+                <div class="associate-card-label">2 urgent</div>
             </div>
         """, unsafe_allow_html=True)
-    
+
     st.markdown("---")
     
     col1, col2 = st.columns([2, 1])
     
     with col1:
-        st.markdown("#### 🎯 Today's Priorities")
+        st.markdown("#### Today's Priorities")
         
-        # High priority tasks preview
-        priority_tasks = [
-            {"title": "BOPIS Order #B2024-0156", "customer": "Sarah Johnson", "due": "10:30 AM", "type": "BOPIS"},
-            {"title": "Personal Shopping Appt", "customer": "Emma Rodriguez", "due": "2:00 PM", "type": "Service"},
-            {"title": "Restock Designer Section", "location": "Floor 2", "due": "12:00 PM", "type": "Restock"}
-        ]
-        
-        for task in priority_tasks:
-            task_type_colors = {"BOPIS": "#007bff", "Service": "#6f42c1", "Restock": "#28a745"}
-            st.markdown(f"""
-                <div class="priority-task-preview">
-                    <div class="task-preview-header">
-                        <span class="task-preview-title">{task['title']}</span>
-                        <span class="task-preview-type" style="background-color: {task_type_colors[task['type']]}">
-                            {task['type']}
-                        </span>
-                    </div>
-                    <div class="task-preview-details">
-                        Due: {task['due']} • {task.get('customer', task.get('location', ''))}
+        # Fixed height container for scrollable priorities
+        with st.container(height=400):
+            st.markdown("""
+                <div class="modern-work-card">
+                    <div style="display: flex; flex-direction: column; gap: 1rem;">
+                        <div style="
+                            display: flex;
+                            justify-content: space-between;
+                            align-items: center;
+                            padding: 1rem;
+                            background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%);
+                            border-radius: 12px;
+                            color: white;
+                            margin-bottom: 0.5rem;
+                            position: relative;
+                        ">
+                            <div>
+                                <div style="font-size: 1.25rem; font-weight: 700; margin-bottom: 0.25rem;">Personal shopping appointment</div>
+                                <div style="font-size: 0.9rem; opacity: 0.9;">Due: 2:00 PM • Emma Rodriguez</div>
+                            </div>
+                            <div style="
+                                background: rgba(255,255,255,0.2);
+                                padding: 0.5rem 1rem;
+                                border-radius: 8px;
+                                font-weight: 600;
+                                font-size: 0.875rem;
+                            ">Service</div>
+                            <div style="
+                                position: absolute;
+                                top: -8px;
+                                right: -8px;
+                                background: #ef4444;
+                                color: white;
+                                padding: 4px 8px;
+                                border-radius: 12px;
+                                font-size: 0.75rem;
+                                font-weight: 700;
+                                animation: pulse 2s infinite;
+                            ">NEW • 1 min ago</div>
+                        </div>
+                        <div style="
+                            display: flex;
+                            justify-content: space-between;
+                            align-items: center;
+                            padding: 1rem;
+                            background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+                            border-radius: 12px;
+                            color: white;
+                            margin-bottom: 0.5rem;
+                        ">
+                            <div>
+                                <div style="font-size: 1.25rem; font-weight: 700; margin-bottom: 0.25rem;">BOPIS Order #B2024-0156</div>
+                                <div style="font-size: 0.9rem; opacity: 0.9;">Due: 10:30 AM • Sarah Johnson</div>
+                            </div>
+                            <div style="
+                                background: rgba(255,255,255,0.2);
+                                padding: 0.5rem 1rem;
+                                border-radius: 8px;
+                                font-weight: 600;
+                                font-size: 0.875rem;
+                            ">BOPIS</div>
+                        </div>
+                        <div style="
+                            display: flex;
+                            justify-content: space-between;
+                            align-items: center;
+                            padding: 1rem;
+                            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+                            border-radius: 12px;
+                            color: white;
+                        ">
+                            <div>
+                                <div style="font-size: 1.25rem; font-weight: 700; margin-bottom: 0.25rem;">Restock designer section</div>
+                                <div style="font-size: 0.9rem; opacity: 0.9;">Due: 12:00 PM • Floor 2</div>
+                            </div>
+                            <div style="
+                                background: rgba(255,255,255,0.2);
+                                padding: 0.5rem 1rem;
+                                border-radius: 8px;
+                                font-weight: 600;
+                                font-size: 0.875rem;
+                            ">Restock</div>
+                        </div>
                     </div>
                 </div>
             """, unsafe_allow_html=True)
@@ -408,9 +567,51 @@ def show_my_work_tab():
             st.switch_page("pages/my_tasks.py")
     
     with col2:
+        st.markdown("#### Current Assignment")
+        
+        st.markdown("""
+            <div class="modern-work-card">
+                <div style="display: flex; flex-direction: column; gap: 1rem;">
+                    <div style="
+                        text-align: center;
+                        padding: 1.5rem;
+                        background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%);
+                        border-radius: 12px;
+                        color: white;
+                        margin-bottom: 1rem;
+                    ">
+                        <div style="font-size: 1.5rem; font-weight: 700; margin-bottom: 0.5rem;">Women's Fashion</div>
+                        <div style="font-size: 1rem; opacity: 0.9;">Designer Area</div>
+                    </div>
+                    <div style="
+                        display: flex;
+                        flex-direction: column;
+                        gap: 0.75rem;
+                        padding: 1rem;
+                        background: #f8fafc;
+                        border-radius: 12px;
+                        border: 1px solid #e2e8f0;
+                    ">
+                        <div style="display: flex; justify-content: space-between;">
+                            <span style="font-weight: 600; color: #64748b;">Coverage:</span>
+                            <span style="color: #1e293b; font-weight: 600;">Solo until 2 PM</span>
+                        </div>
+                        <div style="display: flex; justify-content: space-between;">
+                            <span style="font-weight: 600; color: #64748b;">Break Due:</span>
+                            <span style="color: #ef4444; font-weight: 600;">Now!</span>
+                        </div>
+                        <div style="display: flex; justify-content: space-between;">
+                            <span style="font-weight: 600; color: #64748b;">Performance:</span>
+                            <span style="color: #10b981; font-weight: 600;">94%</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        """, unsafe_allow_html=True)
+        
         st.markdown("#### 🚨 Quick Actions")
         
-        # Quick action buttons
+        # Quick action buttons with modern styling
         if st.button("🛒 Check BOPIS Orders", use_container_width=True):
             st.switch_page("pages/my_tasks.py")
         
@@ -431,75 +632,159 @@ def show_schedule_tab():
         st.markdown("#### ⏰ Current Shift")
         
         st.markdown("""
-            <div class="shift-detail-card">
-                <div class="shift-time-info">
-                    <div class="shift-current-time">12:23 PM</div>
-                    <div class="shift-progress">
-                        <div class="shift-progress-bar">
-                            <div class="shift-progress-fill" style="width: 55%"></div>
-                        </div>
-                        <div class="shift-progress-text">4h 23m worked • 3h 37m remaining</div>
+            <div class="modern-work-card">
+                <div style="display: flex; flex-direction: column; gap: 1.5rem;">
+                    <div style="
+                        text-align: center;
+                        padding: 1.5rem;
+                        background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+                        border-radius: 12px;
+                        color: white;
+                    ">
+                        <div style="font-size: 2.5rem; font-weight: 700; margin-bottom: 0.5rem; line-height: 1.2;">12:23 PM</div>
+                        <div style="font-size: 1rem; opacity: 0.9;">Current Time</div>
                     </div>
-                </div>
-                <div class="shift-details">
-                    <div><strong>Shift:</strong> 8:00 AM - 4:00 PM</div>
-                    <div><strong>Break:</strong> 12:00 - 12:30 PM (Due now!)</div>
-                    <div><strong>Department:</strong> Women's Fashion</div>
+                    <div style="
+                        padding: 1rem;
+                        background: #f8fafc;
+                        border-radius: 12px;
+                        border: 1px solid #e2e8f0;
+                    ">
+                        <div style="
+                            background: #e2e8f0;
+                            border-radius: 12px;
+                            height: 12px;
+                            margin-bottom: 0.75rem;
+                            overflow: hidden;
+                            box-shadow: inset 0 2px 4px rgba(0,0,0,0.1);
+                        ">
+                            <div style="
+                                background: linear-gradient(90deg, #3b82f6, #10b981);
+                                height: 100%;
+                                width: 55%;
+                                border-radius: 12px;
+                                transition: width 0.3s ease;
+                                box-shadow: 0 2px 8px rgba(59, 130, 246, 0.3);
+                            "></div>
+                        </div>
+                        <div style="
+                            text-align: center;
+                            color: #64748b;
+                            font-size: 1rem;
+                            font-weight: 500;
+                            margin-bottom: 1rem;
+                        ">4h 23m worked • 3h 37m remaining</div>
+                        <div style="display: flex; flex-direction: column; gap: 0.75rem;">
+                            <div style="display: flex; justify-content: space-between;">
+                                <span style="font-weight: 600; color: #64748b;">Shift:</span>
+                                <span style="color: #1e293b; font-weight: 600;">8:00 AM - 4:00 PM</span>
+                            </div>
+                            <div style="display: flex; justify-content: space-between;">
+                                <span style="font-weight: 600; color: #64748b;">Break:</span>
+                                <span style="color: #ef4444; font-weight: 600;">12:00 - 12:30 PM (Due now!)</span>
+                            </div>
+                            <div style="display: flex; justify-content: space-between;">
+                                <span style="font-weight: 600; color: #64748b;">Department:</span>
+                                <span style="color: #1e293b; font-weight: 600;">Women's Fashion</span>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
         """, unsafe_allow_html=True)
         
-        if st.button("📅 View Full Schedule", use_container_width=True):
+        if st.button("View Full Schedule", use_container_width=True):
             st.switch_page("pages/my_schedule.py")
     
     with col2:
-        st.markdown("#### 📊 This Week")
+        st.markdown("#### This Week")
         
         st.markdown("""
-            <div class="week-overview-card">
-                <div class="week-stats-grid">
-                    <div class="week-stat">
-                        <div class="week-stat-value">32/40</div>
-                        <div class="week-stat-label">Hours</div>
-                    </div>
-                    <div class="week-stat">
-                        <div class="week-stat-value">4/5</div>
-                        <div class="week-stat-label">Days</div>
-                    </div>
-                    <div class="week-stat">
-                        <div class="week-stat-value">94%</div>
-                        <div class="week-stat-label">Performance</div>
-                    </div>
-                    <div class="week-stat">
-                        <div class="week-stat-value">$2,847</div>
-                        <div class="week-stat-label">Sales</div>
+            <div class="modern-work-card">
+                <div style="display: flex; flex-direction: column; gap: 1.5rem;">
+                    <div style="
+                        display: grid;
+                        grid-template-columns: 1fr 1fr;
+                        gap: 1rem;
+                        padding: 1rem;
+                        background: #f8fafc;
+                        border-radius: 12px;
+                        border: 1px solid #e2e8f0;
+                    ">
+                        <div style="text-align: center; padding: 1rem;">
+                            <div style="font-size: 2rem; font-weight: 700; color: #1e293b; margin-bottom: 0.25rem;">32/40</div>
+                            <div style="font-size: 0.9rem; color: #64748b; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px;">Hours</div>
+                        </div>
+                        <div style="text-align: center; padding: 1rem;">
+                            <div style="font-size: 2rem; font-weight: 700; color: #1e293b; margin-bottom: 0.25rem;">4/5</div>
+                            <div style="font-size: 0.9rem; color: #64748b; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px;">Days</div>
+                        </div>
+                        <div style="text-align: center; padding: 1rem;">
+                            <div style="font-size: 2rem; font-weight: 700; color: #10b981; margin-bottom: 0.25rem;">94%</div>
+                            <div style="font-size: 0.9rem; color: #64748b; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px;">Performance</div>
+                        </div>
+                        <div style="text-align: center; padding: 1rem;">
+                            <div style="font-size: 2rem; font-weight: 700; color: #1e293b; margin-bottom: 0.25rem;">$2,847</div>
+                            <div style="font-size: 0.9rem; color: #64748b; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px;">Sales</div>
+                        </div>
                     </div>
                 </div>
             </div>
         """, unsafe_allow_html=True)
         
         st.markdown("#### 📝 Upcoming")
-        upcoming_items = [
-            {"day": "Tomorrow", "shift": "8 AM - 4 PM", "dept": "Electronics"},
-            {"day": "Friday", "shift": "9 AM - 5 PM", "dept": "Women's Fashion"},
-            {"day": "Saturday", "shift": "OFF", "dept": ""}
-        ]
         
-        for item in upcoming_items:
-            if item["shift"] == "OFF":
-                st.markdown(f"""
-                    <div class="new-item-preview">
-                        <div class="new-item-name">🏖️ {item['day']}</div>
-                        <div class="new-item-details">Day Off</div>
+        st.markdown("""
+            <div class="modern-work-card">
+                <div style="display: flex; flex-direction: column; gap: 0.75rem;">
+                    <div style="
+                        display: flex;
+                        justify-content: space-between;
+                        align-items: center;
+                        padding: 1rem;
+                        background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+                        border-radius: 12px;
+                        color: white;
+                    ">
+                        <div>
+                            <div style="font-size: 1.1rem; font-weight: 700;">Tomorrow</div>
+                            <div style="font-size: 0.9rem; opacity: 0.9;">8 AM - 4 PM - Electronics</div>
+                        </div>
+                        <div style="font-size: 1.5rem;">📱</div>
                     </div>
-                """, unsafe_allow_html=True)
-            else:
-                st.markdown(f"""
-                    <div class="new-item-preview">
-                        <div class="new-item-name">📅 {item['day']}</div>
-                        <div class="new-item-details">{item['shift']} - {item['dept']}</div>
+                    <div style="
+                        display: flex;
+                        justify-content: space-between;
+                        align-items: center;
+                        padding: 1rem;
+                        background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%);
+                        border-radius: 12px;
+                        color: white;
+                    ">
+                        <div>
+                            <div style="font-size: 1.1rem; font-weight: 700;">Friday</div>
+                            <div style="font-size: 0.9rem; opacity: 0.9;">9 AM - 5 PM - Women's Fashion</div>
+                        </div>
+                        <div style="font-size: 1.5rem;">👗</div>
                     </div>
-                """, unsafe_allow_html=True)
+                    <div style="
+                        display: flex;
+                        justify-content: space-between;
+                        align-items: center;
+                        padding: 1rem;
+                        background: linear-gradient(135deg, #64748b 0%, #475569 100%);
+                        border-radius: 12px;
+                        color: white;
+                    ">
+                        <div>
+                            <div style="font-size: 1.1rem; font-weight: 700;">Saturday</div>
+                            <div style="font-size: 0.9rem; opacity: 0.9;">Day Off</div>
+                        </div>
+                        <div style="font-size: 1.5rem;">🏖️</div>
+                    </div>
+                </div>
+            </div>
+        """, unsafe_allow_html=True)
 
 def show_products_tab():
     """Display the Products tab with promotions and product info."""
@@ -508,57 +793,178 @@ def show_products_tab():
     with col1:
         st.markdown("#### 🔥 Active Promotions")
         
-        promotions = [
-            {"name": "Fall Fashion Sale", "discount": "40% off", "ends": "End of week"},
-            {"name": "Designer Handbags", "discount": "25% off", "ends": "Tomorrow"},
-            {"name": "Tech Accessories", "discount": "Buy 2 Get 1", "ends": "3 days"}
-        ]
-        
-        for promo in promotions:
-            st.markdown(f"""
-                <div class="promo-preview-card">
-                    <div class="promo-preview-header">
-                        <span class="promo-preview-name">{promo['name']}</span>
-                        <span class="promo-preview-discount">{promo['discount']}</span>
+        st.markdown("""
+            <div class="modern-work-card">
+                <div style="display: flex; flex-direction: column; gap: 1rem;">
+                    <div style="
+                        display: flex;
+                        justify-content: space-between;
+                        align-items: center;
+                        padding: 1.25rem;
+                        background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+                        border-radius: 12px;
+                        color: white;
+                    ">
+                        <div>
+                            <div style="font-size: 1.25rem; font-weight: 700; margin-bottom: 0.25rem;">Fall Fashion Sale</div>
+                            <div style="font-size: 0.9rem; opacity: 0.9;">Ends: End of week</div>
+                        </div>
+                        <div style="
+                            background: rgba(255,255,255,0.2);
+                            padding: 0.75rem 1.25rem;
+                            border-radius: 8px;
+                            font-weight: 700;
+                            font-size: 1.1rem;
+                        ">40% off</div>
                     </div>
-                    <div class="promo-preview-ends">Ends: {promo['ends']}</div>
+                    <div style="
+                        display: flex;
+                        justify-content: space-between;
+                        align-items: center;
+                        padding: 1.25rem;
+                        background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%);
+                        border-radius: 12px;
+                        color: white;
+                    ">
+                        <div>
+                            <div style="font-size: 1.25rem; font-weight: 700; margin-bottom: 0.25rem;">Designer Handbags</div>
+                            <div style="font-size: 0.9rem; opacity: 0.9;">Ends: Tomorrow</div>
+                        </div>
+                        <div style="
+                            background: rgba(255,255,255,0.2);
+                            padding: 0.75rem 1.25rem;
+                            border-radius: 8px;
+                            font-weight: 700;
+                            font-size: 1.1rem;
+                        ">25% off</div>
+                    </div>
+                    <div style="
+                        display: flex;
+                        justify-content: space-between;
+                        align-items: center;
+                        padding: 1.25rem;
+                        background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+                        border-radius: 12px;
+                        color: white;
+                    ">
+                        <div>
+                            <div style="font-size: 1.25rem; font-weight: 700; margin-bottom: 0.25rem;">Tech Accessories</div>
+                            <div style="font-size: 0.9rem; opacity: 0.9;">Ends: 3 days</div>
+                        </div>
+                        <div style="
+                            background: rgba(255,255,255,0.2);
+                            padding: 0.75rem 1.25rem;
+                            border-radius: 8px;
+                            font-weight: 700;
+                            font-size: 1.1rem;
+                        ">Buy 2 Get 1</div>
+                    </div>
                 </div>
-            """, unsafe_allow_html=True)
+            </div>
+        """, unsafe_allow_html=True)
         
-        if st.button("🏷️ View All Promotions", use_container_width=True):
+        if st.button("View All Promotions", use_container_width=True):
             st.switch_page("pages/products_promotions.py")
     
     with col2:
         st.markdown("#### 🆕 New This Week")
         
-        new_items = [
-            {"name": "iPhone 15 Pro Cases", "category": "Electronics", "location": "E3"},
-            {"name": "Winter Coats", "category": "Women's Apparel", "location": "W2"},
-            {"name": "Designer Sneakers", "category": "Footwear", "location": "F4"}
-        ]
-        
-        for item in new_items:
-            st.markdown(f"""
-                <div class="new-item-preview">
-                    <div class="new-item-name">{item['name']}</div>
-                    <div class="new-item-details">{item['category']} • {item['location']}</div>
+        st.markdown("""
+            <div class="modern-work-card">
+                <div style="display: flex; flex-direction: column; gap: 1rem;">
+                    <div style="
+                        padding: 1.25rem;
+                        background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+                        border-radius: 12px;
+                        border: 1px solid #cbd5e1;
+                    ">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.75rem;">
+                            <div style="font-size: 1.25rem; font-weight: 700; color: #1e293b;">iPhone 15 Pro Cases</div>
+                            <div style="font-size: 1.5rem;">📱</div>
+                        </div>
+                        <div style="color: #64748b; font-size: 0.9rem;">Electronics • E3</div>
+                    </div>
+                    <div style="
+                        padding: 1.25rem;
+                        background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+                        border-radius: 12px;
+                        border: 1px solid #cbd5e1;
+                    ">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.75rem;">
+                            <div style="font-size: 1.25rem; font-weight: 700; color: #1e293b;">Winter Coats</div>
+                            <div style="font-size: 1.5rem;">🧥</div>
+                        </div>
+                        <div style="color: #64748b; font-size: 0.9rem;">Women's Apparel • W2</div>
+                    </div>
+                    <div style="
+                        padding: 1.25rem;
+                        background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+                        border-radius: 12px;
+                        border: 1px solid #cbd5e1;
+                    ">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.75rem;">
+                            <div style="font-size: 1.25rem; font-weight: 700; color: #1e293b;">Designer Sneakers</div>
+                            <div style="font-size: 1.5rem;">👟</div>
+                        </div>
+                        <div style="color: #64748b; font-size: 0.9rem;">Footwear • F4</div>
+                    </div>
                 </div>
-            """, unsafe_allow_html=True)
+            </div>
+        """, unsafe_allow_html=True)
         
         st.markdown("#### 🔥 Trending")
-        trending_items = [
-            {"name": "Wireless Earbuds Pro", "growth": "+45%", "icon": "🎧"},
-            {"name": "Oversized Blazers", "growth": "+60%", "icon": "👗"},
-            {"name": "Minimalist Watches", "growth": "+35%", "icon": "⌚"}
-        ]
         
-        for item in trending_items:
-            st.markdown(f"""
-                <div class="new-item-preview">
-                    <div class="new-item-name">{item['icon']} {item['name']}</div>
-                    <div class="new-item-details">Growth: {item['growth']}</div>
+        st.markdown("""
+            <div class="modern-work-card">
+                <div style="display: flex; flex-direction: column; gap: 0.75rem;">
+                    <div style="
+                        display: flex;
+                        justify-content: space-between;
+                        align-items: center;
+                        padding: 1rem;
+                        background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+                        border-radius: 12px;
+                        color: white;
+                    ">
+                        <div>
+                            <div style="font-size: 1.1rem; font-weight: 700;">🎧 Wireless Earbuds Pro</div>
+                            <div style="font-size: 0.9rem; opacity: 0.9;">Growth: +45%</div>
+                        </div>
+                        <div style="font-size: 1.5rem;">📈</div>
+                    </div>
+                    <div style="
+                        display: flex;
+                        justify-content: space-between;
+                        align-items: center;
+                        padding: 1rem;
+                        background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%);
+                        border-radius: 12px;
+                        color: white;
+                    ">
+                        <div>
+                            <div style="font-size: 1.1rem; font-weight: 700;">👗 Oversized Blazers</div>
+                            <div style="font-size: 0.9rem; opacity: 0.9;">Growth: +60%</div>
+                        </div>
+                        <div style="font-size: 1.5rem;">🔥</div>
+                    </div>
+                    <div style="
+                        display: flex;
+                        justify-content: space-between;
+                        align-items: center;
+                        padding: 1rem;
+                        background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+                        border-radius: 12px;
+                        color: white;
+                    ">
+                        <div>
+                            <div style="font-size: 1.1rem; font-weight: 700;">⌚ Minimalist Watches</div>
+                            <div style="font-size: 0.9rem; opacity: 0.9;">Growth: +35%</div>
+                        </div>
+                        <div style="font-size: 1.5rem;">⭐</div>
+                    </div>
                 </div>
-            """, unsafe_allow_html=True)
+            </div>
+        """, unsafe_allow_html=True)
 
 def show_performance_tab():
     """Display the Performance tab with personal metrics and achievements."""
@@ -568,66 +974,156 @@ def show_performance_tab():
         st.markdown("#### 🏆 Today's Performance")
         
         st.markdown("""
-            <div class="performance-overview-card">
-                <div class="performance-score">
-                    <div class="performance-score-value">94%</div>
-                    <div class="performance-score-label">Overall Score</div>
-                </div>
-                <div class="performance-metrics">
-                    <div class="performance-metric">
-                        <span class="metric-label">BOPIS Orders:</span>
-                        <span class="metric-value">12 completed</span>
+            <div class="modern-work-card">
+                <div style="display: flex; flex-direction: column; gap: 1.5rem;">
+                    <div style="
+                        text-align: center;
+                        padding: 1.5rem;
+                        background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+                        border-radius: 12px;
+                        color: white;
+                    ">
+                        <div style="font-size: 3rem; font-weight: 700; margin-bottom: 0.5rem; line-height: 1.2;">94%</div>
+                        <div style="font-size: 1.1rem; opacity: 0.9; font-weight: 600;">Overall Score</div>
                     </div>
-                    <div class="performance-metric">
-                        <span class="metric-label">Customer Assists:</span>
-                        <span class="metric-value">8 interactions</span>
-                    </div>
-                    <div class="performance-metric">
-                        <span class="metric-label">Sales:</span>
-                        <span class="metric-value">$2,450</span>
-                    </div>
-                    <div class="performance-metric">
-                        <span class="metric-label">Customer Rating:</span>
-                        <span class="metric-value">4.8/5 ⭐</span>
+                    <div style="
+                        display: flex;
+                        flex-direction: column;
+                        gap: 1rem;
+                        padding: 1rem;
+                        background: #f8fafc;
+                        border-radius: 12px;
+                        border: 1px solid #e2e8f0;
+                    ">
+                        <div style="display: flex; justify-content: space-between; padding: 0.75rem 0; border-bottom: 1px solid #e2e8f0;">
+                            <span style="font-weight: 600; color: #64748b;">BOPIS Orders:</span>
+                            <span style="color: #1e293b; font-weight: 700;">12 completed</span>
+                        </div>
+                        <div style="display: flex; justify-content: space-between; padding: 0.75rem 0; border-bottom: 1px solid #e2e8f0;">
+                            <span style="font-weight: 600; color: #64748b;">Customer Assists:</span>
+                            <span style="color: #1e293b; font-weight: 700;">8 interactions</span>
+                        </div>
+                        <div style="display: flex; justify-content: space-between; padding: 0.75rem 0; border-bottom: 1px solid #e2e8f0;">
+                            <span style="font-weight: 600; color: #64748b;">Sales:</span>
+                            <span style="color: #10b981; font-weight: 700;">$2,450</span>
+                        </div>
+                        <div style="display: flex; justify-content: space-between; padding: 0.75rem 0;">
+                            <span style="font-weight: 600; color: #64748b;">Customer Rating:</span>
+                            <span style="color: #fbbf24; font-weight: 700;">4.8/5 ⭐</span>
+                        </div>
                     </div>
                 </div>
             </div>
         """, unsafe_allow_html=True)
     
     with col2:
-        st.markdown("#### 🎯 Goals & Achievements")
+        st.markdown("#### Goals & Achievements")
         
         st.markdown("""
-            <div class="goals-card">
-                <div class="goal-item completed">
-                    <span class="goal-icon">✅</span>
-                    <span class="goal-text">Complete 10 BOPIS orders</span>
-                </div>
-                <div class="goal-item in-progress">
-                    <span class="goal-icon">🔄</span>
-                    <span class="goal-text">Assist 15 customers (8/15)</span>
-                </div>
-                <div class="goal-item pending">
-                    <span class="goal-icon">⏳</span>
-                    <span class="goal-text">Achieve $3,000 in sales</span>
+            <div class="modern-work-card">
+                <div style="display: flex; flex-direction: column; gap: 1rem;">
+                    <div style="
+                        display: flex;
+                        align-items: center;
+                        gap: 1rem;
+                        padding: 1rem;
+                        background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+                        border-radius: 12px;
+                        color: white;
+                    ">
+                        <div style="font-size: 1.5rem;">✅</div>
+                        <div>
+                            <div style="font-size: 1.1rem; font-weight: 700;">Complete 10 BOPIS orders</div>
+                            <div style="font-size: 0.9rem; opacity: 0.9;">Completed</div>
+                        </div>
+                    </div>
+                    <div style="
+                        display: flex;
+                        align-items: center;
+                        gap: 1rem;
+                        padding: 1rem;
+                        background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+                        border-radius: 12px;
+                        color: white;
+                    ">
+                        <div style="font-size: 1.5rem;">🔄</div>
+                        <div>
+                            <div style="font-size: 1.1rem; font-weight: 700;">Assist 15 customers</div>
+                            <div style="font-size: 0.9rem; opacity: 0.9;">In Progress (8/15)</div>
+                        </div>
+                    </div>
+                    <div style="
+                        display: flex;
+                        align-items: center;
+                        gap: 1rem;
+                        padding: 1rem;
+                        background: linear-gradient(135deg, #64748b 0%, #475569 100%);
+                        border-radius: 12px;
+                        color: white;
+                    ">
+                        <div style="font-size: 1.5rem;">⏳</div>
+                        <div>
+                            <div style="font-size: 1.1rem; font-weight: 700;">Achieve $3,000 in sales</div>
+                            <div style="font-size: 0.9rem; opacity: 0.9;">Pending ($2,450/$3,000)</div>
+                        </div>
+                    </div>
                 </div>
             </div>
         """, unsafe_allow_html=True)
         
         st.markdown("#### 🏅 Recent Achievements")
-        achievements = [
-            {"name": "Customer Service Excellence", "icon": "🌟"},
-            {"name": "Sales Target Exceeded", "icon": "💰"}, 
-            {"name": "Speed Champion (BOPIS)", "icon": "⚡"}
-        ]
         
-        for achievement in achievements:
-            st.markdown(f"""
-                <div class="new-item-preview">
-                    <div class="new-item-name">{achievement['icon']} {achievement['name']}</div>
-                    <div class="new-item-details">Recently earned</div>
+        st.markdown("""
+            <div class="modern-work-card">
+                <div style="display: flex; flex-direction: column; gap: 0.75rem;">
+                    <div style="
+                        display: flex;
+                        align-items: center;
+                        gap: 1rem;
+                        padding: 1rem;
+                        background: linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%);
+                        border-radius: 12px;
+                        color: white;
+                    ">
+                        <div style="font-size: 1.5rem;">🌟</div>
+                        <div>
+                            <div style="font-size: 1.1rem; font-weight: 700;">Customer Service Excellence</div>
+                            <div style="font-size: 0.9rem; opacity: 0.9;">Recently earned</div>
+                        </div>
+                    </div>
+                    <div style="
+                        display: flex;
+                        align-items: center;
+                        gap: 1rem;
+                        padding: 1rem;
+                        background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+                        border-radius: 12px;
+                        color: white;
+                    ">
+                        <div style="font-size: 1.5rem;">💰</div>
+                        <div>
+                            <div style="font-size: 1.1rem; font-weight: 700;">Sales Target Exceeded</div>
+                            <div style="font-size: 0.9rem; opacity: 0.9;">Recently earned</div>
+                        </div>
+                    </div>
+                    <div style="
+                        display: flex;
+                        align-items: center;
+                        gap: 1rem;
+                        padding: 1rem;
+                        background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%);
+                        border-radius: 12px;
+                        color: white;
+                    ">
+                        <div style="font-size: 1.5rem;">⚡</div>
+                        <div>
+                            <div style="font-size: 1.1rem; font-weight: 700;">Speed Champion (BOPIS)</div>
+                            <div style="font-size: 0.9rem; opacity: 0.9;">Recently earned</div>
+                        </div>
+                    </div>
                 </div>
-            """, unsafe_allow_html=True)
+            </div>
+        """, unsafe_allow_html=True)
 
 def simulate_chat_notification():
     """Simulate receiving a chat notification (for demo purposes)."""
@@ -747,7 +1243,7 @@ def show_persistent_chat():
     
     # Create the modal
     chat_modal = modal.Modal(
-        title="🤖 AI Assistant",
+        title="AI Assistant",
         key="chat_modal",
         max_width=600,
         padding=20
@@ -787,14 +1283,14 @@ def show_manager_homepage_with_chat(chat_modal, chat_notifications):
     
     with col1:
         # Main content in tabs - fully tab-based experience
-        tab1, tab2, tab3, tab4, tab5, tab6 = st.tabs(["📊 Dashboard", "🎯 Operations", "👥 Team", "📦 Inventory", "📈 Analytics", "💡 Alerts"])
+        tab1, tab2, tab3, tab4, tab5, tab6 = st.tabs(["Store Overview", "Operations", "Team", "📦 Inventory", "Analytics", "💡 Alerts"])
     
     with col2:
         # Chat button aligned with tabs
         if chat_notifications > 0:
-            button_text = f"💬 AI Assistant ({chat_notifications})"
+            button_text = f"AI Assistant ({chat_notifications})"
         else:
-            button_text = "💬 AI Assistant"
+            button_text = "AI Assistant"
         
         if st.button(button_text, key="manager_chat_btn", type="primary", use_container_width=True):
             st.session_state.chat_notifications = 0
@@ -885,105 +1381,249 @@ def show_manager_homepage():
 
 def show_manager_dashboard_tab():
     """Display the Dashboard tab with key metrics."""
+    # Add custom CSS for modern card hover effects
+    st.markdown("""
+    <style>
+    .modern-overview-card {
+        width: 100%;
+        height: 140px;
+        border-radius: 16px;
+        margin: 0;
+        padding: 1rem;
+        text-align: center;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        position: relative;
+        overflow: hidden;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+    }
+    
+    .modern-overview-card:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 8px 40px rgba(0, 0, 0, 0.2) !important;
+    }
+    
+    .card-icon {
+        font-size: 2.5rem;
+        margin-bottom: 0.25rem;
+        transition: transform 0.3s ease;
+    }
+    
+    .modern-overview-card:hover .card-icon {
+        transform: scale(1.1);
+    }
+    
+    .card-value {
+        font-size: 2.25rem;
+        color: white;
+        font-weight: 900;
+        margin-bottom: 0.125rem;
+        text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+        line-height: 1;
+        transition: all 0.3s ease;
+    }
+    
+    .card-label {
+        font-size: 0.9rem;
+        color: rgba(255, 255, 255, 0.9);
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+        transition: all 0.3s ease;
+    }
+    
+    .modern-overview-card:hover .card-label {
+        color: rgba(255, 255, 255, 1);
+        letter-spacing: 1.5px;
+    }
+    
+    .modern-performance-card {
+        background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
+        border-radius: 16px;
+        padding: 1.5rem;
+        box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+        border: 1px solid rgba(226, 232, 240, 0.6);
+        transition: all 0.3s ease;
+    }
+    
+    .modern-performance-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 30px rgba(0,0,0,0.12);
+    }
+    </style>
+    """, unsafe_allow_html=True)
+    
     # Quick executive dashboard at top
-    st.markdown("#### 📊 Store Overview")
     col1, col2, col3, col4 = st.columns(4)
     
     with col1:
-        st.markdown("""
-            <div class="manager-status-card sales">
-                <div class="status-icon">💰</div>
-                <div class="status-text">$28,750</div>
-                <div class="status-detail">Today's Sales (+18%)</div>
+        st.markdown(f"""
+            <div class="modern-overview-card" style="
+                box-shadow: 0 4px 20px rgba(34, 197, 94, 0.4), 0 1px 3px rgba(0, 0, 0, 0.1);
+                background: linear-gradient(135deg, #22c55e 0%, #16a34a 50%, #15803d 100%);
+                border: 1px solid rgba(34, 197, 94, 0.3);
+            ">
+                <div class="card-icon">💰</div>
+                <div class="card-value">$28,750</div>
+                <div class="card-label">Today's Sales (+18%)</div>
             </div>
         """, unsafe_allow_html=True)
     
     with col2:
         st.markdown("""
-            <div class="manager-status-card team">
-                <div class="status-icon">👥</div>
-                <div class="status-text">12/15</div>
-                <div class="status-detail">Staff Present (94% avg)</div>
+            <div class="modern-overview-card" style="
+                box-shadow: 0 4px 20px rgba(59, 130, 246, 0.4), 0 1px 3px rgba(0, 0, 0, 0.1);
+                background: linear-gradient(135deg, #3b82f6 0%, #2563eb 50%, #1d4ed8 100%);
+                border: 1px solid rgba(59, 130, 246, 0.3);
+            ">
+                <div class="card-icon">👥</div>
+                <div class="card-value">12/15</div>
+                <div class="card-label">Staff Present (94% avg)</div>
             </div>
         """, unsafe_allow_html=True)
     
     with col3:
         st.markdown("""
-            <div class="manager-status-card operations">
-                <div class="status-icon">📋</div>
-                <div class="status-text">5/8</div>
-                <div class="status-detail">Tasks Complete (2 urgent)</div>
+            <div class="modern-overview-card" style="
+                box-shadow: 0 4px 20px rgba(245, 158, 11, 0.4), 0 1px 3px rgba(0, 0, 0, 0.1);
+                background: linear-gradient(135deg, #fbbf24 0%, #f59e0b 50%, #d97706 100%);
+                border: 1px solid rgba(245, 158, 11, 0.3);
+            ">
+                <div class="card-icon">📋</div>
+                <div class="card-value">5/8</div>
+                <div class="card-label">Tasks Complete (2 urgent)</div>
             </div>
         """, unsafe_allow_html=True)
     
     with col4:
         st.markdown("""
-            <div class="manager-status-card alerts">
-                <div class="status-icon">🔔</div>
-                <div class="status-text">4</div>
-                <div class="status-detail">Active Alerts</div>
+            <div class="modern-overview-card" style="
+                box-shadow: 0 4px 20px rgba(239, 68, 68, 0.4), 0 1px 3px rgba(0, 0, 0, 0.1);
+                background: linear-gradient(135deg, #ef4444 0%, #dc2626 50%, #b91c1c 100%);
+                border: 1px solid rgba(239, 68, 68, 0.3);
+            ">
+                <div class="card-icon">🔔</div>
+                <div class="card-value">4</div>
+                <div class="card-label">Active Alerts</div>
             </div>
         """, unsafe_allow_html=True)
-    
+
     st.markdown("---")
     
     col1, col2 = st.columns(2)
     
     with col1:
-        st.markdown("#### 📊 Today's Performance")
+        st.markdown("#### Today's Performance")
         
         st.markdown("""
-            <div class="manager-dashboard-card">
-                <div class="dashboard-metrics">
-                    <div class="dashboard-metric">
-                        <span class="metric-label">Sales Target:</span>
-                        <span class="metric-value">96% ($28,750/$30,000)</span>
-                        <span class="metric-trend positive">+18% vs yesterday</span>
+            <div style="
+                background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
+                border-radius: 16px;
+                padding: 1.5rem;
+                box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+                border: 1px solid rgba(226, 232, 240, 0.6);
+                transition: all 0.3s ease;
+            ">
+                <div style="display: flex; flex-direction: column; gap: 1rem;">
+                    <div style="
+                        display: flex;
+                        flex-direction: column;
+                        gap: 0.25rem;
+                        padding: 0.75rem 0;
+                        border-bottom: 1px solid #f1f5f9;
+                    ">
+                        <span style="font-size: 0.9rem; color: #64748b; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px;">Sales Target:</span>
+                        <span style="font-size: 1.25rem; font-weight: 700; color: #1e293b;">96% ($28,750/$30,000)</span>
+                        <span style="font-size: 0.9rem; color: #10b981; font-weight: 600;">+18% vs yesterday</span>
                     </div>
-                    <div class="dashboard-metric">
-                        <span class="metric-label">Customer Traffic:</span>
-                        <span class="metric-value">247 visitors</span>
-                        <span class="metric-trend">Peak: 2-4 PM</span>
+                    <div style="
+                        display: flex;
+                        flex-direction: column;
+                        gap: 0.25rem;
+                        padding: 0.75rem 0;
+                        border-bottom: 1px solid #f1f5f9;
+                    ">
+                        <span style="font-size: 0.9rem; color: #64748b; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px;">Customer Traffic:</span>
+                        <span style="font-size: 1.25rem; font-weight: 700; color: #1e293b;">247 visitors</span>
+                        <span style="font-size: 0.9rem; color: #64748b; font-weight: 500;">Peak: 2-4 PM</span>
                     </div>
-                    <div class="dashboard-metric">
-                        <span class="metric-label">Conversion Rate:</span>
-                        <span class="metric-value">68%</span>
-                        <span class="metric-trend positive">+5% vs avg</span>
+                    <div style="
+                        display: flex;
+                        flex-direction: column;
+                        gap: 0.25rem;
+                        padding: 0.75rem 0;
+                        border-bottom: 1px solid #f1f5f9;
+                    ">
+                        <span style="font-size: 0.9rem; color: #64748b; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px;">Conversion Rate:</span>
+                        <span style="font-size: 1.25rem; font-weight: 700; color: #1e293b;">68%</span>
+                        <span style="font-size: 0.9rem; color: #10b981; font-weight: 600;">+5% vs avg</span>
                     </div>
-                    <div class="dashboard-metric">
-                        <span class="metric-label">Avg Transaction:</span>
-                        <span class="metric-value">$171.50</span>
-                        <span class="metric-trend positive">+12% vs avg</span>
+                    <div style="
+                        display: flex;
+                        flex-direction: column;
+                        gap: 0.25rem;
+                        padding: 0.75rem 0;
+                    ">
+                        <span style="font-size: 0.9rem; color: #64748b; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px;">Avg Transaction:</span>
+                        <span style="font-size: 1.25rem; font-weight: 700; color: #1e293b;">$171.50</span>
+                        <span style="font-size: 0.9rem; color: #10b981; font-weight: 600;">+12% vs avg</span>
                     </div>
                 </div>
             </div>
         """, unsafe_allow_html=True)
     
     with col2:
-        st.markdown("#### 📈 Performance Trends")
+        st.markdown("#### Performance Trends")
         
         st.markdown("""
-            <div class="manager-dashboard-card">
-                <div class="dashboard-metrics">
-                    <div class="dashboard-metric">
-                        <span class="metric-label">Weekly Sales:</span>
-                        <span class="metric-value">$142,350</span>
-                        <span class="metric-trend positive">+12% vs last week</span>
+            <div class="modern-performance-card">
+                <div style="display: flex; flex-direction: column; gap: 1rem;">
+                    <div style="
+                        display: flex;
+                        flex-direction: column;
+                        gap: 0.25rem;
+                        padding: 0.75rem 0;
+                        border-bottom: 1px solid #f1f5f9;
+                    ">
+                        <span style="font-size: 0.9rem; color: #64748b; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px;">Weekly Sales:</span>
+                        <span style="font-size: 1.25rem; font-weight: 700; color: #1e293b;">$142,350</span>
+                        <span style="font-size: 0.9rem; color: #10b981; font-weight: 600;">+12% vs last week</span>
                     </div>
-                    <div class="dashboard-metric">
-                        <span class="metric-label">Monthly Target:</span>
-                        <span class="metric-value">78% complete</span>
-                        <span class="metric-trend positive">On track</span>
+                    <div style="
+                        display: flex;
+                        flex-direction: column;
+                        gap: 0.25rem;
+                        padding: 0.75rem 0;
+                        border-bottom: 1px solid #f1f5f9;
+                    ">
+                        <span style="font-size: 0.9rem; color: #64748b; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px;">Monthly Target:</span>
+                        <span style="font-size: 1.25rem; font-weight: 700; color: #1e293b;">78% complete</span>
+                        <span style="font-size: 0.9rem; color: #10b981; font-weight: 600;">On track</span>
                     </div>
-                    <div class="dashboard-metric">
-                        <span class="metric-label">Customer Satisfaction:</span>
-                        <span class="metric-value">4.7/5.0</span>
-                        <span class="metric-trend positive">+0.2 vs last month</span>
+                    <div style="
+                        display: flex;
+                        flex-direction: column;
+                        gap: 0.25rem;
+                        padding: 0.75rem 0;
+                        border-bottom: 1px solid #f1f5f9;
+                    ">
+                        <span style="font-size: 0.9rem; color: #64748b; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px;">Customer Satisfaction:</span>
+                        <span style="font-size: 1.25rem; font-weight: 700; color: #1e293b;">4.7/5.0</span>
+                        <span style="font-size: 0.9rem; color: #10b981; font-weight: 600;">+0.2 vs last month</span>
                     </div>
-                    <div class="dashboard-metric">
-                        <span class="metric-label">Staff Efficiency:</span>
-                        <span class="metric-value">94%</span>
-                        <span class="metric-trend positive">+3% vs avg</span>
+                    <div style="
+                        display: flex;
+                        flex-direction: column;
+                        gap: 0.25rem;
+                        padding: 0.75rem 0;
+                    ">
+                        <span style="font-size: 0.9rem; color: #64748b; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px;">Staff Efficiency:</span>
+                        <span style="font-size: 1.25rem; font-weight: 700; color: #1e293b;">94%</span>
+                        <span style="font-size: 0.9rem; color: #10b981; font-weight: 600;">+3% vs avg</span>
                     </div>
                 </div>
             </div>
@@ -1044,7 +1684,7 @@ def show_manager_alerts_tab():
     }
     
     .alert-type {
-        font-weight: 600;
+        font-weight: 700;
         color: #495057;
         font-size: 0.9rem;
     }
@@ -1054,8 +1694,8 @@ def show_manager_alerts_tab():
         color: white;
         padding: 0.2rem 0.5rem;
         border-radius: 12px;
-        font-size: 0.7rem;
-        font-weight: 600;
+        font-size: 0.85rem;
+        font-weight: 700;
     }
     
     .alert-severity.important {
@@ -1079,6 +1719,13 @@ def show_manager_alerts_tab():
         gap: 0.5rem;
         align-items: center;
     }
+    
+    .click-hint {
+        font-size: 0.75rem;
+        color: #007bff;
+        font-style: italic;
+        margin-top: 0.25rem;
+    }
     </style>
     """, unsafe_allow_html=True)
     
@@ -1089,17 +1736,40 @@ def show_manager_alerts_tab():
         st.session_state.show_alert_modal = False
     if "modal_alert_type" not in st.session_state:
         st.session_state.modal_alert_type = ""
+    if "selected_alert_id" not in st.session_state:
+        st.session_state.selected_alert_id = None
     
     
-    # All alerts data
+    # All alerts data with detailed information
     all_alerts = [
-        {"id": 0, "type": "Security Alert", "message": "Security system maintenance in 30 minutes - Electronics section", "severity": "urgent", "action": "Notify staff", "time": "5 min ago"},
-        {"id": 1, "type": "VIP Customer", "message": "VIP customer arriving at 2 PM - Personal shopping assistance needed", "severity": "urgent", "action": "Prep personal shopper", "time": "15 min ago"},
+        {
+            "id": 1, 
+            "type": "Personal Styling", 
+            "message": "Platinum Member Victoria Chen arriving in 1 hour - Personal stylist still unassigned", 
+            "severity": "urgent", 
+            "action": "Assign personal stylist", 
+            "time": "15 min ago",
+            "details": {
+                "customer_name": "Victoria Chen",
+                "membership_tier": "Platinum Member (5+ years)",
+                "appointment_time": "11:00 AM (58 minutes from now)",
+                "service_type": "Personal Shopping - Women's Professional Wear",
+                "avg_purchase": "$850 per visit",
+                "last_visit": "3 weeks ago, purchased $1,200 business wardrobe",
+                "original_stylist": "Jessica Martinez (called in sick)",
+                "backup_failed": "Auto-reassignment system failed",
+                "available_stylists": [
+                    {"name": "Maria Santos", "rating": "4.9/5", "specialty": "Women's Fashion", "status": "Available"},
+                    {"name": "David Kim", "rating": "4.7/5", "specialty": "Cross-trained", "status": "Available"},
+                    {"name": "Lisa Park", "rating": "4.8/5", "specialty": "Women's Fashion", "status": "Busy until 11:30 AM"}
+                ]
+            }
+        },
         {"id": 2, "type": "Critical Stock", "message": "Designer Jeans - only 2 left", "severity": "urgent", "action": "Reorder now", "time": "20 min ago"},
         {"id": 3, "type": "Staff Coverage", "message": "Electronics understaffed 3-4 PM", "severity": "urgent", "action": "Find coverage", "time": "30 min ago"},
         {"id": 4, "type": "Delivery Update", "message": "New designer collection arriving tomorrow - Prepare display area", "severity": "important", "action": "Prep display area", "time": "1 hour ago"},
         {"id": 5, "type": "Schedule Change", "message": "Staff meeting moved to 3 PM in conference room", "severity": "important", "action": "Update team", "time": "2 hours ago"},
-        {"id": 6, "type": "VIP Customer", "message": "Sarah Johnson arriving at 2 PM", "severity": "important", "action": "Prep personal shopper", "time": "2 hours ago"},
+        {"id": 6, "type": "Personal Styling", "message": "Preferred Client Sarah Johnson arriving at 2 PM for wardrobe consultation", "severity": "important", "action": "Prep personal shopper", "time": "2 hours ago"},
         {"id": 7, "type": "Delivery Delay", "message": "Designer collection delayed to 4:30 PM", "severity": "important", "action": "Update team", "time": "3 hours ago"}
     ]
     
@@ -1117,156 +1787,176 @@ def show_manager_alerts_tab():
     col1, col2, col3, col4 = st.columns(4)
     
     with col1:
-        # Urgent alerts card - Red theme
+        # Urgent alerts card - Bright Red theme
         urgent_clicked = card(
-            title="🚨 Urgent",
+            title="Urgent",
             text=f"{urgent_count} alerts",
             styles={
                 "card": {
                     "width": "100%",
-                    "height": "200px",
+                    "height": "120px",
                     "border-radius": "16px",
-                    "box-shadow": "0 4px 20px rgba(220, 53, 69, 0.25)",
-                    "background": "linear-gradient(135deg, #dc3545 0%, #c82333 100%)",
-                    "border": "1px solid rgba(220, 53, 69, 0.3)",
+                    "box-shadow": "0 4px 20px rgba(239, 68, 68, 0.4), 0 1px 3px rgba(0, 0, 0, 0.1)",
+                    "background": "linear-gradient(135deg, #ef4444 0%, #dc2626 50%, #b91c1c 100%)",
+                    "border": "1px solid rgba(239, 68, 68, 0.3)",
                     "margin": "0",
-                    "padding": "1.5rem",
+                    "padding": "1rem",
                     "text-align": "center",
                     "cursor": "pointer",
-                    "transition": "all 0.3s ease"
+                    "transition": "all 0.3s ease",
+                    "position": "relative",
+                    "overflow": "hidden"
                 },
                 "title": {
                     "font-size": "2.5rem",
                     "color": "white",
-                    "font-weight": "700",
-                    "margin-bottom": "0.5rem"
+                    "font-weight": "900",
+                    "margin-bottom": "0.1rem",
+                    "text-shadow": "0 2px 4px rgba(0, 0, 0, 0.3)",
+                    "line-height": "1"
                 },
                 "text": {
-                    "font-size": "1rem",
-                    "color": "white",
-                    "font-weight": "500",
+                    "font-size": "1.1rem",
+                    "color": "rgba(255, 255, 255, 0.9)",
+                    "font-weight": "700",
                     "text-transform": "uppercase",
-                    "letter-spacing": "0.5px"
+                    "letter-spacing": "1px",
+                    "text-shadow": "0 1px 2px rgba(0, 0, 0, 0.2)"
                 }
             },
-            key="urgent_card"
+            key="urgent_card_v5"
         )
         
         if urgent_clicked:
             st.session_state.modal_alert_type = "urgent"
     
     with col2:
-        # Important alerts card - Orange theme
+        # Important alerts card - Bright Yellow-Orange theme
         important_clicked = card(
-            title="⚠️ Important",
+            title="Important",
             text=f"{important_count} alerts",
             styles={
                 "card": {
                     "width": "100%",
-                    "height": "200px",
+                    "height": "120px",
                     "border-radius": "16px",
-                    "box-shadow": "0 4px 20px rgba(255, 152, 0, 0.25)",
-                    "background": "linear-gradient(135deg, #ff9800 0%, #f57c00 100%)",
-                    "border": "1px solid rgba(255, 152, 0, 0.3)",
+                    "box-shadow": "0 4px 20px rgba(245, 158, 11, 0.4), 0 1px 3px rgba(0, 0, 0, 0.1)",
+                    "background": "linear-gradient(135deg, #fbbf24 0%, #f59e0b 50%, #d97706 100%)",
+                    "border": "1px solid rgba(245, 158, 11, 0.3)",
                     "margin": "0",
-                    "padding": "1.5rem",
+                    "padding": "1rem",
                     "text-align": "center",
                     "cursor": "pointer",
-                    "transition": "all 0.3s ease"
+                    "transition": "all 0.3s ease",
+                    "position": "relative",
+                    "overflow": "hidden"
                 },
                 "title": {
                     "font-size": "2.5rem",
                     "color": "white",
-                    "font-weight": "700",
-                    "margin-bottom": "0.5rem"
+                    "font-weight": "900",
+                    "margin-bottom": "0.1rem",
+                    "text-shadow": "0 2px 4px rgba(0, 0, 0, 0.3)",
+                    "line-height": "1"
                 },
                 "text": {
-                    "font-size": "1rem",
-                    "color": "white",
-                    "font-weight": "500",
+                    "font-size": "1.1rem",
+                    "color": "rgba(255, 255, 255, 0.9)",
+                    "font-weight": "700",
                     "text-transform": "uppercase",
-                    "letter-spacing": "0.5px"
+                    "letter-spacing": "1px",
+                    "text-shadow": "0 1px 2px rgba(0, 0, 0, 0.2)"
                 }
             },
-            key="important_card"
+            key="important_card_v5"
         )
         
         if important_clicked:
             st.session_state.modal_alert_type = "important"
     
     with col3:
-        # Resolved alerts card - Green theme
+        # Resolved alerts card - Bright Emerald Green theme
         resolved_clicked = card(
-            title="✅ Resolved",
+            title="Resolved",
             text=f"{resolved_count} alerts",
             styles={
                 "card": {
                     "width": "100%",
-                    "height": "200px",
+                    "height": "120px",
                     "border-radius": "16px",
-                    "box-shadow": "0 4px 20px rgba(40, 167, 69, 0.25)",
-                    "background": "linear-gradient(135deg, #28a745 0%, #1e7e34 100%)",
-                    "border": "1px solid rgba(40, 167, 69, 0.3)",
+                    "box-shadow": "0 4px 20px rgba(34, 197, 94, 0.4), 0 1px 3px rgba(0, 0, 0, 0.1)",
+                    "background": "linear-gradient(135deg, #22c55e 0%, #16a34a 50%, #15803d 100%)",
+                    "border": "1px solid rgba(34, 197, 94, 0.3)",
                     "margin": "0",
-                    "padding": "1.5rem",
+                    "padding": "1rem",
                     "text-align": "center",
                     "cursor": "pointer",
-                    "transition": "all 0.3s ease"
+                    "transition": "all 0.3s ease",
+                    "position": "relative",
+                    "overflow": "hidden"
                 },
                 "title": {
                     "font-size": "2.5rem",
                     "color": "white",
-                    "font-weight": "700",
-                    "margin-bottom": "0.5rem"
+                    "font-weight": "900",
+                    "margin-bottom": "0.1rem",
+                    "text-shadow": "0 2px 4px rgba(0, 0, 0, 0.3)",
+                    "line-height": "1"
                 },
                 "text": {
-                    "font-size": "1rem",
-                    "color": "white",
-                    "font-weight": "500",
+                    "font-size": "1.1rem",
+                    "color": "rgba(255, 255, 255, 0.9)",
+                    "font-weight": "700",
                     "text-transform": "uppercase",
-                    "letter-spacing": "0.5px"
+                    "letter-spacing": "1px",
+                    "text-shadow": "0 1px 2px rgba(0, 0, 0, 0.2)"
                 }
             },
-            key="resolved_card"
+            key="resolved_card_v5"
         )
         
         if resolved_clicked:
             st.session_state.modal_alert_type = "resolved"
     
     with col4:
-        # Total active alerts card - Blue theme
+        # Total active alerts card - Bright Blue theme
         total_clicked = card(
-            title="📊 Total Active",
+            title="Total Active",
             text=f"{total_active} alerts",
             styles={
                 "card": {
                     "width": "100%",
-                    "height": "200px",
+                    "height": "120px",
                     "border-radius": "16px",
-                    "box-shadow": "0 4px 20px rgba(0, 123, 255, 0.25)",
-                    "background": "linear-gradient(135deg, #007bff 0%, #0056b3 100%)",
-                    "border": "1px solid rgba(0, 123, 255, 0.3)",
+                    "box-shadow": "0 4px 20px rgba(59, 130, 246, 0.4), 0 1px 3px rgba(0, 0, 0, 0.1)",
+                    "background": "linear-gradient(135deg, #3b82f6 0%, #2563eb 50%, #1d4ed8 100%)",
+                    "border": "1px solid rgba(59, 130, 246, 0.3)",
                     "margin": "0",
-                    "padding": "1.5rem",
+                    "padding": "1rem",
                     "text-align": "center",
                     "cursor": "pointer",
-                    "transition": "all 0.3s ease"
+                    "transition": "all 0.3s ease",
+                    "position": "relative",
+                    "overflow": "hidden"
                 },
                 "title": {
                     "font-size": "2.5rem",
                     "color": "white",
-                    "font-weight": "700",
-                    "margin-bottom": "0.5rem"
+                    "font-weight": "900",
+                    "margin-bottom": "0.1rem",
+                    "text-shadow": "0 2px 4px rgba(0, 0, 0, 0.3)",
+                    "line-height": "1"
                 },
                 "text": {
-                    "font-size": "1rem",
-                    "color": "white",
-                    "font-weight": "500",
+                    "font-size": "1.1rem",
+                    "color": "rgba(255, 255, 255, 0.9)",
+                    "font-weight": "700",
                     "text-transform": "uppercase",
-                    "letter-spacing": "0.5px"
+                    "letter-spacing": "1px",
+                    "text-shadow": "0 1px 2px rgba(0, 0, 0, 0.2)"
                 }
             },
-            key="total_card"
+            key="total_card_v5"
         )
         
         if total_clicked:
@@ -1280,22 +1970,22 @@ def show_manager_alerts_tab():
     # Filter alerts based on current modal type
     if st.session_state.modal_alert_type == "urgent":
         display_alerts = urgent_alerts
-        display_title = f"🚨 Urgent Alerts ({len(display_alerts)})"
+        display_title = f"Urgent Alerts ({len(display_alerts)})"
     elif st.session_state.modal_alert_type == "important":
         display_alerts = important_alerts
-        display_title = f"⚠️ Important Alerts ({len(display_alerts)})"
+        display_title = f"Important Alerts ({len(display_alerts)})"
     elif st.session_state.modal_alert_type == "resolved":
         display_alerts = resolved_alerts
-        display_title = f"✅ Resolved Alerts ({len(display_alerts)})"
+        display_title = f"Resolved Alerts ({len(display_alerts)})"
     else:  # all
         display_alerts = urgent_alerts + important_alerts
-        display_title = f"📊 All Active Alerts ({len(display_alerts)})"
+        display_title = f"All Active Alerts ({len(display_alerts)})"
     
     # Display the selected alert type
     st.markdown(f"### {display_title}")
     
     # Fixed height container with alert cards
-    with st.container(height=400):
+    with st.container(height=350):
         if len(display_alerts) > 0:
             for alert in display_alerts:
                 is_resolved = alert["id"] in st.session_state.resolved_alerts
@@ -1319,64 +2009,668 @@ def show_manager_alerts_tab():
                     severity_bg = "#6c757d"
                     severity_text = "white"
                 
-                # Alert card
-                st.markdown(f"""
-                <div style="
-                    background: {bg_color};
-                    border-left: 4px solid {border_color};
-                    border-radius: 8px;
-                    padding: 1rem;
-                    margin-bottom: 0.75rem;
-                    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-                    opacity: {'0.6' if is_resolved else '1'};
-                ">
-                    <div style="
-                        display: flex;
-                        justify-content: space-between;
-                        align-items: center;
-                        margin-bottom: 0.5rem;
-                    ">
-                        <span style="
-                            font-weight: 600;
-                            color: #495057;
-                            font-size: 0.9rem;
-                        ">{alert['type']}</span>
-                        <div style="display: flex; align-items: center; gap: 0.5rem;">
-                            <span style="
-                                background: {severity_bg};
-                                color: {severity_text};
-                                padding: 0.2rem 0.5rem;
-                                border-radius: 12px;
-                                font-size: 0.7rem;
-                                font-weight: 600;
-                            ">{severity_label}</span>
-                            <span style="
-                                font-size: 0.75rem;
-                                color: #6c757d;
-                            ">{alert['time']}</span>
-                        </div>
-                    </div>
-                    <div style="
-                        color: #495057;
-                        margin-bottom: 0.5rem;
-                        line-height: 1.4;
-                    ">{alert['message']}</div>
-                    <div style="
-                        color: #007bff;
-                        font-size: 0.8rem;
-                    ">→ {alert['action']}</div>
-                </div>
-                """, unsafe_allow_html=True)
+                # Create columns for alert content and button
+                col1, col2 = st.columns([4, 1])
                 
+                with col1:
+                    # Alert card display
+                    st.markdown(f"""
+                    <div style="
+                        background: {bg_color};
+                        border-left: 4px solid {border_color};
+                        border-radius: 8px;
+                        padding: 1rem;
+                        margin-bottom: 0.75rem;
+                        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+                        opacity: {'0.6' if is_resolved else '1'};
+                    ">
+                        <div style="
+                            display: flex;
+                            justify-content: space-between;
+                            align-items: center;
+                            margin-bottom: 0.5rem;
+                        ">
+                            <span style="
+                                font-weight: 700;
+                                color: #495057;
+                                font-size: 0.9rem;
+                            ">{alert['type']}</span>
+                            <div style="display: flex; align-items: center; gap: 0.5rem;">
+                                <span style="
+                                    background: {severity_bg};
+                                    color: {severity_text};
+                                    padding: 0.2rem 0.5rem;
+                                    border-radius: 12px;
+                                    font-size: 0.85rem;
+                                    font-weight: 700;
+                                ">{severity_label}</span>
+                                <span style="
+                                    font-size: 0.75rem;
+                                    color: #6c757d;
+                                ">{alert['time']}</span>
+                            </div>
+                        </div>
+                        <div style="
+                            color: #495057;
+                            margin-bottom: 0.5rem;
+                            line-height: 1.4;
+                        ">{alert['message']}</div>
+                        <div style="
+                            color: #007bff;
+                            font-size: 0.8rem;
+                        ">→ {alert['action']}</div>
+                        <div class="click-hint">Click "Details" for more information</div>
+                    </div>
+                    """, unsafe_allow_html=True)
+                
+                with col2:
+                    # Details button for each alert
+                    if st.button("Details", key=f"alert_details_{alert['id']}", use_container_width=True):
+                        st.session_state.selected_alert_id = alert['id']
+                        st.rerun()
         else:
             st.info("No alerts to display.")
     
+    # Alert details modal using st.dialog - ONLY triggered by Details buttons
+    if st.session_state.selected_alert_id:
+        selected_alert = next((a for a in all_alerts if a['id'] == st.session_state.selected_alert_id), None)
+        
+        if selected_alert:
+            try:
+                @st.dialog(f"Alert Details", width="large")
+                def show_alert_details():
+                    # Add modern CSS styling
+                    st.markdown("""
+                    <style>
+                    .modern-card {
+                        background: white;
+                        border-radius: 16px;
+                        padding: 24px;
+                        margin: 16px 0;
+                        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.08);
+                        border: 1px solid rgba(0, 0, 0, 0.04);
+                        transition: all 0.3s ease;
+                    }
+                    .modern-card:hover {
+                        box-shadow: 0 12px 48px rgba(0, 0, 0, 0.12);
+                    }
+                    .section-header {
+                        font-size: 18px;
+                        font-weight: 700;
+                        color: #1a1a1a;
+                        margin-bottom: 20px;
+                        display: flex;
+                        align-items: center;
+                        gap: 12px;
+                        letter-spacing: -0.02em;
+                    }
+                    .info-grid {
+                        display: grid;
+                        grid-template-columns: 1fr 1fr;
+                        gap: 16px;
+                        margin-bottom: 24px;
+                    }
+                    .info-item {
+                        background: #f8fafc;
+                        border-radius: 12px;
+                        padding: 16px;
+                        border-left: 4px solid;
+                        transition: all 0.2s ease;
+                    }
+                    .info-item:hover {
+                        background: #f1f5f9;
+                        transform: translateY(-2px);
+                    }
+                    .info-label {
+                        font-size: 12px;
+                        font-weight: 600;
+                        text-transform: uppercase;
+                        letter-spacing: 0.05em;
+                        margin-bottom: 8px;
+                        opacity: 0.7;
+                    }
+                    .info-value {
+                        font-size: 16px;
+                        font-weight: 600;
+                        color: #1a1a1a;
+                        line-height: 1.4;
+                    }
+                    .status-badge {
+                        display: inline-flex;
+                        align-items: center;
+                        gap: 6px;
+                        padding: 6px 12px;
+                        border-radius: 20px;
+                        font-size: 13px;
+                        font-weight: 600;
+                        letter-spacing: 0.02em;
+                    }
+                    .status-available {
+                        background: #dcfce7;
+                        color: #166534;
+                        border: 1px solid #bbf7d0;
+                    }
+                    .status-busy {
+                        background: #fef3c7;
+                        color: #92400e;
+                        border: 1px solid #fde68a;
+                    }
+                    .recommended-badge {
+                        background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+                        color: white;
+                        padding: 4px 10px;
+                        border-radius: 12px;
+                        font-size: 11px;
+                        font-weight: 700;
+                        text-transform: uppercase;
+                        letter-spacing: 0.05em;
+                        margin-left: 8px;
+                    }
+                    /* Additional CSS for wider dialog */
+                    div[data-testid="stDialog"] {
+                        position: fixed !important;
+                        top: 0 !important;
+                        left: 0 !important;
+                        right: 0 !important;
+                        bottom: 0 !important;
+                        display: flex !important;
+                        align-items: flex-start !important;
+                        justify-content: center !important;
+                        z-index: 1000 !important;
+                        background: rgba(0, 0, 0, 0.5) !important;
+                        width: 100vw !important;
+                        height: 100vh !important;
+                        padding-top: 2rem !important;
+                        overflow-y: auto !important;
+                    }
+                    div[data-testid="stDialog"] > div {
+                        max-width: 1000px !important;
+                        width: 85vw !important;
+                        position: relative !important;
+                        background: white !important;
+                        border-radius: 16px !important;
+                        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3) !important;
+                        margin: 0 auto !important;
+                        max-height: calc(100vh - 4rem) !important;
+                        overflow-y: auto !important;
+                    }
+                    </style>
+                    """, unsafe_allow_html=True)
+                    
+                    # Create a scrollable container for the modal content
+                    with st.container(height=650):
+                        # Modern header for Personal Styling alerts
+                        if selected_alert['type'] == "Personal Styling":
+                            st.markdown(f"""
+                            <div style="
+                                background: linear-gradient(135deg, #dc2626 0%, #b91c1c 50%, #991b1b 100%);
+                                color: white;
+                                padding: 32px;
+                                border-radius: 20px;
+                                margin-bottom: 32px;
+                                position: relative;
+                                overflow: hidden;
+                                border: 3px solid #fca5a5;
+                                box-shadow: 0 0 30px rgba(220, 38, 38, 0.4);
+                                animation: pulse-urgent 2s infinite;
+                            ">
+                                <style>
+                                @keyframes pulse-urgent {{
+                                    0% {{ box-shadow: 0 0 30px rgba(220, 38, 38, 0.4); }}
+                                    50% {{ box-shadow: 0 0 50px rgba(220, 38, 38, 0.8); }}
+                                    100% {{ box-shadow: 0 0 30px rgba(220, 38, 38, 0.4); }}
+                                }}
+                                </style>
+                                <div style="
+                                    position: absolute;
+                                    top: -50%;
+                                    right: -20%;
+                                    width: 200px;
+                                    height: 200px;
+                                    background: rgba(255, 255, 255, 0.1);
+                                    border-radius: 50%;
+                                    filter: blur(40px);
+                                "></div>
+                                <div style="position: relative; z-index: 2;">
+                                    <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px;">
+                                        <div style="display: flex; align-items: center; gap: 16px;">
+                                            <div style="
+                                                background: rgba(255, 255, 255, 0.2);
+                                                padding: 16px;
+                                                border-radius: 20px;
+                                                backdrop-filter: blur(10px);
+                                            ">
+                                                <span style="font-size: 32px;">⚠️</span>
+                                            </div>
+                                            <div>
+                                                <div style="
+                                                    background: #fef2f2;
+                                                    color: #dc2626;
+                                                    padding: 8px 16px;
+                                                    border-radius: 25px;
+                                                    font-size: 14px;
+                                                    font-weight: 900;
+                                                    text-transform: uppercase;
+                                                    letter-spacing: 1px;
+                                                    margin-bottom: 8px;
+                                                    border: 2px solid #fca5a5;
+                                                ">URGENT - IMMEDIATE ACTION REQUIRED</div>
+                                                <h1 style="
+                                                    margin: 0;
+                                                    font-size: 28px;
+                                                    font-weight: 900;
+                                                    letter-spacing: -0.02em;
+                                                ">STYLIST UNASSIGNED</h1>
+                                            </div>
+                                        </div>
+                                        <div style="text-align: right;">
+                                            <div style="
+                                                background: rgba(255, 255, 255, 0.2);
+                                                padding: 12px 20px;
+                                                border-radius: 15px;
+                                                backdrop-filter: blur(10px);
+                                                border: 1px solid rgba(255, 255, 255, 0.3);
+                                            ">
+                                                <div style="
+                                                    font-size: 24px;
+                                                    font-weight: 900;
+                                                    margin-bottom: 4px;
+                                                ">⏰ 58 MIN</div>
+                                                <div style="
+                                                    font-size: 12px;
+                                                    opacity: 0.9;
+                                                    text-transform: uppercase;
+                                                    letter-spacing: 1px;
+                                                ">Until Appointment</div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div style="
+                                        background: rgba(255, 255, 255, 0.15);
+                                        padding: 20px;
+                                        border-radius: 15px;
+                                        backdrop-filter: blur(10px);
+                                        border: 1px solid rgba(255, 255, 255, 0.2);
+                                    ">
+                                        <div style="
+                                            font-size: 18px;
+                                            font-weight: 600;
+                                            line-height: 1.6;
+                                            margin-bottom: 12px;
+                                        ">
+                                            <span style="
+                                                background: #fbbf24;
+                                                color: #92400e;
+                                                padding: 4px 8px;
+                                                border-radius: 8px;
+                                                font-weight: 900;
+                                                margin-right: 8px;
+                                            ">PLATINUM MEMBER</span>
+                                            Victoria Chen arriving in 1 hour
+                                        </div>
+                                        <div style="
+                                            font-size: 16px;
+                                            opacity: 0.95;
+                                            line-height: 1.5;
+                                            • <strong>Risk of service disruption and customer dissatisfaction</strong>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            """, unsafe_allow_html=True)
+                        else:
+                            # Standard header for other alert types
+                            st.markdown(f"### {selected_alert['message']}")
+                            st.markdown(f"**Severity:** {selected_alert['severity'].title()}")
+                            st.markdown(f"**Time:** {selected_alert['time']}")
+                        # Show additional details if available
+                        if 'details' in selected_alert:
+                            details = selected_alert['details']
+                            
+                            # Issue Details Section - MOVED TO TOP
+                            st.markdown(f"""
+                            <div class="modern-card" style="border-left: 4px solid #ef4444;">
+                                <div class="section-header">
+                                    <span style="color: #ef4444; font-size: 20px;">⚠️</span>
+                                    Issue Analysis
+                                </div>
+                                <div style="
+                                    background: #fef2f2;
+                                    border-radius: 12px;
+                                    padding: 20px;
+                                    border: 1px solid #fecaca;
+                                ">
+                                    <div style="margin-bottom: 12px;">
+                                        <span style="color: #991b1b; font-weight: 600; font-size: 14px;">Original Stylist:</span>
+                                        <span style="color: #1f2937; margin-left: 8px;">{details['original_stylist']}</span>
+                                    </div>
+                                    <div>
+                                        <span style="color: #991b1b; font-weight: 600; font-size: 14px;">Root Cause:</span>
+                                        <span style="color: #1f2937; margin-left: 8px;">{details['backup_failed']}</span>
+                                    </div>
+                                </div>
+                            </div>
+                            """, unsafe_allow_html=True)
+                            
+                            # Customer Information Section - CLEANED UP
+                            st.markdown(f"""
+                            <div class="modern-card">
+                                <div class="section-header">
+                                    <span style="
+                                        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                                        -webkit-background-clip: text;
+                                        -webkit-text-fill-color: transparent;
+                                        background-clip: text;
+                                        font-size: 20px;
+                                    ">👤</span>
+                                    Customer Profile
+                                </div>
+                                <div class="info-grid">
+                                    <div class="info-item" style="border-left-color: #667eea;">
+                                        <div class="info-label" style="color: #667eea;">Customer</div>
+                                        <div class="info-value">{details['customer_name']}</div>
+                                    </div>
+                                    <div class="info-item" style="border-left-color: #f59e0b;">
+                                        <div class="info-label" style="color: #f59e0b;">Membership</div>
+                                        <div class="info-value">{details['membership_tier']}</div>
+                                    </div>
+                                    <div class="info-item" style="border-left-color: #ef4444;">
+                                        <div class="info-label" style="color: #ef4444;">Appointment</div>
+                                        <div class="info-value">{details['appointment_time']}</div>
+                                    </div>
+                                    <div class="info-item" style="border-left-color: #10b981;">
+                                        <div class="info-label" style="color: #10b981;">Average Purchase</div>
+                                        <div class="info-value">{details['avg_purchase']}</div>
+                                    </div>
+                                </div>
+                                <div style="
+                                    background: #f8fafc;
+                                    border-radius: 12px;
+                                    padding: 16px;
+                                    border: 1px solid #e2e8f0;
+                                ">
+                                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; font-size: 14px;">
+                                        <div>
+                                            <span style="color: #64748b; font-weight: 600;">Last Visit:</span><br>
+                                            <span style="color: #1e293b;">{details['last_visit']}</span>
+                                        </div>
+                                        <div>
+                                            <span style="color: #64748b; font-weight: 600;">Service Type:</span><br>
+                                            <span style="color: #1e293b;">{details['service_type']}</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            """, unsafe_allow_html=True)
+                            
+                            # CDP Intelligence Section using native Streamlit components - FIXED LISTS
+                            st.markdown("---")
+                            st.markdown("### 🧠 AI Customer Intelligence")
+                            
+                            col1, col2 = st.columns(2)
+                            
+                            with col1:
+                                st.info("""**Purchase Pattern**
+
+• Shops quarterly  
+• Prefers premium brands  
+• Avg basket: 3-4 items  
+• Low return rate (1.2%)""")
+                                
+                                st.info("""**Brand Affinity**
+
+• Theory, Ann Taylor, Kate Spade  
+• Color pref: Navy, black, cream""")
+                            
+                            with col2:
+                                st.info("""**Style Profile**
+
+• Professional wardrobe focus  
+• Sizes: 8 (dress), M (tops), 8.5 (shoes)""")
+                                
+                                st.info("""**Current Need**
+
+• Executive wardrobe upgrade  
+• Budget range: $1,500-2,500""")
+                            
+                            st.success("""**🎯 Stylist Recommendations**
+
+• Focus on versatile pieces for business travel  
+• Suggest coordinating sets for efficiency  
+• Emphasize quality fabrics and classic cuts  
+• Show care instructions (she always asks)""")                             
+                            # Available Stylists Section
+                            st.markdown("---")
+                            st.markdown("### 👥 Available Stylists")
+                            
+                            # Display each stylist card individually with properly integrated buttons
+                            for i, stylist in enumerate(details['available_stylists']):
+                                if stylist['status'] == "Available":
+                                    status_bg = "#dcfce7"
+                                    status_color = "#166534"
+                                    status_border = "#bbf7d0"
+                                    status_icon = "✓"
+                                else:
+                                    status_bg = "#fef3c7"
+                                    status_color = "#92400e"
+                                    status_border = "#fde68a"
+                                    status_icon = "⏳"
+                                
+                                # Special styling for recommended stylist
+                                if stylist['name'] == "Maria Santos":
+                                    card_style = "border: 2px solid #10b981; background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%);"
+                                    recommended_badge = '<span style="background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: white; padding: 4px 10px; border-radius: 12px; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; margin-left: 8px;">RECOMMENDED</span>'
+                                else:
+                                    card_style = "border: 1px solid #e2e8f0;"
+                                    recommended_badge = ""
+                                
+                                # Create a container for each stylist with integrated button using columns
+                                col_info, col_button = st.columns([4, 1])
+                                
+                                with col_info:
+                                    st.markdown(f"""
+                                    <div style="
+                                        background: white;
+                                        border-radius: 16px;
+                                        padding: 24px;
+                                        margin: 12px 0px;
+                                        {card_style}
+                                        box-shadow: 0 4px 16px rgba(0, 0, 0, 0.04);
+                                        transition: all 0.3s ease;
+                                        height: 120px;
+                                        display: flex;
+                                        align-items: center;
+                                    ">
+                                        <div style="display: flex; align-items: center; gap: 12px; width: 100%;">
+                                            <div style="
+                                                background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                                                color: white;
+                                                width: 40px;
+                                                height: 40px;
+                                                border-radius: 12px;
+                                                display: flex;
+                                                align-items: center;
+                                                justify-content: center;
+                                                font-size: 18px;
+                                            ">👤</div>
+                                            <div style="flex: 1;">
+                                                <div style="
+                                                    font-size: 18px;
+                                                    font-weight: 700;
+                                                    color: #1a1a1a;
+                                                    letter-spacing: -0.01em;
+                                                    margin-bottom: 4px;
+                                                ">{stylist['name']}{recommended_badge}</div>
+                                                <div style="
+                                                    font-size: 14px;
+                                                    color: #64748b;
+                                                    font-weight: 500;
+                                                    margin-bottom: 8px;
+                                                ">{stylist['specialty']}</div>
+                                                <div style="display: flex; align-items: center; gap: 12px;">
+                                                    <div style="
+                                                        display: inline-flex;
+                                                        align-items: center;
+                                                        gap: 6px;
+                                                        padding: 6px 12px;
+                                                        border-radius: 20px;
+                                                        font-size: 13px;
+                                                        font-weight: 600;
+                                                        background: {status_bg};
+                                                        color: {status_color};
+                                                        border: 1px solid {status_border};
+                                                    ">
+                                                        {status_icon} {stylist['status']}
+                                                    </div>
+                                                    <div style="
+                                                        font-size: 14px;
+                                                        color: #f59e0b;
+                                                        font-weight: 600;
+                                                    ">⭐ {stylist['rating']}</div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    """, unsafe_allow_html=True)
+                                
+                                with col_button:
+                                    # Add some top margin to align with the card
+                                    st.markdown("<div style='margin-top: 50px;'></div>", unsafe_allow_html=True)
+                                    
+                                    if stylist['status'] == "Available":
+                                        button_type = "primary" if stylist['name'] == "Maria Santos" else "secondary"
+                                        button_text = f"Assign" if stylist['name'] == "Maria Santos" else f"Assign"
+                                        
+                                        if st.button(button_text, key=f"assign_{stylist['name'].replace(' ', '_')}_individual", 
+                                                   type=button_type, use_container_width=True):
+                                            # Enhanced orchestrated response demonstration
+                                            st.success(f"✅ {stylist['name']} assigned to Victoria Chen's appointment!")
+                                            
+                                            # Show orchestrated workflow details
+                                            st.info("""
+                                            **🔄 Automated Workflow Initiated:**
+                                            
+                                            **📱 Staff Notification:**
+                                            • Maria Santos notified via mobile app
+                                            • Customer profile and preferences sent
+                                            • Appointment details and preparation time provided
+                                            
+                                            **🧠 AI-Powered Preparation:**
+                                            • Victoria's style profile and purchase history loaded
+                                            • Recommended items pre-selected based on preferences
+                                            • Inventory availability confirmed for suggested pieces
+                                            
+                                            **📋 System Updates:**
+                                            • Appointment status updated across all systems
+                                            • Customer service team notified of assignment
+                                            • Performance tracking initiated for service quality
+                                            
+                                            **⏰ Timeline:** All actions completed in <5 seconds
+                                            """)
+                                            
+                                            st.balloons()
+                                            st.session_state.selected_alert_id = None
+                                            st.rerun()
+                                    else:
+                                        st.button(f"N/A", 
+                                                key=f"unavailable_{stylist['name'].replace(' ', '_')}", 
+                                                disabled=True, use_container_width=True, 
+                                                help=f"{stylist['name']} is {stylist['status']}")
+                            # For alerts without detailed information
+                            st.markdown("---")
+                            if st.button("Close", key="close_simple_dialog"):
+                                st.session_state.selected_alert_id = None
+                                st.rerun()
+                
+                # Show the dialog
+                show_alert_details()
+                
+            except Exception as e:
+                st.error(f"Dialog error: {e}")
+                # Fallback: Show details in an expander
+                with st.expander(f"📋 {selected_alert['type']} - Alert Details", expanded=True):
+                    st.markdown(f"### {selected_alert['message']}")
+                    st.markdown(f"**Severity:** {selected_alert['severity'].title()}")
+                    st.markdown(f"**Time:** {selected_alert['time']}")
+                    st.markdown(f"**Recommended Action:** {selected_alert['action']}")
+                    
+                    if 'details' in selected_alert:
+                        details = selected_alert['details']
+                        st.markdown("---")
+                        st.markdown("### Customer Information")
+                        
+                        col1, col2 = st.columns(2)
+                        with col1:
+                            st.markdown(f"**Customer:** {details['customer_name']}")
+                            st.markdown(f"**Membership:** {details['membership_tier']}")
+                            st.markdown(f"**Appointment:** {details['appointment_time']}")
+                            st.markdown(f"**Service:** {details['service_type']}")
+                        
+                        with col2:
+                            st.markdown(f"**Avg Purchase:** {details['avg_purchase']}")
+                            st.markdown(f"**Last Visit:** {details['last_visit']}")
+                            st.markdown(f"**Original Stylist:** {details['original_stylist']}")
+                            st.markdown(f"**Issue:** {details['backup_failed']}")
+                        
+                        st.markdown("### Available Stylists")
+                        for stylist in details['available_stylists']:
+                            status_color = "#28a745" if stylist['status'] == "Available" else "#ffc107"
+                            st.markdown(f"""
+                            <div style="
+                                background: #f8f9fa;
+                                border-radius: 8px;
+                                padding: 0.75rem;
+                                margin-bottom: 0.5rem;
+                                border-left: 3px solid {status_color};
+                            ">
+                                <strong>{stylist['name']}</strong> - {stylist['specialty']}<br>
+                                Rating: {stylist['rating']} | Status: <span style="color: {status_color}; font-weight: bold;">{stylist['status']}</span>
+                            </div>
+                            """, unsafe_allow_html=True)
+                            
+                            # Add individual assign buttons for fallback section too
+                            if stylist['status'] == "Available":
+                                if st.button(f"Assign {stylist['name']}", key=f"assign_{stylist['name'].replace(' ', '_')}_fallback"):
+                                    # Enhanced orchestrated response demonstration
+                                    st.success(f"✅ {stylist['name']} assigned to Victoria Chen's appointment!")
+                                    
+                                    # Show orchestrated workflow details
+                                    st.info("""
+                                    **🔄 Automated Workflow Initiated:**
+                                    
+                                    **📱 Staff Notification:**
+                                    • Maria Santos notified via mobile app
+                                    • Customer profile and preferences sent
+                                    • Appointment details and preparation time provided
+                                    
+                                    **🧠 AI-Powered Preparation:**
+                                    • Victoria's style profile and purchase history loaded
+                                    • Recommended items pre-selected based on preferences
+                                    • Inventory availability confirmed for suggested pieces
+                                    
+                                    **📋 System Updates:**
+                                    • Appointment status updated across all systems
+                                    • Customer service team notified of assignment
+                                    • Performance tracking initiated for service quality
+                                    
+                                    **⏰ Timeline:** All actions completed in <5 seconds
+                                    """)
+                                    
+                                    st.session_state.selected_alert_id = None
+                                    st.rerun()
+                    else:
+                        # For alerts without detailed information
+                        st.markdown("---")
+                        if st.button("Close", key="close_simple_dialog"):
+                            st.session_state.selected_alert_id = None
+                            st.rerun()
+
 def show_manager_operations_tab():
     """Display the Operations tab with daily priorities and tasks."""
     col1, col2 = st.columns([2, 1])
     
     with col1:
-        st.markdown("#### 🎯 Today's Priorities")
+        st.markdown("#### Today's Priorities")
         
         operations = [
             {"task": "Morning inventory check", "status": "completed", "time": "08:00", "owner": "Sarah Chen"},
@@ -1406,7 +2700,7 @@ def show_manager_operations_tab():
             """, unsafe_allow_html=True)
     
     with col2:
-        st.markdown("#### 📅 Quick Actions")
+        st.markdown("#### Quick Actions")
         
         if st.button("➕ Add Task", use_container_width=True):
             st.info("Task creation form would open")
@@ -1417,7 +2711,7 @@ def show_manager_operations_tab():
         if st.button("🚚 Track Deliveries", use_container_width=True):
             st.info("Delivery tracking would open")
         
-        if st.button("📊 Generate Report", use_container_width=True):
+        if st.button("Generate Report", use_container_width=True):
             st.info("Report generator would open")
         
         st.markdown("#### 🕐 Store Hours")
@@ -1439,7 +2733,7 @@ def show_manager_team_tab():
     col1, col2 = st.columns(2)
     
     with col1:
-        st.markdown("#### 👥 Team Status")
+        st.markdown("#### Team Status")
         
         team_members = [
             {"name": "Sarah Chen", "role": "Store Associate", "status": "active", "performance": 98, "location": "Women's Fashion"},
@@ -1468,11 +2762,11 @@ def show_manager_team_tab():
                 </div>
             """, unsafe_allow_html=True)
         
-        if st.button("👥 View Team Insights", use_container_width=True):
+        if st.button("View Team Insights", use_container_width=True):
             st.switch_page("pages/team_insights.py")
     
     with col2:
-        st.markdown("#### 📊 Team Metrics")
+        st.markdown("#### Team Metrics")
         
         st.markdown("""
             <div class="team-metrics-card">
@@ -1536,7 +2830,7 @@ def show_manager_inventory_tab():
                 </div>
             """, unsafe_allow_html=True)
         
-        if st.button("📊 Detailed Inventory", use_container_width=True):
+        if st.button("Detailed Inventory", use_container_width=True):
             st.switch_page("pages/inventory.py")
     
     with col2:
@@ -1559,7 +2853,7 @@ def show_manager_inventory_tab():
             </div>
         """, unsafe_allow_html=True)
         
-        st.markdown("#### 📈 Department Stock Levels")
+        st.markdown("#### Department Stock Levels")
         departments = [
             {"name": "Electronics", "level": 95, "color": "#28a745"},
             {"name": "Women's Fashion", "level": 87, "color": "#ffc107"},
@@ -1583,7 +2877,7 @@ def show_manager_analytics_tab():
     col1, col2 = st.columns(2)
     
     with col1:
-        st.markdown("#### 📈 Sales Trends")
+        st.markdown("#### Sales Trends")
         
         st.markdown("""
             <div class="analytics-card">
@@ -1606,7 +2900,7 @@ def show_manager_analytics_tab():
             </div>
         """, unsafe_allow_html=True)
         
-        st.markdown("#### 🎯 Goals Progress")
+        st.markdown("#### Goals Progress")
         goals = [
             {"name": "Monthly Sales Target", "progress": 78, "target": "$450K"},
             {"name": "Customer Satisfaction", "progress": 92, "target": "4.5/5"},
@@ -1650,31 +2944,12 @@ def show_manager_analytics_tab():
                 </div>
             """, unsafe_allow_html=True)
 
-def show_floating_chat_window():
-    """Legacy function - now redirects to modal implementation."""
-    # This function is kept for backward compatibility
-    # but the actual implementation is now in show_persistent_chat
-    pass
-
-# Legacy functions for backward compatibility (simplified versions)
-def show_kpi_dashboard():
-    """Legacy function - redirects to summary."""
-    show_kpi_summary()
-
-def show_notifications():
-    """Legacy function - redirects to modal."""
-    show_notifications_modal()
-
-def show_inventory_status():
-    """Legacy function - redirects to summary."""
-    show_inventory_summary()
-
 def show_homepage():
     """Main homepage function that routes to appropriate view based on user role."""
     # Get user role from session state
     user_role = st.session_state.get("user_role", "store_associate")
     
-    # Get employee name and store name (keep full name including BrickMart)
+    # Get employee name and store name
     employee_name = st.session_state.config["employees"][st.session_state.user_role]["name"]
     store_name = st.session_state.store_name
     
@@ -1683,7 +2958,7 @@ def show_homepage():
     
     # Create the modal first
     chat_modal = modal.Modal(
-        title="🤖 AI Assistant",
+        title="AI Assistant",
         key="homepage_chat_modal",
         max_width=700,
         padding=20
@@ -1700,7 +2975,7 @@ def show_homepage():
         else:
             location = store_name
         
-        st.title(f"🏪 BrickMart - {location}")
+        st.title(f"BrickMart - {location}")
         
         # Integrated store info bar - blends with header
         current_time = datetime.now().strftime("%I:%M %p")
@@ -1730,8 +3005,8 @@ def show_homepage():
                 store_hours = "8:00 AM - 9:00 PM"  # Default hours
         else:
             # Fallback data if store not found in database
-            full_address = "123 Main Street, San Francisco, CA 94102"
-            store_phone = "(555) 123-4567"
+            full_address = "789 Market St, San Francisco, CA 94102"
+            store_phone = "(415) 555-9876"
             store_hours = "8:00 AM - 9:00 PM"
         
         store_info = {
@@ -1752,7 +3027,7 @@ def show_homepage():
                 font-size: 14px;
             ">
                 <div style="display: flex; align-items: center; gap: 20px; flex-wrap: wrap;">
-                    <div style="font-weight: 600; color: #495057;">
+                    <div style="font-weight: 700; color: #495057;">
                         <strong>Welcome back, {employee_name}!</strong>
                     </div>
                     <div style="display: flex; align-items: center; gap: 15px; font-size: 13px;">
@@ -1770,9 +3045,9 @@ def show_homepage():
         st.markdown("<br>", unsafe_allow_html=True)
         # Chat button with notification badge
         if chat_notifications > 0:
-            button_text = f"💬 AI Assistant ({chat_notifications})"
+            button_text = f"AI Assistant ({chat_notifications})"
         else:
-            button_text = "💬 AI Assistant"
+            button_text = "AI Assistant"
         
         if st.button(button_text, key="header_chat_btn", type="primary", use_container_width=True):
             st.session_state.chat_notifications = 0
@@ -1793,8 +3068,6 @@ def show_homepage():
     
     # Show appropriate homepage content based on user role
     if user_role == "store_manager":
-        # Show new tab-based manager homepage
         show_manager_homepage()
     else:
-        # Show new tab-based associate homepage
         show_associate_homepage() 

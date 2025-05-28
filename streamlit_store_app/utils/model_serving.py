@@ -61,7 +61,7 @@ def _throw_unexpected_endpoint_format():
                     "2) Databricks agent serving endpoints that implement the conversational agent schema documented "
                     "in https://docs.databricks.com/aws/en/generative-ai/agent-framework/author-agent")
 
-def query_endpoint_stream(messages: list[dict[str, str]], max_tokens: int, return_traces: bool, endpoint_name: Optional[str] = None):
+def query_endpoint_stream(messages: list[dict[str, str]], max_tokens: int, return_traces: bool, endpoint_name: Optional[str] = None, custom_inputs: Optional[dict] = None):
     """
     Streams chat-completions style chunks and converts to ChatAgent-style streaming deltas.
     
@@ -70,6 +70,7 @@ def query_endpoint_stream(messages: list[dict[str, str]], max_tokens: int, retur
         max_tokens: Maximum tokens in response
         return_traces: Whether to return tracing information
         endpoint_name: Optional endpoint name. If None, gets from config/env.
+        custom_inputs: Optional custom inputs to pass to the agent (e.g., store_num, user_id)
     """
     endpoint = validate_endpoint(endpoint_name)
     client = get_deploy_client("databricks")
@@ -79,6 +80,11 @@ def query_endpoint_stream(messages: list[dict[str, str]], max_tokens: int, retur
         "messages": messages,
         "max_tokens": max_tokens,
     }
+    
+    # Add custom_inputs if provided
+    if custom_inputs:
+        inputs["custom_inputs"] = custom_inputs
+        
     if return_traces:
         inputs["databricks_options"] = {"return_trace": True}
 
@@ -104,13 +110,14 @@ def query_endpoint_stream(messages: list[dict[str, str]], max_tokens: int, retur
         else:
             _throw_unexpected_endpoint_format()
 
-def query_endpoint(messages: list[dict[str, str]], endpoint_name: Optional[str] = None, **kwargs):
+def query_endpoint(messages: list[dict[str, str]], endpoint_name: Optional[str] = None, custom_inputs: Optional[dict] = None, **kwargs):
     """
     Query an endpoint, returning the string message content and request ID for feedback.
     
     Args:
         messages (list): List of message dictionaries with role and content
         endpoint_name (str, optional): Name of the model serving endpoint. If None, gets from config/env.
+        custom_inputs (dict, optional): Custom inputs to pass to the agent (e.g., store_num, user_id)
         **kwargs: Optional parameters including:
             - return_traces (bool): Whether to return tracing information
             - max_tokens (int): Maximum tokens in response
@@ -123,6 +130,10 @@ def query_endpoint(messages: list[dict[str, str]], endpoint_name: Optional[str] 
     
     # Start with required messages parameter
     inputs = {"messages": messages}
+
+    # Add custom_inputs if provided
+    if custom_inputs:
+        inputs["custom_inputs"] = custom_inputs
 
     # Add optional parameters from kwargs
     for param in ['temperature', 'max_tokens', 'stop', 'n', 'stream']:
