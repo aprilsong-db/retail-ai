@@ -235,8 +235,8 @@ RETURNS TABLE(
   ,department_name STRING COMMENT 'Name of the department the product belongs to'
   ,category_name STRING COMMENT 'Name of the category the product belongs to'
   ,subcategory_name STRING COMMENT 'Name of the subcategory the product belongs to'
-  ,base_price DECIMAL(10,2) COMMENT 'Base price of the product'
-  ,msrp DECIMAL(10,2) COMMENT 'MSRP (Manufacturer Suggested Retail Price)'
+  ,base_price DOUBLE COMMENT 'Base price of the product'
+  ,msrp DOUBLE COMMENT 'MSRP (Manufacturer Suggested Retail Price)'
 )
 READS SQL DATA
 COMMENT 'Retrieves detailed information about a specific product by its SKU. This function is designed for product information retrieval in retail applications and can be used for product information, comparison, and recommendation.'
@@ -314,8 +314,8 @@ RETURNS TABLE(
   ,department_name STRING COMMENT 'Name of the department where product is typically located'
   ,category_name STRING COMMENT 'Name of the product category'
   ,subcategory_name STRING COMMENT 'Name of the product subcategory'
-  ,base_price DECIMAL(11,2) COMMENT 'Standard retail price before any discounts'
-  ,msrp DECIMAL(11,2) COMMENT 'MSRP (Manufacturer Suggested Retail Price)'
+  ,base_price DOUBLE COMMENT 'Standard retail price before any discounts'
+  ,msrp DOUBLE COMMENT 'MSRP (Manufacturer Suggested Retail Price)'
 )
 READS SQL DATA
 COMMENT 'Retrieves detailed information about specific products by their UPC. This function is designed for product information retrieval in retail applications and can be used for product information, comparison, and recommendation.'
@@ -394,7 +394,7 @@ RETURNS TABLE(
   ,store_quantity INT COMMENT 'Current available quantity of product in the specified store'
   ,warehouse STRING COMMENT 'Warehouse identifier where backup inventory is stored'
   ,warehouse_quantity INT COMMENT 'Current available quantity of product in the specified warehouse'
-  ,retail_amount DECIMAL(11, 2) COMMENT 'Current retail price of the product'
+  ,retail_amount DOUBLE COMMENT 'Current retail price of the product'
   ,popularity_rating STRING COMMENT 'Rating indicating how popular/frequently purchased the product is (e.g., high, medium, low)'
   ,department STRING COMMENT 'Department within the store where the product is categorized'
   ,aisle_location STRING COMMENT 'Physical aisle location identifier where the product can be found in store'
@@ -473,7 +473,7 @@ RETURNS TABLE(
   ,store_quantity INT COMMENT 'Current available quantity of product in the specified store'
   ,warehouse STRING COMMENT 'Warehouse identifier where backup inventory is stored'
   ,warehouse_quantity INT COMMENT 'Current available quantity of product in the specified warehouse'
-  ,retail_amount DECIMAL(11, 2) COMMENT 'Current retail price of the product'
+  ,retail_amount DOUBLE COMMENT 'Current retail price of the product'
   ,popularity_rating STRING COMMENT 'Rating indicating how popular/frequently purchased the product is (e.g., high, medium, low)'
   ,department STRING COMMENT 'Department within the store where the product is categorized'
   ,aisle_location STRING COMMENT 'Physical aisle location identifier where the product can be found in store'
@@ -558,7 +558,7 @@ RETURNS TABLE(
   ,store_quantity INT COMMENT 'Current available quantity of product in the specified store'
   ,warehouse STRING COMMENT 'Warehouse identifier where backup inventory is stored'
   ,warehouse_quantity INT COMMENT 'Current available quantity of product in the specified warehouse'
-  ,retail_amount DECIMAL(11, 2) COMMENT 'Current retail price of the product'
+  ,retail_amount DOUBLE COMMENT 'Current retail price of the product'
   ,popularity_rating STRING COMMENT 'Rating indicating how popular/frequently purchased the product is (e.g., high, medium, low)'
   ,department STRING COMMENT 'Department within the store where the product is categorized'
   ,aisle_location STRING COMMENT 'Physical aisle location identifier where the product can be found in store'
@@ -639,7 +639,7 @@ RETURNS TABLE(
   ,store_quantity INT COMMENT 'Current available quantity of product in the specified store'
   ,warehouse STRING COMMENT 'Warehouse identifier where backup inventory is stored'
   ,warehouse_quantity INT COMMENT 'Current available quantity of product in the specified warehouse'
-  ,retail_amount DECIMAL(11, 2) COMMENT 'Current retail price of the product'
+  ,retail_amount DOUBLE COMMENT 'Current retail price of the product'
   ,popularity_rating STRING COMMENT 'Rating indicating how popular/frequently purchased the product is (e.g., high, medium, low)'
   ,department STRING COMMENT 'Department within the store where the product is categorized'
   ,aisle_location STRING COMMENT 'Physical aisle location identifier where the product can be found in store'
@@ -713,10 +713,10 @@ def create_find_store_by_number_function(catalog_name: str, database_name: str, 
     
     sql_function_body = f"""
 CREATE OR REPLACE FUNCTION {function_name}(
-  store_ids ARRAY<STRING> COMMENT 'One or more store identifiers to retrieve. Store IDs are string values'
+  store_ids ARRAY<INT> COMMENT 'One or more store identifiers to retrieve. Store IDs are integer values'
 )
 RETURNS TABLE(
-  store_id STRING COMMENT 'Unique identifier for each store in the system'
+  store_id INT COMMENT 'Unique identifier for each store in the system'
   ,store_name STRING COMMENT 'Display name of the store location'
   ,store_address STRING COMMENT 'Street address of the store location'
   ,store_city STRING COMMENT 'City where the store is located'
@@ -779,12 +779,12 @@ create_find_store_by_number_function(catalog_name, database_name, client)
 # Test the find_store_by_number function with dim_stores2
 try:
     print("🔍 Testing store lookup by store ID using dim_stores2 table...")
-    print("📋 Testing with store IDs: ['001', '002']")
+    print("📋 Testing with store IDs: [1, 2]")
     
     test_df = execute_and_display_function(
         client=client,
         function_name=f"{catalog_name}.{database_name}.find_store_by_number",
-        parameters={"store_ids": ["001", "002"]},
+        parameters={"store_ids": [1, 2]},
         description="Testing store lookup by store ID using dim_stores2 table"
     )
     
@@ -793,7 +793,7 @@ try:
         print("1. Verify that the dim_stores2 table exists and has data:")
         print(f"   SELECT COUNT(*) FROM {catalog_name}.{database_name}.dim_stores2;")
         print("2. Check if the store IDs exist in the table:")
-        print(f"   SELECT store_id FROM {catalog_name}.{database_name}.dim_stores2 WHERE store_id IN ('001', '002');")
+        print(f"   SELECT store_id FROM {catalog_name}.{database_name}.dim_stores2 WHERE store_id IN (1, 2);")
         print("3. Ensure the data has been loaded from dim_stores_data.sql")
         print("4. Verify the function was created successfully")
     else:

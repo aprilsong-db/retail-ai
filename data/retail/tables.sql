@@ -15,12 +15,12 @@ CREATE TABLE IF NOT EXISTS store_inventory (
     store_phone STRING NOT NULL,
     store_email STRING NOT NULL,
     -- Location coordinates
-    latitude DECIMAL(10,8) NOT NULL,
-    longitude DECIMAL(11,8) NOT NULL,
+    latitude DOUBLE NOT NULL,
+    longitude DOUBLE NOT NULL,
     -- Store details
     store_type STRING NOT NULL, -- 'flagship', 'outlet', 'express', 'popup'
     store_size_sqft INT NOT NULL,
-    store_rating DECIMAL(2,1) NOT NULL,
+    store_rating DOUBLE NOT NULL,
     store_hours JSON NOT NULL, -- JSON object with opening hours for each day
     location_type STRING NOT NULL, -- 'sales_floor', 'backroom', 'warehouse'
     quantity INT NOT NULL,
@@ -44,9 +44,9 @@ CREATE TABLE IF NOT EXISTS store_inventory (
     stockout_risk_level STRING NOT NULL, -- 'low', 'medium', 'high', 'critical'
     -- Seasonality and trend data
     is_seasonal BOOLEAN NOT NULL,
-    season_peak_factor DECIMAL(5,2) NOT NULL,
+    season_peak_factor DOUBLE NOT NULL,
     trend_direction STRING NOT NULL, -- 'increasing', 'stable', 'decreasing'
-    trend_strength DECIMAL(5,2) NOT NULL,
+    trend_strength DOUBLE NOT NULL,
     -- Last prediction update
     last_prediction_update TIMESTAMP NOT NULL,
     -- Store status

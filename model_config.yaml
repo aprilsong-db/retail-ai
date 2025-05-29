@@ -1,6 +1,7 @@
 catalog_name: demos_genie
 database_name: rcg_store_manager_gold
 volume_name: retail_ai
+genie_space_id: 01f03432c01a1b18b710fe597c2d68ee
 permissions:
   - principals: [fc584ce6-aceb-4083-a4cc-0e64b87ba347]
     privileges:
@@ -43,16 +44,10 @@ resources:
       doc_uri: ~
       embedding_source_column: long_description
       columns:
-        - sku
-        - upc
         - product_id
+        - sku
         - product_name
-        - short_description
         - long_description
-        - brand_name
-        - merchandise_class
-        - category_name
-        - subcategory_name
 
     store_vector_store: &store_vector_store
       embedding_model_endpoint_name: databricks-gte-large-en
@@ -69,17 +64,6 @@ resources:
         - store_address
         - store_city
         - store_state
-        - store_zipcode
-        - store_country
-        - store_phone
-        - store_email
-        - store_manager_id
-        - opening_date
-        - store_area_sqft
-        - is_open_24_hours
-        - latitude
-        - longitude
-        - region_id
         - store_details_text
 
     # List of all vector stores to provision
@@ -170,102 +154,535 @@ app:
         - CAN_MANAGE
 
   examples:
+    # Demo Script Scene 1: Initial Inventory Check
+    demo_initial_inventory_check:
+      messages:
+        - role: user
+          content: Hey Assistant, can you check if we have Adidas Gazelle sneakers in black at our Downtown Market location?
+      custom_inputs:
+        configurable:
+          thread_id: "1"
+          user_id: sarah.associate
+          store_num: 101
+
+    # Demo Script Scene 2: Recommendation Request
+    demo_recommendation_request:
+      messages:
+        - role: user
+          content: Assistant, can you recommend similar sneakers to the black Gazelles that we have in stock?
+      custom_inputs:
+        configurable:
+          thread_id: "1"
+          user_id: sarah.associate
+          store_num: 101
+
+    # Demo Script Scene 3: Cross-Store Inventory Check
+    demo_cross_store_check:
+      messages:
+        - role: user
+          content: Assistant, can you check which nearby stores have black Gazelles in stock?
+      custom_inputs:
+        configurable:
+          thread_id: "1"
+          user_id: sarah.associate
+          store_num: 101
+
+    # Demo Script Scene 4: Hold Request
+    demo_hold_request:
+      messages:
+        - role: user
+          content: Assistant, can you place a hold on black Gazelles, size 10, at Marina Market for this customer?
+      custom_inputs:
+        configurable:
+          thread_id: "1"
+          user_id: sarah.associate
+          store_num: 101
+
+    # Customer Profile Intelligence Example
+    customer_profile_intelligence_example:
+      messages:
+        - role: user
+          content: Show me everything I need to know about Victoria Chen.
+      custom_inputs:
+        configurable:
+          thread_id: "1"
+          user_id: maria.stylist
+          store_num: 101
+
+    # Styling Appointment Preparation Example
+    styling_appointment_prep_example:
+      messages:
+        - role: user
+          content: I have a styling appointment with Victoria Sterling today. Help me prepare.
+      custom_inputs:
+        configurable:
+          thread_id: "1"
+          user_id: maria.stylist
+          store_num: 101
+
+    # Stylist Notification Example
+    stylist_notification_example:
+      messages:
+        - role: user
+          content: Generate a notification for Victoria Sterling's upcoming styling appointment.
+      custom_inputs:
+        configurable:
+          thread_id: "1"
+          user_id: maria.stylist
+          store_num: 101
+
+    # Real-time Styling Assistance Example
+    real_time_styling_example:
+      messages:
+        - role: user
+          content: Victoria is here for her appointment. She's looking at sneakers but seems unsure. What should I recommend?
+      custom_inputs:
+        configurable:
+          thread_id: "1"
+          user_id: maria.stylist
+          store_num: 101
+
+    # Demo Script Scene 4: Directions and Notifications
+    demo_directions_notifications:
+      messages:
+        - role: user
+          content: Assistant, please send directions to Marina Market and set up restock notifications for black Gazelles.
+      custom_inputs:
+        configurable:
+          thread_id: "1"
+          user_id: sarah.associate
+          store_num: 101
+
+    # Manager Demo: Customer Profile Request
+    demo_customer_profile:
+      messages:
+        - role: user
+          content: Show me everything I need to know about Victoria Chen.
+      custom_inputs:
+        configurable:
+          thread_id: "1"
+          user_id: maria.stylist
+          store_num: 101
+
+    # Manager Demo: Appointment Preparation
+    demo_appointment_preparation:
+      messages:
+        - role: user
+          content: What should I prepare for Victoria's appointment today?
+      custom_inputs:
+        configurable:
+          thread_id: "1"
+          user_id: maria.stylist
+          store_num: 101
+
+    # Manager Demo: Real-time Styling Support
+    demo_styling_support:
+      messages:
+        - role: user
+          content: Victoria likes the navy blazer but wants something more modern. Suggestions?
+      custom_inputs:
+        configurable:
+          thread_id: "1"
+          user_id: maria.stylist
+          store_num: 101
+
+    # Local San Francisco context
+    sf_weather_styling_example:
+      messages:
+        - role: user
+          content: What Adidas sneakers work best for San Francisco's foggy weather and hilly terrain?
+      custom_inputs:
+        configurable:
+          thread_id: "1"
+          user_id: sf.customer
+          store_num: 101
+
+    # Brand Rep Product Education Demo Examples
+    brand_rep_nike_customers:
+      messages:
+        - role: user
+          content: Nike brand representative is coming to train us on Air Max SC. What should I know about our customers who buy Nike?
+      custom_inputs:
+        configurable:
+          thread_id: "1"
+          user_id: marcus.associate
+          store_num: 101
+
+    brand_rep_product_performance:
+      messages:
+        - role: user
+          content: Show me how Nike Air Max products perform at our store.
+      custom_inputs:
+        configurable:
+          thread_id: "1"
+          user_id: marcus.associate
+          store_num: 101
+
+    brand_rep_competitive_analysis:
+      messages:
+        - role: user
+          content: What do customers say when they choose Adidas over Nike?
+      custom_inputs:
+        configurable:
+          thread_id: "1"
+          user_id: marcus.associate
+          store_num: 101
+
+    brand_rep_product_comparison:
+      messages:
+        - role: user
+          content: How does Air Max SC cushioning compare to our top-selling Air Max 90?
+      custom_inputs:
+        configurable:
+          thread_id: "1"
+          user_id: marcus.associate
+          store_num: 101
+
+    brand_rep_positioning:
+      messages:
+        - role: user
+          content: How should I position Nike Air Max products to different customer segments based on our sales data?
+      custom_inputs:
+        configurable:
+          thread_id: "1"
+          user_id: marcus.associate
+          store_num: 101
+
+    brand_rep_objection_handling:
+      messages:
+        - role: user
+          content: What are the most common objections to Nike products and how do successful associates handle them?
+      custom_inputs:
+        configurable:
+          thread_id: "1"
+          user_id: marcus.associate
+          store_num: 101
+
+    # Product Tools Examples
+    product_by_sku_example:
+      messages:
+        - role: user
+          content: Can you tell me about the Adidas Gazelle Classic Sneakers? What's the price and available colors?
+      custom_inputs:
+        configurable:
+          thread_id: "1"
+          user_id: sf.customer
+          store_num: 101
+
+    # Inventory Tools Examples
+    inventory_by_sku_example:
+      messages:
+        - role: user
+          content: How many Adidas Samba Classic Sneakers do you have in stock across all San Francisco stores?
+      custom_inputs:
+        configurable:
+          thread_id: "1"
+          user_id: sf.customer
+          store_num: 101
+
+    store_inventory_by_sku_example:
+      messages:
+        - role: user
+          content: Do you have Adidas Gazelle sneakers in stock at the Downtown Market store?
+      custom_inputs:
+        configurable:
+          thread_id: "1"
+          user_id: sf.customer
+          store_num: 101
+
+    # Store Tools Examples
+    store_by_number_example:
+      messages:
+        - role: user
+          content: Can you give me details about the Downtown Market and Marina Market stores in San Francisco?
+      custom_inputs:
+        configurable:
+          thread_id: "1"
+          user_id: sf.customer
+          store_num: 101
+
+    store_hours_example:
+      messages:
+        - role: user
+          content: What are the store hours for the Mission Market location and do you offer BrickRewards points on Adidas purchases?
+      custom_inputs:
+        configurable:
+          thread_id: "1"
+          user_id: sf.customer
+          store_num: 103
+
+    # Customer Tools Examples
+    customer_appointments_example:
+      messages:
+        - role: user
+          content: What upcoming appointments do we have for customer CUST-001 at our San Francisco stores?
+      custom_inputs:
+        configurable:
+          thread_id: "1"
+          user_id: sf.employee
+          store_num: 101
+
+    customer_details_example:
+      messages:
+        - role: user
+          content: Can you get me the details for customer CUST-002 including their footwear preferences?
+      custom_inputs:
+        configurable:
+          thread_id: "1"
+          user_id: sf.employee
+          store_num: 101
+
+    customer_preparation_example:
+      messages:
+        - role: user
+          content: Help me prepare for Victoria Sterling's appointment - what should I know about her style preferences for sneakers?
+      custom_inputs:
+        configurable:
+          thread_id: "1"
+          user_id: sf.employee
+          store_num: 101
+
+    # Employee Tools Examples
+    top_employees_example:
+      messages:
+        - role: user
+          content: Who are the top performing employees in the Footwear department at our San Francisco stores?
+      custom_inputs:
+        configurable:
+          thread_id: "1"
+          user_id: sf.manager
+          store_num: 101
+
+    personal_shopping_associates_example:
+      messages:
+        - role: user
+          content: Which personal shopping associates are available for sneaker styling appointments in San Francisco?
+      custom_inputs:
+        configurable:
+          thread_id: "1"
+          user_id: sf.employee
+          store_num: 101
+
+    employee_manager_example:
+      messages:
+        - role: user
+          content: Who is the manager for employee EMP-016 at the Downtown Market store?
+      custom_inputs:
+        configurable:
+          thread_id: "1"
+          user_id: sf.employee
+          store_num: 101
+
+    task_assignment_example:
+      messages:
+        - role: user
+          content: Assign a BOPIS task for Adidas Gazelle pickup to the Footwear department at Marina Market.
+      custom_inputs:
+        configurable:
+          thread_id: "1"
+          user_id: sf.manager
+          store_num: 102
+
+    # Recommendation Examples
     recommendation_example:
       messages:
         - role: user
-          content: Can you recommend a coffee pod similar to Starbucks Pike Place? I prefer medium roast coffee.
+          content: Can you recommend sneakers similar to Adidas Gazelle? I like retro suede styles.
       custom_inputs:
         configurable:
           thread_id: "1"
-          user_id: nate.fleming
-          store_num: "SF-DOWNTOWN"
+          user_id: sf.customer
+          store_num: 101
 
-    inventory_example:
-      messages:
-        - role: user
-          content: How many Peet's Major Dickason's Blend K-Cup pods do you have in stock?
-      custom_inputs:
-        configurable:
-          thread_id: "1"
-          user_id: nate.fleming
-          store_num: "SF-DOWNTOWN"
-
+    # Comparison Examples
     comparison_example:
       messages:
         - 
           role: user
           content: >-
-            Can you compare Starbucks Pike Place (SKU: STB-KCP-001) and Dunkin' Original Blend (SKU: DUN-KCP-001) K-Cup pods?
+            Can you compare Adidas Gazelle (SKU: ADI-GAZ-001) and Adidas Samba (SKU: ADI-SMB-001) sneakers?
       custom_inputs:
         configurable:
           thread_id: "1"
-          user_id: nate.fleming
-          store_num: "SF-DOWNTOWN"
+          user_id: sf.customer
+          store_num: 101
 
     comparison_image_example:
       messages:
         - role: user
-          content: Can you compare these coffee pods?
+          content: Can you compare these Adidas sneakers?
           image_paths: 
-            - tests/images/starbucks_pike_place.png
-            - tests/images/peets_major_dickason.png
+            - tests/images/adidas_gazelle.png
+            - tests/images/adidas_samba.png
       custom_inputs:
         configurable:
           thread_id: "1"
-          user_id: nate.fleming
-          store_num: "SF-DOWNTOWN"
+          user_id: sf.customer
+          store_num: 101
 
+    # General Examples
     general_example:
       messages:
         - role: user
-          content: What are your store hours and do you offer BrickRewards points on coffee purchases?
+          content: What are your store hours and location for the Downtown Market in San Francisco?
       custom_inputs:
         configurable:
           thread_id: "1"
-          user_id: nate.fleming
-          store_num: "SF-DOWNTOWN"
+          user_id: sf.customer
+          store_num: 101
 
+    # DIY Examples
     diy_example:
       messages:
         - role: user
-          content: How do I descale my Keurig coffee maker?
+          content: How do I clean and maintain my Adidas Gazelle suede sneakers?
       custom_inputs:
         configurable:
           thread_id: "1"
-          user_id: nate.fleming
-          store_num: "SF-DOWNTOWN"
+          user_id: sf.customer
+          store_num: 101
 
+    # Orders Examples
     orders_example:
       messages:
         - role: user
-          content: When will my online order of Green Mountain Breakfast Blend K-Cups arrive? Order number is 12345.
+          content: When will my online order of Adidas Samba sneakers arrive at the Marina Market? Order number is 12345.
       custom_inputs:
         configurable:
           thread_id: "1"
-          user_id: nate.fleming
-          store_num: "SF-DOWNTOWN"
+          user_id: sf.customer
+          store_num: 102
 
-    product_example:
-      messages:
-        - role: user
-          content: Can you tell me about the Peet's Major Dickason's Blend K-Cup pods? What's the roast level and price?
-      custom_inputs:
-        configurable:
-          thread_id: "1"
-          user_id: nate.fleming
-          store_num: "SF-DOWNTOWN"
-
+    # Product Image Examples
     product_image_example:
       messages:
         - role: user
-          content: Can you give me information about this coffee pod?
+          content: Can you give me information about these Adidas sneakers?
           image_paths: 
-            - tests/images/starbucks_pike_place.png
+            - tests/images/adidas_gazelle.png
       custom_inputs:
         configurable:
           thread_id: "1"
-          user_id: nate.fleming
-          store_num: "SF-DOWNTOWN"
+          user_id: sf.customer
+          store_num: 101
+
+    # Vector Search Examples
+    store_location_search_example:
+      messages:
+        - role: user
+          content: Find me BrickMart stores in San Francisco that carry Adidas footwear.
+      custom_inputs:
+        configurable:
+          thread_id: "1"
+          user_id: sf.customer
+          store_num: 101
+
+    # Real Data Examples with Specific IDs
+    out_of_stock_example:
+      messages:
+        - role: user
+          content: Hi, do you have the Adidas Gazelle sneakers in black at the Downtown Market?
+      custom_inputs:
+        configurable:
+          thread_id: "1"
+          user_id: sf.customer
+          store_num: 101
+
+    alternative_recommendation_example:
+      messages:
+        - role: user
+          content: The Adidas Gazelle in black is out of stock. What would you recommend that's similar?
+      custom_inputs:
+        configurable:
+          thread_id: "1"
+          user_id: sf.customer
+          store_num: 101
+
+    specific_sku_lookup_example:
+      messages:
+        - role: user
+          content: Can you tell me about SKU ADI-GAZ-001?
+      custom_inputs:
+        configurable:
+          thread_id: "1"
+          user_id: sf.customer
+          store_num: 101
+
+    # Multi-store inventory check
+    cross_store_inventory_example:
+      messages:
+        - role: user
+          content: Check inventory for Adidas Samba sneakers across all San Francisco stores.
+      custom_inputs:
+        configurable:
+          thread_id: "1"
+          user_id: sf.customer
+          store_num: 101
+
+    # Employee performance example
+    department_performance_example:
+      messages:
+        - role: user
+          content: Show me the top performers in the Footwear department at San Francisco stores this month.
+      custom_inputs:
+        configurable:
+          thread_id: "1"
+          user_id: sf.manager
+          store_num: 101
+
+    # Customer service example
+    vip_customer_example:
+      messages:
+        - role: user
+          content: Victoria Sterling has an appointment today for sneaker styling. What should I prepare for her visit?
+      custom_inputs:
+        configurable:
+          thread_id: "1"
+          user_id: sf.employee
+          store_num: 101
+
+    # Store comparison example
+    store_comparison_example:
+      messages:
+        - role: user
+          content: Compare the Downtown Market and Marina Market locations - which has better Adidas selection?
+      custom_inputs:
+        configurable:
+          thread_id: "1"
+          user_id: sf.customer
+          store_num: 101
+
+    # Size and fit examples
+    size_availability_example:
+      messages:
+        - role: user
+          content: Do you have Adidas Gazelle in size 9.5 available at any San Francisco stores?
+      custom_inputs:
+        configurable:
+          thread_id: "1"
+          user_id: sf.customer
+          store_num: 101
+
+    color_availability_example:
+      messages:
+        - role: user
+          content: What colors are available for Adidas Samba at the Mission Market store?
+      custom_inputs:
+        configurable:
+          thread_id: "1"
+          user_id: sf.customer
+          store_num: 103
+
+    # Style consultation examples
+    style_consultation_example:
+      messages:
+        - role: user
+          content: I'm looking for versatile sneakers for both casual and semi-formal occasions in San Francisco. What Adidas styles would you recommend?
+      custom_inputs:
+        configurable:
+          thread_id: "1"
+          user_id: sf.customer
+          store_num: 101
 
 
 checkpointer: &checkpointer
@@ -282,16 +699,10 @@ retrievers:
   products_retriever: &products_retriever
     vector_store: *products_vector_store
     columns:
-      - sku
-      - upc
       - product_id
+      - sku
       - product_name
-      - short_description
       - long_description
-      - brand_name
-      - merchandise_class
-      - category_name
-      - subcategory_name
     search_parameters:
       num_results: 20
       filter: {}
@@ -305,17 +716,6 @@ retrievers:
       - store_address
       - store_city
       - store_state
-      - store_zipcode
-      - store_country
-      - store_phone
-      - store_email
-      - store_manager_id
-      - opening_date
-      - store_area_sqft
-      - is_open_24_hours
-      - latitude
-      - longitude
-      - region_id
       - store_details_text
     search_parameters:
       num_results: 10
@@ -334,6 +734,7 @@ agents:
       - diy
       - orders
       - general
+      - stylist
     default_route: general
     prompt: |
       Analyze the customer question and select ONE specific route from the allowed options:
@@ -356,6 +757,9 @@ agents:
       - Route to 'orders': Questions about tracking orders, delivery status, scheduling deliveries or services
         Example: "When will my order arrive?" or "Can I schedule delivery for my new refrigerator?"
 
+      - Route to 'stylist': Questions about personal styling, fashion advice, customer appointments, or styling services
+        Example: "I have a styling appointment with Victoria Sterling" or "Help me prepare for a customer styling session"
+
       - Route to 'general': ANY other questions that don't fit the above categories, including store policies, hours, etc.
         Example: "What are your store hours?" or "Do you offer free delivery?"
       
@@ -370,8 +774,66 @@ agents:
       ### User Information
       - **User Id**: {user_id}
       - **Store Number**: {store_num}
-      You are a helpful retail associate at BrickMart, providing information about our wide selection of products across departments including home goods, electronics, clothing, groceries, and more. Assist customers with questions about our store policies, operating hours, returns and exchanges, gift cards and registries, available services, BrickRewards program, and other general inquiries. Be warm and welcoming while providing clear, concise information. If you're unsure about specific store policies, share common retail practices while encouraging customers to check with our in-store team members for confirmation. Maintain our commitment to excellent customer service with a friendly, professional demeanor.
+      
+      You are a helpful store associate providing general information and assistance. Help customers with:
+      
+      **Customer Profile Intelligence:**
+      - Use `get_customer_profile_intelligence` for comprehensive customer insights
+      - Perfect for questions like "Show me everything I need to know about [customer name]"
+      - Provides AI-powered analysis of purchase patterns, brand affinity, style profile, and recommendations
+      - Includes current needs assessment and personalized service recommendations
+      
+      **Store Information:**
+      - Use `find_store_by_location` for store locations and details
+      - Use `find_nearby_stores_inventory` for inventory at nearby locations
+      
+      **Complex Analytics:**
+      - Use `query_genie` for complex analytical questions about business data
+      - Perfect for questions requiring data analysis across multiple tables
+      - Examples: sales trends, customer analytics, inventory insights, performance metrics
+      
+      **General Assistance:**
+      - Answer general questions about store policies, hours, services
+      - Provide helpful information and guidance
+      - Route complex requests to appropriate specialists
+      
+      Always be helpful, informative, and customer-focused.
 
+  stylist:
+    model: *tool_calling_llm
+    guardrails: ~
+      #- *llm_judge_guardrail
+    prompt: |
+      ### User Information
+      - **User Id**: {user_id}
+      - **Store Number**: {store_num}
+      
+      You are a professional personal stylist providing expert styling services and appointment support. You specialize in:
+      
+      **Personal Styling Appointments:**
+      - Use `generate_stylist_notification` to create intelligent appointment notifications
+      - Use `prepare_customer_appointment` for comprehensive appointment preparation
+      - Use `generate_inventory_preselection` to pre-select items for customer appointments
+      - Use `get_real_time_styling_assistance` during active styling sessions
+      
+      **Customer Intelligence:**
+      - Use `get_customer_profile_intelligence` for deep customer insights
+      - Analyze purchase patterns, brand affinity, and style preferences
+      - Identify current needs and styling opportunities
+      
+      **Styling Expertise:**
+      - Provide personalized styling recommendations based on customer profile
+      - Suggest outfit combinations and styling tips
+      - Help customers discover new styles that match their preferences
+      - Use `find_similar_products_with_inventory` for alternative recommendations
+      
+      **Appointment Workflow:**
+      - Prepare for upcoming appointments with customer intelligence
+      - Generate pre-selected inventory recommendations
+      - Provide real-time styling assistance during appointments
+      - Follow up with styling tips and recommendations
+      
+      Always be professional, fashion-forward, and customer-focused. Provide specific, actionable styling advice.
 
   orders:
     model: *tool_calling_llm
@@ -382,7 +844,45 @@ agents:
       - **User Id**: {user_id}
       - **Store Number**: {store_num}
       
-      You are a helpful store associate at BrickMart. Help customers with questions about their online and in-store orders, including order tracking, pickup status, delivery scheduling, order changes, cancellations, and returns. For online orders, direct customers to check their order status through our website/app or call our customer service line. For in-store pickup orders, check if they've received their "Ready for Pickup" email and verify their photo ID and order number at Customer Service. For returns, remind customers they need their receipt or can look up purchases with the card used for payment. Be friendly and solution-oriented while setting realistic expectations about what information you can access. If you can't fully resolve their issue, guide them to the appropriate next steps like visiting Customer Service or contacting our customer service team.
+      You are a customer service specialist helping with orders and fulfillment. Assist customers with:
+      
+      **Order Management:**
+      - Track online and in-store orders
+      - Check BOPIS (Buy Online, Pick up In Store) status
+      - Schedule deliveries and pickups
+      - Handle order modifications and cancellations
+      
+      **BOPIS Services:**
+      - Verify "Ready for Pickup" notifications
+      - Coordinate pickup at store locations
+      - Assign pickup tasks to appropriate departments
+      - Provide pickup instructions and requirements
+      
+      **Task Assignment:**
+      - Assign BOPIS tasks to specific departments
+      - Coordinate with relevant departments for product pickups
+      - Manage task priorities and timing
+      - Ensure proper handoff between departments
+      
+      **Customer Appointments:**
+      - Schedule customer appointments for personal styling
+      - Coordinate with personal shopping associates
+      - Manage appointment preparation and follow-up
+      - Handle appointment modifications
+      
+      **Key Processes:**
+      - Verify customer ID and order numbers for pickups
+      - Provide accurate pickup timeframes
+      - Coordinate between online orders and store inventory
+      - Ensure smooth customer experience for all order types
+      
+      **Multi-Location Support:**
+      - Support all store locations
+      - Coordinate transfers between stores when needed
+      - Provide location-specific pickup instructions
+      - Handle location-specific delivery logistics
+      
+      Focus on efficient order fulfillment and excellent customer service throughout the order lifecycle.
 
   diy:
     model: *tool_calling_llm
@@ -432,14 +932,57 @@ agents:
       - **User Id**: {user_id}
       - **Store Number**: {store_num}
       
-      You are a helpful store associate at BrickMart. Provide detailed information about products across our departments, 
-      including features, specifications, dimensions, materials, warranty information, and intended uses. This could be 
-      anything from electronics and home goods to clothing and groceries. Focus on being accurate and thorough when 
-      describing what products can and cannot do. When appropriate, suggest related items that customers might need, 
-      like batteries for electronics or storage containers for food items. If asked about product quality, share balanced 
-      feedback based on typical customer reviews and your experience with the products. Always prioritize giving accurate 
-      information over making a sale. If you're not certain about specific product details, offer to check the packaging 
-      or find a department specialist who can help.
+      You are a product specialist with expertise in our product catalog. Help customers with:
+      
+      **Product Lookup Process:**
+      1. **When given product names/descriptions**: Use vector search to find products
+         - Use `find_product_details_by_description` to search by natural language
+         - Extract SKU, product details, and specifications from search results
+         - Example: "Adidas Gazelle sneakers" → search → get detailed product info
+      
+      2. **When given specific SKUs**: Use direct SKU lookup
+         - Use `find_product_by_sku` for exact SKU matches
+         - Provide detailed specifications and pricing
+      
+      **Product Information:**
+      - Provide detailed specifications, features, and pricing
+      - Share materials, colors, sizing, and availability information
+      - Explain product features and intended uses
+      - Compare different models and their characteristics
+      
+      **Key Tools Available:**
+      - `find_product_details_by_description`: Search products using natural language descriptions
+      - `find_product_by_sku`: Get detailed product info using exact SKU codes
+      - `find_similar_products_with_inventory`: Find similar products with real-time inventory data
+      
+      **Workflow Example:**
+      1. Customer asks: "Tell me about Adidas Gazelle sneakers"
+      2. Search for "Adidas Gazelle sneakers" using vector search
+      3. Extract product details, SKU, pricing from results
+      4. Provide comprehensive product information
+      
+      **Product Categories:**
+      - Footwear and athletic shoes
+      - Apparel and accessories
+      - Home goods and electronics
+      - Sporting goods and outdoor equipment
+      - Various brand offerings and product lines
+      
+      **Important Notes:**
+      - Always use vector search first when given product names or descriptions
+      - Use exact SKU lookup only when customers provide specific SKU codes
+      - Focus on accurate product specifications and pricing
+      - Highlight features relevant to customer needs and local conditions
+      - Suggest complementary products when appropriate
+      - **For similar products**: Use `find_similar_products_with_inventory` when customers ask for alternatives, similar items, or "products like this"
+      
+      **Similar Products Workflow:**
+      1. Customer asks: "What products are similar to Adidas Gazelle?"
+      2. Use `find_similar_products_with_inventory` with "Adidas Gazelle"
+      3. Present similar products with availability and pricing
+      4. Explain similarities and differences between products
+      
+      Provide accurate, detailed product information to help customers make informed decisions.
 
   inventory:
     model: *tool_calling_llm
@@ -450,36 +993,88 @@ agents:
       - **User Id**: {user_id}
       - **Store Number**: {store_num}
       
-      You are a store associate at BrickMart. Help customers find the items they're looking for by checking:
-      - Current in-store availability and exact aisle locations
-      - Real-time stock levels (store_quantity)
-      - Warehouse backup inventory (warehouse_quantity)
-      - Expected delivery dates for out-of-stock items (next_restock_date)
-      - Stock status indicators (is_out_of_stock, is_low_stock)
-      - Demand predictions and trends
-      - Store details including hours and location
+      You are a store associate specializing in inventory management. Help customers and staff with:
       
-      When items are out of stock:
-      - Check nearby store availability using latitude/longitude
-      - Provide accurate restock dates
-      - Share stockout risk level
-      - Offer demand-based recommendations
-      - Calculate days until stockout
+      **Product and Store Lookup Process:**
+      1. **When given product names**: Use vector search to find the correct SKU codes
+         - Use `find_product_details_by_description` to search for products by name/description
+         - Extract the SKU from the search results before checking inventory
+         - Example: "Adidas Gazelle" → search → get SKU "ADI-GAZ-001"
       
-      Use the enhanced inventory data to provide:
-      - Store operating hours from store_hours
-      - Exact aisle_location for in-store pickup
-      - Current retail_amount and any closeout status
-      - Store ratings and contact information
-      - Accurate demand predictions
+      2. **When given store names**: Use vector search to find the correct store ID
+         - Use `find_store_details_by_location` to search for stores by name/location
+         - Extract the store_id from the search results before checking store inventory
+         - Example: "Downtown Market" → search → get store_id "101"
       
-      Be precise with inventory information while maintaining a helpful attitude. Use our real-time 
-      inventory tracking to give customers the most up-to-date and accurate information possible. 
-
-      Use the find_product_details_by_description to find the UPC and SKU numbers
-      Use as many tools as you need to find the inventory 
-
-      Only use find_store_inventory_by_upc when you know the store number 
+      **Inventory Checking:**
+      - Check current stock levels using SKU codes (after lookup if needed)
+      - Verify availability at specific store locations (after store lookup if needed)
+      - Provide exact aisle locations and store quantities
+      - Check warehouse backup inventory levels
+      
+      **Cross-Store Inventory:**
+      - Search inventory across multiple store locations
+      - Compare stock levels between stores
+      - Identify which nearby stores have items in stock
+      - Provide store contact information for transfers
+      
+      **Hold Placement:**
+      - Place 24-hour holds on items at specific stores for customers
+      - Generate hold confirmation with unique hold ID
+      - Provide pickup instructions and store contact information
+      - Handle hold requests with customer names and item sizes when specified
+      - Confirm hold details including expiration time and pickup requirements
+      
+      **Key Tools Available:**
+      - `find_product_details_by_description`: Search products by name/description to get SKU
+      - `find_store_details_by_location`: Search stores by name/location to get store_id
+      - `find_inventory_by_sku`: Check inventory across all stores for specific SKUs
+      - `find_store_inventory_by_sku`: Check inventory at a specific store location
+      - `find_nearby_stores_inventory`: Find inventory at stores near a reference location
+      - `find_similar_products_with_inventory`: Find similar products with real-time inventory when items are out of stock
+      - `place_item_hold`: Place a hold on an item at a specific store for customer pickup
+      
+      **Workflow Example:**
+      1. Customer asks: "Do you have Adidas Gazelle at Downtown Market?"
+      2. Search for "Adidas Gazelle" to get SKU (e.g., "ADI-GAZ-001")
+      3. Search for "Downtown Market" to get store_id (e.g., "101")
+      4. Use `find_store_inventory_by_sku` with store_id and SKU
+      5. If out of stock: Use `find_nearby_stores_inventory` to check nearby locations
+      6. If still needed: Use `find_similar_products_with_inventory` to suggest alternatives
+      
+      **Hold Placement Workflow:**
+      1. Customer requests: "Place a hold for size 10 black Gazelles at Marina Market"
+      2. Search for "Adidas Gazelle" to get SKU (e.g., "ADI-GAZ-001")
+      3. Use `place_item_hold` with SKU="ADI-GAZ-001", store_name="Marina Market", size="10"
+      4. Provide hold confirmation with hold ID, expiration time, and pickup instructions
+      5. Include store phone number and address for customer reference
+      
+      **Nearby Stores Workflow:**
+      1. When primary store is out of stock, automatically check nearby locations
+      2. Use `find_nearby_stores_inventory` with reference store and SKU
+      3. Present options sorted by distance and availability
+      4. Include travel time estimates and store contact information
+      5. Offer to hold items at nearby stores if available
+      
+      **Important Notes:**
+      - Always use vector search first when given product names or store names
+      - Only use SKU codes for inventory lookups (no UPC support)
+      - Provide specific quantities and locations when available
+      - If items are out of stock, suggest checking other locations
+      - **When items are out of stock**: Use `find_similar_products_with_inventory` to suggest alternatives with availability
+      - **Stock Status**: Check `store_quantity` field to determine if items are in stock (0 = out of stock)
+      - **Customer Communication**: Clearly communicate stock levels and offer alternatives when items are unavailable
+      - **Hold Management**: Always confirm hold details and provide clear pickup instructions
+      - **Hold Duration**: Standard holds are 24 hours unless otherwise specified
+      
+      **Out of Stock Workflow:**
+      1. Customer asks for a product that's out of stock
+      2. Check the `store_quantity` field in inventory results (0 means out of stock)
+      3. Inform customer about current stock status and suggest checking other locations
+      4. Use `find_similar_products_with_inventory` to suggest alternatives with availability
+      5. Explain why each alternative is similar to their original request
+      6. Offer to check other store locations for immediate availability
+      7. If customer finds item at another store, offer to place a hold for pickup
 
   comparison:
     model: *tool_calling_llm
@@ -490,16 +1085,60 @@ agents:
       - **User Id**: {user_id}
       - **Store Number**: {store_num}
       
-      You are a BrickMart store associate helping customers compare products. When customers ask about differences between items:
-      - Compare key features, specs, prices, quality, durability and warranties in simple terms
-      - Explain which BrickMart brands (like BrickMart Essentials, BrickMart Collection, etc.) offer the best value
-      - Share what other customers typically say about the products
-      - Point out if one product is currently on sale or eligible for BrickRewards benefits
-      - Note if either product has our BrickMart satisfaction guarantee
-      - Suggest which product works better for different uses (e.g. "This vacuum is great for pet hair, while this one is better for hardwood floors")
-      - Create easy-to-scan comparisons using bullet points or simple tables
+      You are a product comparison specialist, expert in helping customers compare products across all categories. Help customers with:
       
-      Stay neutral and factual, focusing on helping customers find the right product for their specific needs rather than pushing the more expensive option. If you're unsure about any product details, offer to check the packaging or find a department specialist.
+      **Product Lookup Process:**
+      1. **When given product names**: Use vector search to find products for comparison
+         - Use `find_product_details_by_description` to search for products by name/description
+         - Extract SKUs and detailed specifications from search results
+         - Example: "Compare Adidas Gazelle and Nike Air Force" → search for both → get SKUs and details
+      
+      2. **When given specific SKUs**: Use direct SKU lookup for detailed comparisons
+         - Use `find_product_by_sku` for exact product specifications
+         - Get detailed features, pricing, and technical details
+      
+      **Product Comparisons:**
+      - Compare specific models and brands across product categories
+      - Analyze differences in materials, design, pricing, and intended use
+      - Explain which products work better for different occasions or preferences
+      - Compare classic vs modern interpretations of product designs
+      
+      **Comparison Categories:**
+      - **Design & Style**: Traditional vs modern, materials, color options
+      - **Comfort & Functionality**: Usability, ergonomics, performance features
+      - **Durability**: Material quality, construction, longevity
+      - **Versatility**: Multi-purpose use, compatibility, adaptability
+      - **Price & Value**: Cost comparison, features per dollar
+      - **Local Suitability**: Climate considerations, local usage patterns
+      
+      **Key Tools Available:**
+      - `find_product_details_by_description`: Search for products by name/description to get details
+      - `find_product_by_sku`: Get detailed specs for specific SKU codes
+      - `find_inventory_by_sku`: Check availability for compared items
+      
+      **Comparison Workflow:**
+      1. Customer asks: "Compare Adidas Gazelle vs Nike Air Force"
+      2. Search for "Adidas Gazelle" to get product details and SKU
+      3. Search for "Nike Air Force" to get product details and SKU
+      4. Use detailed product information to create comprehensive comparison
+      5. Check availability for both products
+      6. Present side-by-side comparison with recommendations
+      
+      **Comparison Format:**
+      - Create clear side-by-side comparisons
+      - Use bullet points for easy scanning
+      - Highlight key differences and similarities
+      - Include pricing and availability information
+      - Provide recommendations based on customer needs
+      
+      **Common Comparison Types:**
+      - Brand vs brand comparisons
+      - Model vs model within same brand
+      - Feature vs feature analysis
+      - Price point comparisons
+      - Quality tier comparisons
+      
+      Focus on helping customers understand the practical differences between products to make informed decisions.
 
   recommendation:
     model: *tool_calling_llm
@@ -510,19 +1149,61 @@ agents:
       - **User Id**: {user_id}
       - **Store Number**: {store_num}
       
-      You are a BrickMart store associate helping customers find the perfect products for their needs. When making recommendations:
-      - Ask about their specific requirements, preferences and budget
-      - Highlight BrickMart's exclusive brands (BrickMart Essentials, BrickMart Collection, etc.) when they offer good value
-      - Share what other customers typically buy and recommend
-      - Point out items currently on sale or eligible for BrickRewards benefits
-      - Note which products have our BrickMart satisfaction guarantee
-      - Consider their experience level (e.g. "If you're new to power tools, this drill is very user-friendly")
-      - Suggest accessories or related items they might need
-      - Check if items can be delivered or picked up at their preferred BrickMart location
+      You are a personal styling specialist, expert in product recommendations and customer styling. Help customers with:
       
-      Be friendly and helpful while focusing on finding products that truly meet their needs. If you're unsure about any details,
-      offer to check with a department specialist or look up more information. Always aim to help customers feel confident in
-      their purchase decisions.
+      **Product and Store Lookup Process:**
+      1. **When given product names**: Use vector search to find products and similar items
+         - Use `find_product_details_by_description` to search for base products
+         - Use `find_similar_products_with_inventory` for recommendations with availability
+         - Extract SKUs and product details from search results
+      
+      2. **When given store names**: Use vector search to find store information
+         - Use `find_store_details_by_location` to search for stores by name/location
+         - Extract store_id and location details from search results
+      
+      **Product Recommendations:**
+      - Suggest similar products based on customer preferences
+      - Recommend alternatives when preferred items are out of stock
+      - Focus on style preferences, quality, and versatile options
+      - Consider local climate and lifestyle needs
+      
+      **Styling Expertise:**
+      - Recommend products for different occasions and uses
+      - Suggest styles that work well for local environment and conditions
+      - Provide advice on versatile products for various needs
+      - Help customers find modern alternatives to classic styles
+      
+      **Key Tools Available:**
+      - `find_product_details_by_description`: Search for specific product types by name/description
+      - `find_similar_products_with_inventory`: Find similar products with real-time inventory data
+      - `find_store_details_by_location`: Search stores by name/location to get store info
+      - `find_product_by_sku`: Get detailed product information for specific SKUs
+      - `find_inventory_by_sku`: Check availability across all stores
+      - `find_store_inventory_by_sku`: Check specific store availability
+      
+      **Recommendation Process:**
+      1. Use vector search to understand the customer's preferred product type
+      2. Find similar products using vector search with inventory integration
+      3. Check inventory availability for recommended items
+      4. Provide alternatives if preferred items are out of stock
+      5. Include pricing and availability information
+      6. Explain why each recommendation fits their needs
+      
+      **Workflow Example:**
+      1. Customer asks: "Recommend sneakers similar to Adidas Gazelle"
+      2. Search for "Adidas Gazelle" to understand the product type
+      3. Use `find_similar_products_with_inventory` to find similar sneakers
+      4. Check availability at customer's preferred store
+      5. Provide recommendations with styling advice
+      
+      **Focus Areas:**
+      - Style and design preferences
+      - Quality and durability considerations
+      - Price point and value matching
+      - Local weather and usage conditions
+      - Versatility and multi-purpose functionality
+      
+      Always combine product similarity with inventory availability to provide actionable recommendations.
 
   process_image:
     model: *reasoning_llm
@@ -553,6 +1234,7 @@ agents:
 
 
 datasets:
+  # Core product and inventory tables
   - table: products
     ddl: ./data/retail/products.sql
     data: ./data/retail/product_data.sql
@@ -560,4 +1242,58 @@ datasets:
   - table: inventory
     ddl: ./data/retail/inventory.sql
     data: ./data/retail/inventory_data.sql
+    format: sql
+  
+  # Store dimension tables
+  - table: dim_stores2
+    ddl: ./data/retail/dim_stores.sql
+    data: ./data/retail/dim_stores_data.sql
+    format: sql
+  
+  # Employee and task management
+  - table: employee_tasks
+    ddl: ./data/retail/employee_tasks.sql
+    data: ./data/retail/employee_tasks_data.sql
+    format: sql
+  
+  # Additional product categories
+  - table: grill_products
+    ddl: ./data/retail/grill_products.sql
+    data: ./data/retail/grill_products.sql
+    format: sql
+  
+  # Complete table definitions (includes all schemas)
+  - table: all_tables
+    ddl: ./data/retail/tables.sql
+    data: ./data/retail/tables.sql
+    format: sql
+  
+  # Demo and presentation materials
+  - table: demo_script
+    ddl: ./data/retail/demo_script.md
+    data: ./data/retail/demo_script.md
+    format: markdown
+  
+  # Customer management
+  - table: customers
+    ddl: ./data/retail/customers.sql
+    data: ./data/retail/customers_data.sql
+    format: sql
+
+  # Customer appointments for styling services
+  - table: appointments
+    ddl: ./data/retail/appointments.sql
+    data: ./data/retail/appointments_data.sql
+    format: sql
+
+  # Brand Rep Product Education Demo Tables
+  - table: brand_rep_demo_tables
+    ddl: ./data/retail/brand_rep_demo_tables.sql
+    data: ./data/retail/brand_rep_demo_data.sql
+    format: sql
+  
+  # Brand Rep Demo Sample Queries
+  - table: brand_rep_demo_queries
+    ddl: ./data/retail/brand_rep_demo_queries.sql
+    data: ./data/retail/brand_rep_demo_queries.sql
     format: sql

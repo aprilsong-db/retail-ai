@@ -16,6 +16,7 @@ from langchain_core.tools import tool
 from langchain_core.vectorstores.base import VectorStore
 from loguru import logger
 from typing import Callable, Sequence
+from mlflow.models import ModelConfig
 
 from retail_ai.tools.models import StoreInfo
 
@@ -80,8 +81,12 @@ def find_store_details_by_location_tool(
     return find_store_details_by_location
 
 
-def create_find_store_by_number_tool(catalog_name: str, database_name: str, warehouse_id: str) -> None:
+def create_find_store_by_number_tool(warehouse_id: str, config: ModelConfig) -> Callable:
     """Create a Unity Catalog tool for finding stores by store number/ID."""
+    
+    # Get catalog and database names from config
+    catalog_name = config.get("catalog_name")
+    database_name = config.get("database_name")
     
     @tool
     def find_store_by_number(store_numbers: list[str]) -> tuple:
@@ -146,6 +151,8 @@ def create_find_store_by_number_tool(catalog_name: str, database_name: str, ware
             return tuple(df.to_dict('records'))
         
         return ()
+    
+    return find_store_by_number
 
 
 def create_store_number_extraction_tool(llm: LanguageModelLike) -> Callable[[str], str]:

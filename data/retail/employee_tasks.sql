@@ -3,18 +3,18 @@ USE IDENTIFIER(:database);
 -- Employee Tasks table for retail store management
 -- Supports the store companion app with task tracking, priorities, and assignments
 CREATE TABLE IF NOT EXISTS employee_tasks (
-    task_id STRING NOT NULL COMMENT 'Unique identifier for each task (UUID or sequential ID)',
-    employee_id STRING NOT NULL COMMENT 'Employee ID who is assigned to complete the task',
-    store_id STRING NOT NULL COMMENT 'Store location where the task should be performed',
-    task_title STRING NOT NULL COMMENT 'Brief descriptive title of the task',
+    task_id STRING COMMENT 'Unique identifier for each task (UUID or sequential ID)',
+    employee_id STRING COMMENT 'Employee ID who is assigned to complete the task',
+    store_id STRING COMMENT 'Store location where the task should be performed',
+    task_title STRING COMMENT 'Brief descriptive title of the task',
     task_description STRING COMMENT 'Detailed description of what needs to be accomplished',
-    task_type STRING NOT NULL COMMENT 'Type of task: BOPIS, Service, Restock, Cleaning, Training, Administrative, Customer_Service, Inventory',
-    task_category STRING NOT NULL COMMENT 'Category grouping: Operations, Customer_Service, Inventory_Management, Maintenance, Administrative',
-    priority_level STRING NOT NULL COMMENT 'Task priority: Low, Medium, High, Critical, Urgent',
-    task_status STRING NOT NULL COMMENT 'Current status: Pending, In_Progress, Completed, Cancelled, On_Hold, Overdue',
+    task_type STRING COMMENT 'Type of task: BOPIS, Service, Restock, Cleaning, Training, Administrative, Customer_Service, Inventory',
+    task_category STRING COMMENT 'Category grouping: Operations, Customer_Service, Inventory_Management, Maintenance, Administrative',
+    priority_level STRING COMMENT 'Task priority: Low, Medium, High, Critical, Urgent',
+    task_status STRING COMMENT 'Current status: Pending, In_Progress, Completed, Cancelled, On_Hold, Overdue',
     
     -- Scheduling information
-    assigned_date DATE NOT NULL COMMENT 'Date when the task was assigned',
+    assigned_date DATE COMMENT 'Date when the task was assigned',
     due_date DATE COMMENT 'Target completion date for the task',
     due_time TIMESTAMP COMMENT 'Specific time when task should be completed',
     estimated_duration_minutes INT COMMENT 'Estimated time to complete the task in minutes',
@@ -22,7 +22,7 @@ CREATE TABLE IF NOT EXISTS employee_tasks (
     
     -- Assignment details
     assigned_by STRING COMMENT 'Employee ID of the person who assigned the task',
-    assigned_to STRING NOT NULL COMMENT 'Employee ID of the person responsible for completing the task',
+    assigned_to STRING COMMENT 'Employee ID of the person responsible for completing the task',
     department STRING COMMENT 'Department where the task should be performed (e.g., Electronics, Grocery)',
     location_details STRING COMMENT 'Specific location within store (e.g., Floor 2, Electronics Section, Aisle 5)',
     
@@ -49,8 +49,8 @@ CREATE TABLE IF NOT EXISTS employee_tasks (
     parent_task_id STRING COMMENT 'Reference to parent task if this is a recurring instance',
     
     -- Performance and quality metrics
-    quality_score DECIMAL(3,2) COMMENT 'Quality rating for completed task (1.00 to 5.00 scale)',
-    customer_satisfaction_score DECIMAL(3,2) COMMENT 'Customer satisfaction rating if applicable (1.00 to 5.00 scale)',
+    quality_score DOUBLE COMMENT 'Quality rating for completed task (1.00 to 5.00 scale)',
+    customer_satisfaction_score DOUBLE COMMENT 'Customer satisfaction rating if applicable (1.00 to 5.00 scale)',
     requires_manager_approval BOOLEAN COMMENT 'Whether task completion requires manager approval (true/false)',
     approved_by STRING COMMENT 'Manager employee ID who approved the task completion',
     approved_at TIMESTAMP COMMENT 'Timestamp when manager approved the task completion',
@@ -61,18 +61,16 @@ CREATE TABLE IF NOT EXISTS employee_tasks (
     created_by STRING COMMENT 'Employee ID of who created the task record',
     updated_by STRING COMMENT 'Employee ID of who last updated the task record',
     
-    -- Additional metadata
+    -- Additional metadata (converted to JSON strings for parquet compatibility)
     tags ARRAY<STRING> COMMENT 'Tags for categorization and filtering (e.g., urgent, seasonal, training)',
-    attachments ARRAY<STRING> COMMENT 'File paths or URLs to related documents, images, or instructions',
-    dependencies ARRAY<STRING> COMMENT 'Task IDs that must be completed before this task can start',
+    attachments STRING COMMENT 'File paths or URLs to related documents as JSON array',
+    dependencies STRING COMMENT 'Task IDs that must be completed before this task can start as JSON array',
     
     -- Mobile app specific fields
     requires_photo_proof BOOLEAN COMMENT 'Whether task completion requires photo documentation (true/false)',
-    photo_urls ARRAY<STRING> COMMENT 'URLs to photos taken during or after task completion',
+    photo_urls STRING COMMENT 'URLs to photos taken during or after task completion as JSON array',
     gps_location STRING COMMENT 'GPS coordinates where the task was completed for verification',
-    device_id STRING COMMENT 'Mobile device identifier used to complete the task',
-    
-    CONSTRAINT pk_employee_tasks PRIMARY KEY (task_id)
+    device_id STRING COMMENT 'Mobile device identifier used to complete the task'
 ) 
 USING DELTA
 TBLPROPERTIES (

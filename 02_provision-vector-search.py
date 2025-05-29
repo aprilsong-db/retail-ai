@@ -50,15 +50,35 @@ def provision_vector_store_index(vsc: VectorSearchClient, vector_store_config: D
     # Create or sync index
     if not index_exists(vsc, endpoint_name, index_name):
         print(f"Creating index {index_name} on endpoint {endpoint_name}...")
-        vsc.create_delta_sync_index_and_wait(
-            endpoint_name=endpoint_name,
-            index_name=index_name,
-            source_table_name=source_table_name,
-            pipeline_type="TRIGGERED",
-            primary_key=primary_key,
-            embedding_source_column=embedding_source_column, 
-            embedding_model_endpoint_name=embedding_model_endpoint_name
-        )
+        
+        # Prepare the columns list for columns_to_sync parameter
+        columns_to_sync = list(columns) if columns else None
+        
+        if columns_to_sync:
+            print(f"Creating index with columns_to_sync: {columns_to_sync}")
+            
+            vsc.create_delta_sync_index_and_wait(
+                endpoint_name=endpoint_name,
+                index_name=index_name,
+                source_table_name=source_table_name,
+                pipeline_type="TRIGGERED",
+                primary_key=primary_key,
+                embedding_source_column=embedding_source_column, 
+                embedding_model_endpoint_name=embedding_model_endpoint_name,
+                columns_to_sync=columns_to_sync  # Use columns_to_sync parameter
+            )
+        else:
+            print("Creating index with all columns from source table")
+            
+            vsc.create_delta_sync_index_and_wait(
+                endpoint_name=endpoint_name,
+                index_name=index_name,
+                source_table_name=source_table_name,
+                pipeline_type="TRIGGERED",
+                primary_key=primary_key,
+                embedding_source_column=embedding_source_column, 
+                embedding_model_endpoint_name=embedding_model_endpoint_name
+            )
     else:
         print(f"Index {index_name} already exists. Syncing...")
         vsc.get_index(endpoint_name, index_name).sync()

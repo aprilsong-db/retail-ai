@@ -13,20 +13,26 @@ from langchain_core.tools import BaseTool
 from loguru import logger
 from mlflow.models import ModelConfig
 
+from retail_ai.tools.employee import (
+    create_find_top_employees_by_department_tool,
+    create_find_personal_shopping_associates_tool,
+    create_department_extraction_tool,
+    create_find_employee_manager_tool,
+    create_task_assignment_tool,
+    create_task_extraction_tool,
+)
 from retail_ai.tools.external import create_genie_tool, search_tool
 from retail_ai.tools.inventory import (
     create_find_inventory_by_sku_tool,
-    create_find_inventory_by_upc_tool,
     create_find_store_inventory_by_sku_tool,
-    create_find_store_inventory_by_upc_tool,
 )
 from retail_ai.tools.product import (
     create_find_product_by_sku_tool,
-    create_find_product_by_upc_tool,
     create_product_classification_tool,
     create_product_comparison_tool,
     create_sku_extraction_tool,
     find_product_details_by_description_tool,
+    create_similar_products_recommendation_tool,
 )
 from retail_ai.tools.store import (
     create_find_store_by_number_tool,
@@ -35,6 +41,16 @@ from retail_ai.tools.store import (
 )
 from retail_ai.tools.unity_catalog import create_uc_tools, find_allowable_classifications
 from retail_ai.tools.vector_search import create_vector_search_tool
+from retail_ai.tools.customer import (
+    create_find_upcoming_customer_appointments_tool,
+    create_get_customer_details_tool,
+    create_customer_preparation_summary_tool,
+    create_customer_profile_intelligence_tool,
+    create_stylist_notification_tool,
+    create_inventory_preselection_tool,
+    create_appointment_preparation_workflow_tool,
+    create_real_time_styling_assistant_tool,
+)
 
 
 class ToolFactory:
@@ -93,8 +109,7 @@ class ToolFactory:
             "product_search": find_product_details_by_description_tool(
                 endpoint_name, index_name, columns, k
             ),
-            "find_product_by_sku": create_find_product_by_sku_tool(warehouse_id),
-            "find_product_by_upc": create_find_product_by_upc_tool(warehouse_id),
+            "find_product_by_sku": create_find_product_by_sku_tool(warehouse_id, self.model_config),
         }
 
     def create_inventory_tools(self, warehouse_id: str) -> dict[str, Any]:
@@ -110,10 +125,8 @@ class ToolFactory:
         self.logger.debug("Creating inventory tools")
         
         return {
-            "find_inventory_by_sku": create_find_inventory_by_sku_tool(warehouse_id),
-            "find_inventory_by_upc": create_find_inventory_by_upc_tool(warehouse_id),
-            "find_store_inventory_by_sku": create_find_store_inventory_by_sku_tool(warehouse_id),
-            "find_store_inventory_by_upc": create_find_store_inventory_by_upc_tool(warehouse_id),
+            "find_inventory_by_sku": create_find_inventory_by_sku_tool(warehouse_id, self.model_config),
+            "find_store_inventory_by_sku": create_find_store_inventory_by_sku_tool(warehouse_id, self.model_config),
         }
 
     def create_store_tools(
@@ -141,17 +154,42 @@ class ToolFactory:
         """
         self.logger.debug("Creating store tools")
         
-        catalog_name = self.model_config.get("catalog_name")
-        database_name = self.model_config.get("database_name")
-        
         return {
             "store_number_extraction": create_store_number_extraction_tool(llm),
             "store_search": find_store_details_by_location_tool(
                 endpoint_name, index_name, columns, k
             ),
-            "find_store_by_number": create_find_store_by_number_tool(
-                catalog_name, database_name, warehouse_id
+            "find_store_by_number": create_find_store_by_number_tool(warehouse_id, self.model_config),
+        }
+
+    def create_employee_tools(self, llm: LanguageModelLike, warehouse_id: str) -> dict[str, Any]:
+        """
+        Create all employee-related tools.
+        
+        Args:
+            llm: Language model for LLM-based tools
+            warehouse_id: Warehouse ID for Unity Catalog tools
+            
+        Returns:
+            Dictionary of employee tools
+        """
+        self.logger.debug("Creating employee tools")
+        
+        return {
+            "find_top_employees_by_department": create_find_top_employees_by_department_tool(
+                warehouse_id, self.model_config
             ),
+            "find_personal_shopping_associates": create_find_personal_shopping_associates_tool(
+                warehouse_id, self.model_config
+            ),
+            "department_extraction": create_department_extraction_tool(llm),
+            "find_employee_manager": create_find_employee_manager_tool(
+                warehouse_id, self.model_config
+            ),
+            "assign_task_to_employee": create_task_assignment_tool(
+                warehouse_id, self.model_config, llm
+            ),
+            "task_extraction": create_task_extraction_tool(llm),
         }
 
     def create_external_tools(self, space_id: Optional[str] = None) -> dict[str, BaseTool]:
@@ -213,6 +251,46 @@ class ToolFactory:
         
         return create_uc_tools(function_names)
 
+    def create_customer_tools(self, llm: LanguageModelLike, warehouse_id: str) -> dict[str, Any]:
+        """
+        Create all customer-related tools.
+        
+        Args:
+            llm: Language model for LLM-based tools
+            warehouse_id: Warehouse ID for Unity Catalog tools
+            
+        Returns:
+            Dictionary of customer tools
+        """
+        self.logger.debug("Creating customer tools")
+        
+        return {
+            "find_upcoming_customer_appointments": create_find_upcoming_customer_appointments_tool(
+                warehouse_id, self.model_config
+            ),
+            "get_customer_details": create_get_customer_details_tool(
+                warehouse_id, self.model_config
+            ),
+            "create_customer_preparation_summary": create_customer_preparation_summary_tool(
+                warehouse_id, self.model_config, llm
+            ),
+            "get_customer_profile_intelligence": create_customer_profile_intelligence_tool(
+                warehouse_id, self.model_config, llm
+            ),
+            "generate_stylist_notification": create_stylist_notification_tool(
+                warehouse_id, self.model_config, llm
+            ),
+            "generate_inventory_preselection": create_inventory_preselection_tool(
+                warehouse_id, self.model_config, llm
+            ),
+            "prepare_customer_appointment": create_appointment_preparation_workflow_tool(
+                warehouse_id, self.model_config, llm
+            ),
+            "get_real_time_styling_assistance": create_real_time_styling_assistant_tool(
+                warehouse_id, self.model_config, llm
+            ),
+        }
+
     def create_all_tools(
         self,
         llm: LanguageModelLike,
@@ -251,6 +329,7 @@ class ToolFactory:
                 llm, warehouse_id, product_endpoint_name, product_index_name, product_columns, k
             ),
             "inventory": self.create_inventory_tools(warehouse_id),
+            "employee": self.create_employee_tools(llm, warehouse_id),
             "external": self.create_external_tools(space_id),
         }
         
@@ -261,14 +340,12 @@ class ToolFactory:
             )
         else:
             # Create store tools without vector search
-            catalog_name = self.model_config.get("catalog_name")
-            database_name = self.model_config.get("database_name")
             tools["store"] = {
                 "store_number_extraction": create_store_number_extraction_tool(llm),
-                "find_store_by_number": create_find_store_by_number_tool(
-                    catalog_name, database_name, warehouse_id
-                ),
+                "find_store_by_number": create_find_store_by_number_tool(warehouse_id, self.model_config),
             }
+        
+        tools["customer"] = self.create_customer_tools(llm, warehouse_id)
         
         self.logger.info(f"Created {sum(len(category) for category in tools.values())} tools")
         return tools 
