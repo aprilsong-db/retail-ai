@@ -1,66 +1,4 @@
 # Databricks notebook source
-from typing import Sequence
-
-pip_requirements: Sequence[str] = (
-  "langgraph",
-  "langchain",
-  "databricks-langchain",
-  "unitycatalog-langchain[databricks]",
-  "langgraph-checkpoint-postgres",
-  "duckduckgo-search",
-  "databricks-agents",
-  "psycopg[binary,pool]", 
-  "databricks-sdk",
-  "langgraph-reflection",
-  "openevals",
-  "mlflow",
-  "pydantic",
-  "python-dotenv",
-  "uv",
-  "grandalf",
-  "loguru",
-  "rich"
-)
-
-pip_requirements: str = " ".join(pip_requirements)
-
-%pip install --quiet --upgrade {pip_requirements}
-%restart_python
-
-# COMMAND ----------
-
-from typing import Sequence
-from importlib.metadata import version
-
-pip_requirements: Sequence[str] = (
-    f"langgraph=={version('langgraph')}",
-    f"langchain=={version('langchain')}",
-    f"databricks-langchain=={version('databricks-langchain')}",
-    f"unitycatalog-langchain[databricks]=={version('unitycatalog-langchain')}",
-    f"langgraph-checkpoint-postgres=={version('langgraph-checkpoint-postgres')}",
-    f"duckduckgo-search=={version('duckduckgo-search')}",
-    f"databricks-sdk=={version('databricks-sdk')}",
-    f"langgraph-reflection=={version('langgraph-reflection')}",
-    f"openevals=={version('openevals')}",
-    f"mlflow=={version('mlflow')}",
-    f"psycopg[binary,pool]=={version('psycopg')}",
-    f"databricks-agents=={version('databricks-agents')}",
-    f"pydantic=={version('pydantic')}",
-    f"loguru=={version('loguru')}",
-)
-
-print("\n".join(pip_requirements))
-
-# COMMAND ----------
-
-# MAGIC %load_ext autoreload
-# MAGIC %autoreload 2
-
-# COMMAND ----------
-
-# MAGIC %restart_python
-
-# COMMAND ----------
 
 from typing import Any
 from rich import print as pprint
@@ -72,14 +10,14 @@ input_example: dict[str, Any] = {
   'messages': [
     {
       'role': 'user',
-      'content': 'How many of grills do you have in stock?'
+      'content': 'Hi, do you have the Starbucks Pike Place coffee pods in stock?'
     }
   ],
   'custom_inputs': {
       'configurable': {
         'thread_id': '1',
         'user_id': 'nate.fleming',
-        'store_num': 35048
+        'store_num': "SF-DOWNTOWN"
       }
     }
   }
@@ -100,7 +38,7 @@ input_example: dict[str, Any] = {
   'messages': [
     {
       'role': 'user',
-      'content': 'How many of 0017627748017 do you have in stock in my store?'
+      'content': '"What would you recommend that\'s similar?"'
     }
   ],
   'custom_inputs': {
@@ -461,5 +399,4 @@ process_messages(
   messages=messages, 
   custom_inputs=custom_inputs
 )
-
 
