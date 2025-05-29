@@ -325,6 +325,10 @@ def show_associate_homepage():
 
 def show_my_work_tab():
     """Display the My Tasks tab with tasks and immediate priorities."""
+    # Initialize personal shopping modal state
+    if "show_personal_shopping_modal" not in st.session_state:
+        st.session_state.show_personal_shopping_modal = False
+    
     # Add modern CSS for associate overview cards
     st.markdown("""
     <style>
@@ -478,90 +482,119 @@ def show_my_work_tab():
         
         # Fixed height container for scrollable priorities
         with st.container(height=400):
-            st.markdown("""
-                <div class="modern-work-card">
-                    <div style="display: flex; flex-direction: column; gap: 1rem;">
-                        <div style="
-                            display: flex;
-                            justify-content: space-between;
-                            align-items: center;
-                            padding: 1rem;
-                            background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%);
-                            border-radius: 12px;
-                            color: white;
-                            margin-bottom: 0.5rem;
-                            position: relative;
-                        ">
-                            <div>
-                                <div style="font-size: 1.25rem; font-weight: 700; margin-bottom: 0.25rem;">Personal shopping appointment</div>
-                                <div style="font-size: 0.9rem; opacity: 0.9;">Due: 2:00 PM • Emma Rodriguez</div>
-                            </div>
-                            <div style="
-                                background: rgba(255,255,255,0.2);
-                                padding: 0.5rem 1rem;
-                                border-radius: 8px;
-                                font-weight: 600;
-                                font-size: 0.875rem;
-                            ">Service</div>
-                            <div style="
-                                position: absolute;
-                                top: -8px;
-                                right: -8px;
-                                background: #ef4444;
-                                color: white;
-                                padding: 4px 8px;
-                                border-radius: 12px;
-                                font-size: 0.75rem;
-                                font-weight: 700;
-                                animation: pulse 2s infinite;
-                            ">NEW • 1 min ago</div>
+            # Personal shopping appointment - clickable card with Details button
+            col1_task, col2_task = st.columns([4, 1])
+            
+            with col1_task:
+                st.markdown("""
+                    <div style="
+                        display: flex;
+                        justify-content: space-between;
+                        align-items: center;
+                        padding: 1rem;
+                        background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%);
+                        border-radius: 12px;
+                        color: white;
+                        margin-bottom: 0.5rem;
+                        position: relative;
+                    ">
+                        <div>
+                            <div style="font-size: 1.25rem; font-weight: 700; margin-bottom: 0.25rem;">Personal shopping appointment</div>
+                            <div style="font-size: 0.9rem; opacity: 0.9;">Due: 2:00 PM • Emma Rodriguez</div>
                         </div>
                         <div style="
-                            display: flex;
-                            justify-content: space-between;
-                            align-items: center;
-                            padding: 1rem;
-                            background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
-                            border-radius: 12px;
-                            color: white;
-                            margin-bottom: 0.5rem;
-                        ">
-                            <div>
-                                <div style="font-size: 1.25rem; font-weight: 700; margin-bottom: 0.25rem;">BOPIS Order #B2024-0156</div>
-                                <div style="font-size: 0.9rem; opacity: 0.9;">Due: 10:30 AM • Sarah Johnson</div>
-                            </div>
-                            <div style="
-                                background: rgba(255,255,255,0.2);
-                                padding: 0.5rem 1rem;
-                                border-radius: 8px;
-                                font-weight: 600;
-                                font-size: 0.875rem;
-                            ">BOPIS</div>
-                        </div>
+                            background: rgba(255,255,255,0.2);
+                            padding: 0.5rem 1rem;
+                            border-radius: 8px;
+                            font-weight: 600;
+                            font-size: 0.875rem;
+                        ">Service</div>
                         <div style="
-                            display: flex;
-                            justify-content: space-between;
-                            align-items: center;
-                            padding: 1rem;
-                            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
-                            border-radius: 12px;
+                            position: absolute;
+                            top: -8px;
+                            right: -8px;
+                            background: #ef4444;
                             color: white;
-                        ">
-                            <div>
-                                <div style="font-size: 1.25rem; font-weight: 700; margin-bottom: 0.25rem;">Restock designer section</div>
-                                <div style="font-size: 0.9rem; opacity: 0.9;">Due: 12:00 PM • Floor 2</div>
-                            </div>
-                            <div style="
-                                background: rgba(255,255,255,0.2);
-                                padding: 0.5rem 1rem;
-                                border-radius: 8px;
-                                font-weight: 600;
-                                font-size: 0.875rem;
-                            ">Restock</div>
-                        </div>
+                            padding: 4px 8px;
+                            border-radius: 12px;
+                            font-size: 0.75rem;
+                            font-weight: 700;
+                            animation: pulse 2s infinite;
+                        ">NEW • 1 min ago</div>
                     </div>
-                </div>
-            """, unsafe_allow_html=True)
+                """, unsafe_allow_html=True)
+            
+            with col2_task:
+                # Details button for personal shopping appointment
+                if st.button("Details", key="personal_shopping_details", use_container_width=True):
+                    st.session_state.show_personal_shopping_modal = True
+                    st.rerun()
+            
+            # BOPIS Order task with Details button
+            col1_bopis, col2_bopis = st.columns([4, 1])
+            
+            with col1_bopis:
+                st.markdown("""
+                    <div style="
+                        display: flex;
+                        justify-content: space-between;
+                        align-items: center;
+                        padding: 1rem;
+                        background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+                        border-radius: 12px;
+                        color: white;
+                        margin-bottom: 0.5rem;
+                    ">
+                        <div>
+                            <div style="font-size: 1.25rem; font-weight: 700; margin-bottom: 0.25rem;">BOPIS Order #B2024-0156</div>
+                            <div style="font-size: 0.9rem; opacity: 0.9;">Due: 10:30 AM • Sarah Johnson</div>
+                        </div>
+                        <div style="
+                            background: rgba(255,255,255,0.2);
+                            padding: 0.5rem 1rem;
+                            border-radius: 8px;
+                            font-weight: 600;
+                            font-size: 0.875rem;
+                        ">BOPIS</div>
+                    </div>
+                """, unsafe_allow_html=True)
+            
+            with col2_bopis:
+                if st.button("Details", key="bopis_details", use_container_width=True):
+                    st.info("📦 BOPIS Order #B2024-0156 - Sarah Johnson\n\nItems: 2x Women's Blazer (Navy), 1x Dress Pants (Black)\nPickup Time: 10:30 AM\nStatus: Ready for pickup")
+            
+            # Restock task with Details button
+            col1_restock, col2_restock = st.columns([4, 1])
+            
+            with col1_restock:
+                st.markdown("""
+                    <div style="
+                        display: flex;
+                        justify-content: space-between;
+                        align-items: center;
+                        padding: 1rem;
+                        background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+                        border-radius: 12px;
+                        color: white;
+                        margin-bottom: 0.5rem;
+                    ">
+                        <div>
+                            <div style="font-size: 1.25rem; font-weight: 700; margin-bottom: 0.25rem;">Restock designer section</div>
+                            <div style="font-size: 0.9rem; opacity: 0.9;">Due: 12:00 PM • Floor 2</div>
+                        </div>
+                        <div style="
+                            background: rgba(255,255,255,0.2);
+                            padding: 0.5rem 1rem;
+                            border-radius: 8px;
+                            font-weight: 600;
+                            font-size: 0.875rem;
+                        ">Restock</div>
+                    </div>
+                """, unsafe_allow_html=True)
+            
+            with col2_restock:
+                if st.button("Details", key="restock_details", use_container_width=True):
+                    st.info("📦 Restock Designer Section - Floor 2\n\nItems needed: 15x Designer Handbags, 8x Luxury Scarves\nLocation: Aisle D2-D4\nPriority: Medium")
         
         if st.button("📋 View All Tasks", key="view_all_tasks", use_container_width=True):
             st.switch_page("pages/my_tasks.py")
@@ -623,6 +656,261 @@ def show_my_work_tab():
         
         if st.button("☕ Take Break", use_container_width=True):
             st.success("Break started - timer activated")
+    
+    # Personal Shopping Appointment Modal
+    if st.session_state.show_personal_shopping_modal:
+        @st.dialog("Personal Shopping Appointment", width="large")
+        def show_personal_shopping_details():
+            st.markdown("""
+            <style>
+            /* Modal styling */
+            div[data-testid="stDialog"] {
+                position: fixed !important;
+                top: 0 !important;
+                left: 0 !important;
+                right: 0 !important;
+                bottom: 0 !important;
+                display: flex !important;
+                align-items: flex-start !important;
+                justify-content: center !important;
+                z-index: 1000 !important;
+                background: rgba(0, 0, 0, 0.5) !important;
+                width: 100vw !important;
+                height: 100vh !important;
+                padding-top: 2rem !important;
+                overflow-y: auto !important;
+            }
+            div[data-testid="stDialog"] > div {
+                max-width: 900px !important;
+                width: 85vw !important;
+                position: relative !important;
+                background: white !important;
+                border-radius: 16px !important;
+                box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3) !important;
+                margin: 0 auto !important;
+                max-height: calc(100vh - 4rem) !important;
+                overflow-y: auto !important;
+            }
+            </style>
+            """, unsafe_allow_html=True)
+            
+            # Header with urgent styling
+            st.markdown("""
+            <div style="
+                background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 50%, #6d28d9 100%);
+                color: white;
+                padding: 32px;
+                border-radius: 20px;
+                margin-bottom: 32px;
+                position: relative;
+                overflow: hidden;
+                border: 3px solid #c4b5fd;
+                box-shadow: 0 0 30px rgba(139, 92, 246, 0.4);
+            ">
+                <div style="
+                    position: absolute;
+                    top: -50%;
+                    right: -20%;
+                    width: 200px;
+                    height: 200px;
+                    background: rgba(255, 255, 255, 0.1);
+                    border-radius: 50%;
+                    filter: blur(40px);
+                "></div>
+                <div style="position: relative; z-index: 2;">
+                    <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px;">
+                        <div style="display: flex; align-items: center; gap: 16px;">
+                            <div style="
+                                background: rgba(255, 255, 255, 0.2);
+                                padding: 16px;
+                                border-radius: 20px;
+                                backdrop-filter: blur(10px);
+                            ">
+                                <span style="font-size: 32px;">🛍️</span>
+                            </div>
+                            <div>
+                                <div style="
+                                    background: #fef3c7;
+                                    color: #92400e;
+                                    padding: 8px 16px;
+                                    border-radius: 25px;
+                                    font-size: 14px;
+                                    font-weight: 900;
+                                    text-transform: uppercase;
+                                    letter-spacing: 1px;
+                                    margin-bottom: 8px;
+                                    border: 2px solid #fbbf24;
+                                ">URGENT - PERSONAL STYLING APPOINTMENT</div>
+                                <h1 style="
+                                    margin: 0;
+                                    font-size: 28px;
+                                    font-weight: 900;
+                                    letter-spacing: -0.02em;
+                                ">ASSIGNMENT NOTIFICATION</h1>
+                            </div>
+                        </div>
+                        <div style="text-align: right;">
+                            <div style="
+                                background: rgba(255, 255, 255, 0.2);
+                                padding: 12px 20px;
+                                border-radius: 15px;
+                                backdrop-filter: blur(10px);
+                                border: 1px solid rgba(255, 255, 255, 0.3);
+                            ">
+                                <div style="
+                                    font-size: 24px;
+                                    font-weight: 900;
+                                    margin-bottom: 4px;
+                                ">⏰ 55 MIN</div>
+                                <div style="
+                                    font-size: 12px;
+                                    opacity: 0.9;
+                                    text-transform: uppercase;
+                                    letter-spacing: 1px;
+                                ">Until Appointment</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div style="
+                        background: rgba(255, 255, 255, 0.15);
+                        padding: 20px;
+                        border-radius: 15px;
+                        backdrop-filter: blur(10px);
+                        border: 1px solid rgba(255, 255, 255, 0.2);
+                    ">
+                        <div style="
+                            font-size: 18px;
+                            font-weight: 600;
+                            line-height: 1.6;
+                            margin-bottom: 12px;
+                        ">
+                            <span style="
+                                background: #fbbf24;
+                                color: #92400e;
+                                padding: 4px 8px;
+                                border-radius: 8px;
+                                font-weight: 900;
+                                margin-right: 8px;
+                            ">PLATINUM MEMBER</span>
+                            Victoria Chen arriving in 55 minutes
+                        </div>
+                        <div style="
+                            font-size: 16px;
+                            opacity: 0.95;
+                            line-height: 1.5;
+                        ">
+                            • <strong>Personal styling appointment assigned to you</strong><br>
+                            • <strong>Customer intelligence and preparation recommendations included</strong>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            """, unsafe_allow_html=True)
+            
+            # Customer Information Section
+            st.markdown("### 👤 Customer Information")
+            
+            col1, col2 = st.columns(2)
+            
+            with col1:
+                st.markdown("""
+                <div style="
+                    background: #f8fafc;
+                    border-radius: 12px;
+                    padding: 20px;
+                    border-left: 4px solid #8b5cf6;
+                    margin-bottom: 16px;
+                ">
+                    <div style="font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 8px; color: #64748b;">Customer</div>
+                    <div style="font-size: 18px; font-weight: 700; color: #1e293b; margin-bottom: 4px;">Victoria Chen</div>
+                    <div style="font-size: 14px; color: #64748b;">Platinum Member (5+ years)</div>
+                </div>
+                
+                <div style="
+                    background: #f8fafc;
+                    border-radius: 12px;
+                    padding: 20px;
+                    border-left: 4px solid #10b981;
+                    margin-bottom: 16px;
+                ">
+                    <div style="font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 8px; color: #64748b;">Appointment</div>
+                    <div style="font-size: 18px; font-weight: 700; color: #1e293b; margin-bottom: 4px;">11:00 AM (55 minutes remaining)</div>
+                    <div style="font-size: 14px; color: #64748b;">Personal Shopping - Women's Professional Wear</div>
+                </div>
+                
+                <div style="
+                    background: #f8fafc;
+                    border-radius: 12px;
+                    padding: 20px;
+                    border-left: 4px solid #f59e0b;
+                    margin-bottom: 16px;
+                ">
+                    <div style="font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 8px; color: #64748b;">Average Spend</div>
+                    <div style="font-size: 18px; font-weight: 700; color: #1e293b; margin-bottom: 4px;">$850 per visit</div>
+                    <div style="font-size: 14px; color: #64748b;">High-value customer</div>
+                </div>
+                """, unsafe_allow_html=True)
+            
+            with col2:
+                st.markdown("""
+                <div style="
+                    background: #f8fafc;
+                    border-radius: 12px;
+                    padding: 20px;
+                    border-left: 4px solid #3b82f6;
+                    margin-bottom: 16px;
+                ">
+                    <div style="font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 8px; color: #64748b;">Last Purchase</div>
+                    <div style="font-size: 18px; font-weight: 700; color: #1e293b; margin-bottom: 4px;">$1,200 business wardrobe</div>
+                    <div style="font-size: 14px; color: #64748b;">3 weeks ago</div>
+                </div>
+                
+                <div style="
+                    background: #f8fafc;
+                    border-radius: 12px;
+                    padding: 20px;
+                    border-left: 4px solid #ef4444;
+                    margin-bottom: 16px;
+                ">
+                    <div style="font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 8px; color: #64748b;">Style Profile</div>
+                    <div style="font-size: 18px; font-weight: 700; color: #1e293b; margin-bottom: 4px;">Classic Professional</div>
+                    <div style="font-size: 14px; color: #64748b;">Size 8, prefers neutral colors</div>
+                </div>
+                
+                <div style="
+                    background: #f8fafc;
+                    border-radius: 12px;
+                    padding: 20px;
+                    border-left: 4px solid #8b5cf6;
+                    margin-bottom: 16px;
+                ">
+                    <div style="font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 8px; color: #64748b;">Purchase Triggers</div>
+                    <div style="font-size: 18px; font-weight: 700; color: #1e293b; margin-bottom: 4px;">Career Milestones</div>
+                    <div style="font-size: 14px; color: #64748b;">Buys for promotions, presentations, networking events</div>
+                </div>
+                """, unsafe_allow_html=True)
+            
+            # Action Buttons
+            col1, col2, col3 = st.columns(3)
+            
+            with col1:
+                if st.button("✅ Accept Assignment", type="primary", use_container_width=True):
+                    st.success("✅ Assignment accepted! Customer preparation initiated.")
+                    st.balloons()
+                    st.session_state.show_personal_shopping_modal = False
+                    st.rerun()
+            
+            with col2:
+                if st.button("📱 View Customer Profile", use_container_width=True):
+                    st.info("📱 Full customer profile would open in new window")
+            
+            with col3:
+                if st.button("❌ Close", use_container_width=True):
+                    st.session_state.show_personal_shopping_modal = False
+                    st.rerun()
+        
+        # Show the modal
+        show_personal_shopping_details()
 
 def show_schedule_tab():
     """Display the Schedule tab with shift info and time tracking."""
@@ -968,108 +1256,204 @@ def show_products_tab():
 
 def show_performance_tab():
     """Display the Performance tab with personal metrics and achievements."""
+    
+    # Add CSS for performance grid cards
+    st.markdown("""
+    <style>
+    .performance-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 1rem;
+        height: 100%;
+    }
+    
+    .performance-metric-card {
+        background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
+        border-radius: 12px;
+        padding: 1.5rem;
+        box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+        border: 1px solid rgba(226, 232, 240, 0.6);
+        transition: all 0.3s ease;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        text-align: center;
+        position: relative;
+        overflow: hidden;
+    }
+    
+    .performance-metric-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 30px rgba(0,0,0,0.12);
+    }
+    
+    .metric-icon {
+        font-size: 2.5rem;
+        margin-bottom: 0.75rem;
+        filter: drop-shadow(0 2px 4px rgba(0,0,0,0.1));
+    }
+    
+    .metric-value {
+        font-size: 2rem;
+        font-weight: 900;
+        margin-bottom: 0.5rem;
+        line-height: 1;
+    }
+    
+    .metric-label {
+        font-size: 0.9rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        color: #64748b;
+    }
+    
+    .trend-card {
+        background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
+        border-radius: 12px;
+        padding: 1rem;
+        box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+        border: 1px solid rgba(226, 232, 240, 0.6);
+        transition: all 0.3s ease;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        height: 100%;
+    }
+    
+    .trend-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 30px rgba(0,0,0,0.12);
+    }
+    </style>
+    """, unsafe_allow_html=True)
+    
     col1, col2 = st.columns(2)
     
     with col1:
-        st.markdown("#### 🏆 Today's Performance")
+        st.markdown("#### 📊 Performance Metrics")
+        
+        # Fixed height container for performance metrics in 2x2 grid
+        with st.container(height=350):
+            st.markdown("""
+                <div class="performance-grid">
+                    <div class="performance-metric-card" style="border-left: 4px solid #10b981;">
+                        <div class="metric-icon">🛒</div>
+                        <div class="metric-value" style="color: #10b981;">12</div>
+                        <div class="metric-label">BOPIS Orders</div>
+                    </div>
+                    <div class="performance-metric-card" style="border-left: 4px solid #3b82f6;">
+                        <div class="metric-icon">🤝</div>
+                        <div class="metric-value" style="color: #3b82f6;">8</div>
+                        <div class="metric-label">Customer Assists</div>
+                    </div>
+                    <div class="performance-metric-card" style="border-left: 4px solid #fbbf24;">
+                        <div class="metric-icon">💰</div>
+                        <div class="metric-value" style="color: #fbbf24;">$2,450</div>
+                        <div class="metric-label">Sales Today</div>
+                    </div>
+                    <div class="performance-metric-card" style="border-left: 4px solid #8b5cf6;">
+                        <div class="metric-icon">⭐</div>
+                        <div class="metric-value" style="color: #8b5cf6;">4.8/5</div>
+                        <div class="metric-label">Customer Rating</div>
+                    </div>
+                </div>
+            """, unsafe_allow_html=True)
+        
+        st.markdown("#### 🏆 Overall Performance")
         
         st.markdown("""
             <div class="modern-work-card">
-                <div style="display: flex; flex-direction: column; gap: 1.5rem;">
+                <div style="
+                    text-align: center;
+                    padding: 2rem;
+                    background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+                    border-radius: 12px;
+                    color: white;
+                    position: relative;
+                    overflow: hidden;
+                ">
                     <div style="
-                        text-align: center;
-                        padding: 1.5rem;
-                        background: linear-gradient(135deg, #10b981 0%, #059669 100%);
-                        border-radius: 12px;
-                        color: white;
-                    ">
-                        <div style="font-size: 3rem; font-weight: 700; margin-bottom: 0.5rem; line-height: 1.2;">94%</div>
-                        <div style="font-size: 1.1rem; opacity: 0.9; font-weight: 600;">Overall Score</div>
-                    </div>
-                    <div style="
-                        display: flex;
-                        flex-direction: column;
-                        gap: 1rem;
-                        padding: 1rem;
-                        background: #f8fafc;
-                        border-radius: 12px;
-                        border: 1px solid #e2e8f0;
-                    ">
-                        <div style="display: flex; justify-content: space-between; padding: 0.75rem 0; border-bottom: 1px solid #e2e8f0;">
-                            <span style="font-weight: 600; color: #64748b;">BOPIS Orders:</span>
-                            <span style="color: #1e293b; font-weight: 700;">12 completed</span>
-                        </div>
-                        <div style="display: flex; justify-content: space-between; padding: 0.75rem 0; border-bottom: 1px solid #e2e8f0;">
-                            <span style="font-weight: 600; color: #64748b;">Customer Assists:</span>
-                            <span style="color: #1e293b; font-weight: 700;">8 interactions</span>
-                        </div>
-                        <div style="display: flex; justify-content: space-between; padding: 0.75rem 0; border-bottom: 1px solid #e2e8f0;">
-                            <span style="font-weight: 600; color: #64748b;">Sales:</span>
-                            <span style="color: #10b981; font-weight: 700;">$2,450</span>
-                        </div>
-                        <div style="display: flex; justify-content: space-between; padding: 0.75rem 0;">
-                            <span style="font-weight: 600; color: #64748b;">Customer Rating:</span>
-                            <span style="color: #fbbf24; font-weight: 700;">4.8/5 ⭐</span>
-                        </div>
+                        position: absolute;
+                        top: -50%;
+                        right: -20%;
+                        width: 200px;
+                        height: 200px;
+                        background: rgba(255, 255, 255, 0.1);
+                        border-radius: 50%;
+                        filter: blur(40px);
+                    "></div>
+                    <div style="position: relative; z-index: 2;">
+                        <div style="font-size: 4rem; font-weight: 900; margin-bottom: 0.5rem; line-height: 1; text-shadow: 0 2px 4px rgba(0,0,0,0.2);">94%</div>
+                        <div style="font-size: 1.2rem; font-weight: 600; opacity: 0.9;">Overall Score</div>
+                        <div style="font-size: 0.9rem; opacity: 0.8; margin-top: 0.5rem;">Excellent Performance</div>
                     </div>
                 </div>
             </div>
         """, unsafe_allow_html=True)
     
     with col2:
-        st.markdown("#### Goals & Achievements")
+        st.markdown("#### 📈 Performance Trends")
         
-        st.markdown("""
-            <div class="modern-work-card">
-                <div style="display: flex; flex-direction: column; gap: 1rem;">
-                    <div style="
-                        display: flex;
-                        align-items: center;
-                        gap: 1rem;
-                        padding: 1rem;
-                        background: linear-gradient(135deg, #10b981 0%, #059669 100%);
-                        border-radius: 12px;
-                        color: white;
-                    ">
-                        <div style="font-size: 1.5rem;">✅</div>
-                        <div>
-                            <div style="font-size: 1.1rem; font-weight: 700;">Complete 10 BOPIS orders</div>
-                            <div style="font-size: 0.9rem; opacity: 0.9;">Completed</div>
+        # Fixed height container for performance trends in 2x2 grid
+        with st.container(height=350):
+            st.markdown("""
+                <div class="performance-grid">
+                    <div class="trend-card">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+                            <div style="font-weight: 700; color: #1e293b;">Sales Trend</div>
+                            <div style="color: #10b981; font-weight: 600;">↗ +18%</div>
                         </div>
+                        <div style="
+                            background: linear-gradient(90deg, #e2e8f0 0%, #10b981 100%);
+                            height: 8px;
+                            border-radius: 4px;
+                            margin-bottom: 0.5rem;
+                        "></div>
+                        <div style="font-size: 0.85rem; color: #64748b;">vs. last week</div>
                     </div>
-                    <div style="
-                        display: flex;
-                        align-items: center;
-                        gap: 1rem;
-                        padding: 1rem;
-                        background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
-                        border-radius: 12px;
-                        color: white;
-                    ">
-                        <div style="font-size: 1.5rem;">🔄</div>
-                        <div>
-                            <div style="font-size: 1.1rem; font-weight: 700;">Assist 15 customers</div>
-                            <div style="font-size: 0.9rem; opacity: 0.9;">In Progress (8/15)</div>
+                    <div class="trend-card">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+                            <div style="font-weight: 700; color: #1e293b;">Customer Rating</div>
+                            <div style="color: #fbbf24; font-weight: 600;">↗ +0.3</div>
                         </div>
+                        <div style="
+                            background: linear-gradient(90deg, #e2e8f0 0%, #fbbf24 96%);
+                            height: 8px;
+                            border-radius: 4px;
+                            margin-bottom: 0.5rem;
+                        "></div>
+                        <div style="font-size: 0.85rem; color: #64748b;">4.8/5 average</div>
                     </div>
-                    <div style="
-                        display: flex;
-                        align-items: center;
-                        gap: 1rem;
-                        padding: 1rem;
-                        background: linear-gradient(135deg, #64748b 0%, #475569 100%);
-                        border-radius: 12px;
-                        color: white;
-                    ">
-                        <div style="font-size: 1.5rem;">⏳</div>
-                        <div>
-                            <div style="font-size: 1.1rem; font-weight: 700;">Achieve $3,000 in sales</div>
-                            <div style="font-size: 0.9rem; opacity: 0.9;">Pending ($2,450/$3,000)</div>
+                    <div class="trend-card">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+                            <div style="font-weight: 700; color: #1e293b;">Task Completion</div>
+                            <div style="color: #3b82f6; font-weight: 600;">↗ +12%</div>
                         </div>
+                        <div style="
+                            background: linear-gradient(90deg, #e2e8f0 0%, #3b82f6 87%);
+                            height: 8px;
+                            border-radius: 4px;
+                            margin-bottom: 0.5rem;
+                        "></div>
+                        <div style="font-size: 0.85rem; color: #64748b;">87% completion rate</div>
+                    </div>
+                    <div class="trend-card">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+                            <div style="font-weight: 700; color: #1e293b;">Speed Score</div>
+                            <div style="color: #8b5cf6; font-weight: 600;">↗ +8%</div>
+                        </div>
+                        <div style="
+                            background: linear-gradient(90deg, #e2e8f0 0%, #8b5cf6 92%);
+                            height: 8px;
+                            border-radius: 4px;
+                            margin-bottom: 0.5rem;
+                        "></div>
+                        <div style="font-size: 0.85rem; color: #64748b;">92% efficiency</div>
                     </div>
                 </div>
-            </div>
-        """, unsafe_allow_html=True)
+            """, unsafe_allow_html=True)
         
         st.markdown("#### 🏅 Recent Achievements")
         
@@ -1514,120 +1898,185 @@ def show_manager_dashboard_tab():
 
     st.markdown("---")
     
+    # Add CSS for manager performance grid cards
+    st.markdown("""
+    <style>
+    .manager-performance-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 1rem;
+        height: 100%;
+    }
+    
+    .manager-metric-card {
+        background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
+        border-radius: 12px;
+        padding: 1.5rem;
+        box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+        border: 1px solid rgba(226, 232, 240, 0.6);
+        transition: all 0.3s ease;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        text-align: center;
+        position: relative;
+        overflow: hidden;
+    }
+    
+    .manager-metric-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 30px rgba(0,0,0,0.12);
+    }
+    
+    .manager-metric-icon {
+        font-size: 2.5rem;
+        margin-bottom: 0.75rem;
+        filter: drop-shadow(0 2px 4px rgba(0,0,0,0.1));
+    }
+    
+    .manager-metric-value {
+        font-size: 2rem;
+        font-weight: 900;
+        margin-bottom: 0.5rem;
+        line-height: 1;
+    }
+    
+    .manager-metric-label {
+        font-size: 0.9rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        color: #64748b;
+    }
+    
+    .manager-metric-change {
+        font-size: 0.8rem;
+        font-weight: 600;
+        margin-top: 0.25rem;
+    }
+    
+    .manager-trend-card {
+        background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
+        border-radius: 12px;
+        padding: 1rem;
+        box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+        border: 1px solid rgba(226, 232, 240, 0.6);
+        transition: all 0.3s ease;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        height: 100%;
+    }
+    
+    .manager-trend-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 30px rgba(0,0,0,0.12);
+    }
+    </style>
+    """, unsafe_allow_html=True)
+    
     col1, col2 = st.columns(2)
     
     with col1:
-        st.markdown("#### Today's Performance")
+        st.markdown("#### 📊 Today's Performance")
         
-        st.markdown("""
-            <div style="
-                background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
-                border-radius: 16px;
-                padding: 1.5rem;
-                box-shadow: 0 4px 20px rgba(0,0,0,0.08);
-                border: 1px solid rgba(226, 232, 240, 0.6);
-                transition: all 0.3s ease;
-            ">
-                <div style="display: flex; flex-direction: column; gap: 1rem;">
-                    <div style="
-                        display: flex;
-                        flex-direction: column;
-                        gap: 0.25rem;
-                        padding: 0.75rem 0;
-                        border-bottom: 1px solid #f1f5f9;
-                    ">
-                        <span style="font-size: 0.9rem; color: #64748b; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px;">Sales Target:</span>
-                        <span style="font-size: 1.25rem; font-weight: 700; color: #1e293b;">96% ($28,750/$30,000)</span>
-                        <span style="font-size: 0.9rem; color: #10b981; font-weight: 600;">+18% vs yesterday</span>
+        # Fixed height container for today's performance metrics in 2x2 grid
+        with st.container(height=350):
+            st.markdown("""
+                <div class="manager-performance-grid">
+                    <div class="manager-metric-card" style="border-left: 4px solid #10b981;">
+                        <div class="manager-metric-icon">💰</div>
+                        <div class="manager-metric-value" style="color: #10b981;">$28,750</div>
+                        <div class="manager-metric-label">Sales Target</div>
+                        <div class="manager-metric-change" style="color: #10b981;">96% (+18%)</div>
                     </div>
-                    <div style="
-                        display: flex;
-                        flex-direction: column;
-                        gap: 0.25rem;
-                        padding: 0.75rem 0;
-                        border-bottom: 1px solid #f1f5f9;
-                    ">
-                        <span style="font-size: 0.9rem; color: #64748b; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px;">Customer Traffic:</span>
-                        <span style="font-size: 1.25rem; font-weight: 700; color: #1e293b;">247 visitors</span>
-                        <span style="font-size: 0.9rem; color: #64748b; font-weight: 500;">Peak: 2-4 PM</span>
+                    <div class="manager-metric-card" style="border-left: 4px solid #3b82f6;">
+                        <div class="manager-metric-icon">👥</div>
+                        <div class="manager-metric-value" style="color: #3b82f6;">247</div>
+                        <div class="manager-metric-label">Customer Traffic</div>
+                        <div class="manager-metric-change" style="color: #64748b;">Peak: 2-4 PM</div>
                     </div>
-                    <div style="
-                        display: flex;
-                        flex-direction: column;
-                        gap: 0.25rem;
-                        padding: 0.75rem 0;
-                        border-bottom: 1px solid #f1f5f9;
-                    ">
-                        <span style="font-size: 0.9rem; color: #64748b; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px;">Conversion Rate:</span>
-                        <span style="font-size: 1.25rem; font-weight: 700; color: #1e293b;">68%</span>
-                        <span style="font-size: 0.9rem; color: #10b981; font-weight: 600;">+5% vs avg</span>
+                    <div class="manager-metric-card" style="border-left: 4px solid #fbbf24;">
+                        <div class="manager-metric-icon">📈</div>
+                        <div class="manager-metric-value" style="color: #fbbf24;">68%</div>
+                        <div class="manager-metric-label">Conversion Rate</div>
+                        <div class="manager-metric-change" style="color: #10b981;">+5% vs avg</div>
                     </div>
-                    <div style="
-                        display: flex;
-                        flex-direction: column;
-                        gap: 0.25rem;
-                        padding: 0.75rem 0;
-                    ">
-                        <span style="font-size: 0.9rem; color: #64748b; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px;">Avg Transaction:</span>
-                        <span style="font-size: 1.25rem; font-weight: 700; color: #1e293b;">$171.50</span>
-                        <span style="font-size: 0.9rem; color: #10b981; font-weight: 600;">+12% vs avg</span>
+                    <div class="manager-metric-card" style="border-left: 4px solid #8b5cf6;">
+                        <div class="manager-metric-icon">💳</div>
+                        <div class="manager-metric-value" style="color: #8b5cf6;">$171.50</div>
+                        <div class="manager-metric-label">Avg Transaction</div>
+                        <div class="manager-metric-change" style="color: #10b981;">+12% vs avg</div>
                     </div>
                 </div>
-            </div>
-        """, unsafe_allow_html=True)
+            """, unsafe_allow_html=True)
     
     with col2:
-        st.markdown("#### Performance Trends")
+        st.markdown("#### 📈 Performance Trends")
         
-        st.markdown("""
-            <div class="modern-performance-card">
-                <div style="display: flex; flex-direction: column; gap: 1rem;">
-                    <div style="
-                        display: flex;
-                        flex-direction: column;
-                        gap: 0.25rem;
-                        padding: 0.75rem 0;
-                        border-bottom: 1px solid #f1f5f9;
-                    ">
-                        <span style="font-size: 0.9rem; color: #64748b; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px;">Weekly Sales:</span>
-                        <span style="font-size: 1.25rem; font-weight: 700; color: #1e293b;">$142,350</span>
-                        <span style="font-size: 0.9rem; color: #10b981; font-weight: 600;">+12% vs last week</span>
+        # Fixed height container for performance trends in 2x2 grid
+        with st.container(height=350):
+            st.markdown("""
+                <div class="manager-performance-grid">
+                    <div class="manager-trend-card">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+                            <div style="font-weight: 700; color: #1e293b;">Weekly Sales</div>
+                            <div style="color: #10b981; font-weight: 600;">↗ +12%</div>
+                        </div>
+                        <div style="
+                            background: linear-gradient(90deg, #e2e8f0 0%, #10b981 100%);
+                            height: 8px;
+                            border-radius: 4px;
+                            margin-bottom: 0.5rem;
+                        "></div>
+                        <div style="font-size: 1.1rem; font-weight: 700; color: #1e293b; margin-bottom: 0.25rem;">$142,350</div>
+                        <div style="font-size: 0.85rem; color: #64748b;">vs. last week</div>
                     </div>
-                    <div style="
-                        display: flex;
-                        flex-direction: column;
-                        gap: 0.25rem;
-                        padding: 0.75rem 0;
-                        border-bottom: 1px solid #f1f5f9;
-                    ">
-                        <span style="font-size: 0.9rem; color: #64748b; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px;">Monthly Target:</span>
-                        <span style="font-size: 1.25rem; font-weight: 700; color: #1e293b;">78% complete</span>
-                        <span style="font-size: 0.9rem; color: #10b981; font-weight: 600;">On track</span>
+                    <div class="manager-trend-card">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+                            <div style="font-weight: 700; color: #1e293b;">Monthly Target</div>
+                            <div style="color: #10b981; font-weight: 600;">On track</div>
+                        </div>
+                        <div style="
+                            background: linear-gradient(90deg, #e2e8f0 0%, #3b82f6 78%);
+                            height: 8px;
+                            border-radius: 4px;
+                            margin-bottom: 0.5rem;
+                        "></div>
+                        <div style="font-size: 1.1rem; font-weight: 700; color: #1e293b; margin-bottom: 0.25rem;">78%</div>
+                        <div style="font-size: 0.85rem; color: #64748b;">complete</div>
                     </div>
-                    <div style="
-                        display: flex;
-                        flex-direction: column;
-                        gap: 0.25rem;
-                        padding: 0.75rem 0;
-                        border-bottom: 1px solid #f1f5f9;
-                    ">
-                        <span style="font-size: 0.9rem; color: #64748b; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px;">Customer Satisfaction:</span>
-                        <span style="font-size: 1.25rem; font-weight: 700; color: #1e293b;">4.7/5.0</span>
-                        <span style="font-size: 0.9rem; color: #10b981; font-weight: 600;">+0.2 vs last month</span>
+                    <div class="manager-trend-card">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+                            <div style="font-weight: 700; color: #1e293b;">Customer Satisfaction</div>
+                            <div style="color: #fbbf24; font-weight: 600;">↗ +0.2</div>
+                        </div>
+                        <div style="
+                            background: linear-gradient(90deg, #e2e8f0 0%, #fbbf24 94%);
+                            height: 8px;
+                            border-radius: 4px;
+                            margin-bottom: 0.5rem;
+                        "></div>
+                        <div style="font-size: 1.1rem; font-weight: 700; color: #1e293b; margin-bottom: 0.25rem;">4.7/5.0</div>
+                        <div style="font-size: 0.85rem; color: #64748b;">vs. last month</div>
                     </div>
-                    <div style="
-                        display: flex;
-                        flex-direction: column;
-                        gap: 0.25rem;
-                        padding: 0.75rem 0;
-                    ">
-                        <span style="font-size: 0.9rem; color: #64748b; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px;">Staff Efficiency:</span>
-                        <span style="font-size: 1.25rem; font-weight: 700; color: #1e293b;">94%</span>
-                        <span style="font-size: 0.9rem; color: #10b981; font-weight: 600;">+3% vs avg</span>
+                    <div class="manager-trend-card">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+                            <div style="font-weight: 700; color: #1e293b;">Staff Efficiency</div>
+                            <div style="color: #8b5cf6; font-weight: 600;">↗ +3%</div>
+                        </div>
+                        <div style="
+                            background: linear-gradient(90deg, #e2e8f0 0%, #8b5cf6 94%);
+                            height: 8px;
+                            border-radius: 4px;
+                            margin-bottom: 0.5rem;
+                        "></div>
+                        <div style="font-size: 1.1rem; font-weight: 700; color: #1e293b; margin-bottom: 0.25rem;">94%</div>
+                        <div style="font-size: 0.85rem; color: #64748b;">vs. average</div>
                     </div>
                 </div>
-            </div>
-        """, unsafe_allow_html=True)
+            """, unsafe_allow_html=True)
 
 def show_manager_alerts_tab():
     """Display the Alerts tab with interactive counters and scrollable alert containers."""
