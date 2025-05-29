@@ -258,21 +258,27 @@ def process_messages(
 
 
 def display_graph(app: LanggraphChatModel) -> None:
-    from IPython.display import HTML, Image, display
-
     try:
-        content = Image(app.graph.get_graph(xray=True).draw_mermaid_png())
-    except Exception as e:
-        print(e)
-        ascii_graph: str = app.graph.get_graph(xray=True).draw_ascii()
-        html_content = f"""
-    <pre style="font-family: monospace; line-height: 1.2; white-space: pre;">
-    {ascii_graph}
-    </pre>
-    """
-        content = HTML(html_content)
+        from IPython.display import HTML, Image, display
+        
+        try:
+            content = Image(app.graph.get_graph(xray=True).draw_mermaid_png())
+        except Exception as e:
+            print(e)
+            ascii_graph: str = app.graph.get_graph(xray=True).draw_ascii()
+            html_content = f"""
+        <pre style="font-family: monospace; line-height: 1.2; white-space: pre;">
+        {ascii_graph}
+        </pre>
+        """
+            content = HTML(html_content)
 
-    display(content)
+        display(content)
+    except ImportError:
+        # IPython not available, fall back to ASCII display
+        print("IPython not available, displaying ASCII graph:")
+        ascii_graph: str = app.graph.get_graph(xray=True).draw_ascii()
+        print(ascii_graph)
 
 
 def save_image(app: LanggraphChatModel, path: PathLike) -> None:

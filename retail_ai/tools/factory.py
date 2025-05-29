@@ -32,6 +32,7 @@ from retail_ai.tools.product import (
     create_product_comparison_tool,
     create_sku_extraction_tool,
     find_product_details_by_description_tool,
+    create_similar_products_recommendation_tool,
 )
 from retail_ai.tools.store import (
     create_find_store_by_number_tool,
